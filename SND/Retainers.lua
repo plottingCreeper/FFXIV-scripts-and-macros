@@ -12,7 +12,7 @@ for retainers = 1, 9 do -- First value is retainer number to start at. Second va
         yield("/pcall RetainerSellList true 0 "..list.." 1 <wait.0.1>")
         if IsAddonVisible("ContextMenu") then yield("/pcall ContextMenu true 0 0 <wait.1>") else break end
         a = 0
-        while(a == 0)do    -- Wait for user to click a price to undercut!
+        while(a == 0)do    -- Wait for user to click a price to undercut! Expected but not necessary to use MarketBuddy.
             if IsAddonVisible("RetainerSell") then yield("/wait 1") else  a = 1 end
         end      -- No, it's not stuck! You're expecting a bot, but what you have is not.
     end
