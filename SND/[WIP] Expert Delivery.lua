@@ -108,6 +108,11 @@ function Deliver()
     while (ed == 1) do
         yield("/pcall GrandCompanySupplyList true 1 0 0")
         yield("/wait 0.1")
+        if IsAddonVisible("Request") then
+            yield("/pcall Request true 1")
+            ed = 0
+            step = "finish"
+        end
         if IsAddonVisible("GrandCompanySupplyList") then
             ed = 0
             step = "finish"
