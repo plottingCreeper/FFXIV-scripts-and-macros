@@ -1,15 +1,4 @@
 --[[
-WORK IN PROGRESS
-Untested, but ready to begin testing.
-
-TODO LIST (not exhaustive)
-    paper
-    coke
-    literally any testing at all
-    refactor menu throttle
---]]
-
---[[
     Automagic grand company expert delivery and purchase script for SomethingNeedDoing
     Written by plottingCreeper
     
@@ -22,7 +11,7 @@ TODO LIST (not exhaustive)
     If the script doesn't work for you, double check your variables. 
 --]]
 
-GC = "Flame" -- "Storm", "Flame", "Serpent"
+GC = "Serpent" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke"
 NumberToBuy = 390
 CompletionSound = 1 -- Should be safe to leave this blank for no sound. Not tested. 
@@ -33,7 +22,7 @@ Verbose = 1 -- If something doesn't work, set this to 1 and try again before bot
     Very high chance of breaking things here. Don't mess with these unless you understand the script.
 --]]
 
-ExpertDeliveryThrottle = 1 -- Seconds to wait after handing in each item. This WILL break the script if set too low.
+ExpertDeliveryThrottle = 0.2 -- Seconds to wait after handing in each item. This WILL break the script if set too low.
 PurchaseThrottle = 2 -- Seconds to wait after buying. Mostly to not be super suspicious to anyone who may be watching.
 
 --[[
@@ -42,11 +31,11 @@ PurchaseThrottle = 2 -- Seconds to wait after buying. Mostly to not be super sus
 --]]
 
 function OpenPurchase()
-    if Verbose==1 then yield("/echo OpenPurchase") end
+    if Verbose==1 then yield("/echo Running OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
-        yield("/pint")
-        yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle">")
+        yield("/send NUMPAD0")
+        yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle..">")
         step = "Purchase"
     else
         yield("/echo Target not found. Are you at the GC desk?")
@@ -55,34 +44,41 @@ function OpenPurchase()
 end
 
 function Purchase() -- TODO paper and coke
-    if Verbose==1 then yield("/echo Purchase "..NumberToBuy.." "..WhatToBuy) end
+    if Verbose==1 then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
     if WhatToBuy=="Ventures" then
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
+    else
+        if WhatToBuy=="Paper" then
+            yield("/pcall GrandCompanyExchange true 1 2")
+            yield("/pcall GrandCompanyExchange true ")
+            yield("/pcall GrandCompanyExchange false 0 17 "..NumberToBuy.." 0 True False 0 0 0")
+        else
+            if WhatToBuy=="Coke" then
+                yield("/pcall GrandCompanyExchange true 1 2")
+                yield("/pcall GrandCompanyExchange true 2 4")
+                yield("/pcall GrandCompanyExchange false 0 31 "..NumberToBuy.." 0 True False 0 0 0")
+            end
+        end
     end
-    if WhatToBuy=="Paper" then
-        yield("/pcall GrandCompanyExchange true ")
-        yield("/pcall GrandCompanyExchange true ")
-        yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
-    end
-    if WhatToBuy=="Coke" then
-        yield("/pcall GrandCompanyExchange true ")
-        yield("/pcall GrandCompanyExchange true ")
-        yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
-    end
+    yield("/wait 0.3")
+    if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
+    QuitPurchase()
+    step = "OpenDeliver"
+    yield("/wait 1")
 end
 
 function QuitPurchase()
-    if Verbose==1 then yield("/echo QuitPurchase") end
+    if Verbose==1 then yield("/echo Running QuitPurchase") end
     yield("/pcall GrandCompanyExchange true -1")
 end
 
 function OpenDeliver()
-    if Verbose==1 then yield("/echo OpenDeliver") end
+    if Verbose==1 then yield("/echo Running OpenDeliver") end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
-        yield("/pint")
+        yield("/send NUMPAD0")
         yield("/waitaddon SelectString")
         yield("/click select_string1")
         yield("/wait 1")
@@ -94,7 +90,7 @@ function OpenDeliver()
 end
 
 function Deliver()
-    if Verbose==1 then yield("/echo Deliver") end
+    if Verbose==1 then yield("/echo Running Deliver") end
     ed = 1
     while (ed == 1) do
         yield("/pcall GrandCompanySupplyList true 1 0 0")
@@ -102,25 +98,29 @@ function Deliver()
             ed = 0
             step = "finish"
         else
+            yield("/wait 0.1")
+            if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
+            yield("/wait 0.5")
+            if IsAddonVisible("SelectYesno") then
+                yield("/pcall SelectYesno true 1")
+                ed = 0
+                step = "OpenPurchase"
+            end
             yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
         end
-        if IsAddonVisible("SelectYesNo") then
-            yield("/pcall SelectYesNo true -1")
-            ed = 0
-            step = "QuitDeliver"
-        end
-    end    
+    end
+    QuitDeliver()
 end
 
 function QuitDeliver()
-    if Verbose==1 then yield("/echo QuitDeliver") end
+    if Verbose==1 then yield("/echo Running QuitDeliver") end
     yield("/pcall GrandCompanySupplyList true -1")
     yield("/waitaddon SelectString")
     yield("/pcall SelectString true -1 <wait.1>")
 end
 
 function Validation()
-    if Verbose==1 then yield("/echo Validation...") end
+    if Verbose==1 then yield("/echo Running Validation...") end
     if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
         yield("/echo GC = "..GC)
         yield("/echo ERROR: Variable GC does not match expected options")
@@ -153,7 +153,7 @@ function Validation()
 end
 
 function Startup()
-    if Verbose==1 then yield("/echo Startup...") end
+    if Verbose==1 then yield("/echo Running Startup...") end
     step = "Startup"
     if IsAddonVisible("GrandCompanyExchange") then
         step = "Purchase"
@@ -177,7 +177,7 @@ while (step~=finish) do
     if step=="Purchase" then Purchase() end 
     if step=="QuitPurchase" then QuitPurchase() end 
     if step=="Startup" then step = "OpenDeliver" end
-    if Verbose==1 then yield("/echo "..step) end
+    if Verbose==1 then yield("/echo DEGUG: step = "..step) end
     yield ("/wait 1")
 end
 
