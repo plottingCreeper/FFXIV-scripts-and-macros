@@ -69,6 +69,8 @@ function Purchase() -- TODO paper and coke
                         yield("/pcall GrandCompanyExchange true 1 2")
                         yield("/pcall GrandCompanyExchange true 2 1")
                         yield("/pcall GrandCompanyExchange false 0 39 "..NumberToBuy.." 0 True False 0 0 0")
+                    end
+                end
             end
         end
     end
