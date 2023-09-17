@@ -177,7 +177,7 @@ while (step~=finish) do
     if step=="Purchase" then Purchase() end 
     if step=="QuitPurchase" then QuitPurchase() end 
     if step=="Startup" then step = "OpenDeliver" end
-    yield("/echo "..step)
+    if Verbose==1 then yield("/echo "..step) end
     yield ("/wait 1")
 end
 
