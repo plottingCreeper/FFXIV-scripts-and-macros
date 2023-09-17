@@ -45,19 +45,21 @@ function Purchase()
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
     else if WhatToBuy==Paper then
-        yield("/pcall GrandCompanyExchange true ") --TODO
-        yield("/pcall GrandCompanyExchange true ") --TODO
-        yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0") --TODO
-    else if WhatToBuy==Coke then
-        yield("/pcall GrandCompanyExchange true ") --TODO
-        yield("/pcall GrandCompanyExchange true ") --TODO
-        yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0") --TODO
-    else
-        yield("/echo Variable WhatToBuy is set as:")
-        yield("/echo "..WhatToBuy)
-        yield("WhatToBuy invalid - terminating script.")
-        step = quit
-        break
+            yield("/pcall GrandCompanyExchange true ") --TODO
+            yield("/pcall GrandCompanyExchange true ") --TODO
+            yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0") --TODO
+        else if WhatToBuy==Coke then
+                yield("/pcall GrandCompanyExchange true ") --TODO
+                yield("/pcall GrandCompanyExchange true ") --TODO
+                yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0") --TODO
+            else
+                yield("/echo Variable WhatToBuy is set as:")
+                yield("/echo "..WhatToBuy)
+                yield("WhatToBuy invalid - terminating script.")
+                step = quit
+                break
+            end
+        end
     end
 end
 
@@ -110,22 +112,26 @@ if ( GC==Storm or GC==Flame or GC==Serpent )==false then
     yield("/echo GC = "..GC")
     yield("/echo ERROR: Variable GC does not match expected options")
     break
-else if ( WhatToBuy==Ventures or WhatToBuy==Paper or WhatToBuy==Coke )==false then 
-    yield("/echo WhatToBuy = "..WhatToBuy")
-    yield("/echo ERROR: Variable WhatToBuy does not match expected options")
-    break
-else if ( NumberToBuy>0 )==false then
-    yield("/echo NumberToBuy = "..NumberToBuy")
-    yield("/echo ERROR: Variable NumberToBuy is invalid")
-    break
-else if ( ExpertDeliveryThrottle>=0)==false then
-    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle")
-    yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
-    break
-else if ( MenuThrottle>0)==false then
-    yield("/echo MenuThrottle = "..MenuThrottle")
-    yield("/echo ERROR: Variable MenuThrottle is too short or is not a number")
-    break
+    else if ( WhatToBuy==Ventures or WhatToBuy==Paper or WhatToBuy==Coke )==false then 
+        yield("/echo WhatToBuy = "..WhatToBuy")
+        yield("/echo ERROR: Variable WhatToBuy does not match expected options")
+        break
+    else if ( NumberToBuy>0 )==false then
+            yield("/echo NumberToBuy = "..NumberToBuy")
+            yield("/echo ERROR: Variable NumberToBuy is invalid")
+            break
+        else if ( ExpertDeliveryThrottle>=0)==false then
+                yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle")
+                yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
+                break
+            else if ( MenuThrottle>0)==false then
+                    yield("/echo MenuThrottle = "..MenuThrottle")
+                    yield("/echo ERROR: Variable MenuThrottle is too short or is not a number")
+                    break
+                end
+            end
+        end
+    end
 end
 
 if Verbose==1 then yield("/echo Startup...") end
