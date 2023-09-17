@@ -137,6 +137,13 @@ function QuitDeliver()
     yield("/pcall SelectString true -1 <wait.1>")
 end
 
+function GetCloser()
+    if IsAddonVisible("_TargetInfoMainTarget") then
+        yield("/lockon on")
+        yield("/automove on")
+    end
+end
+
 function Validation()
     if Verbose==1 then yield("/echo Running Validation...") end
     if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
