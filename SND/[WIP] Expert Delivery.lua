@@ -12,7 +12,7 @@
 --]]
 
 GC = "Serpent" -- "Storm", "Flame", "Serpent"
-WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke"
+WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = 390
 CompletionSound = 1 -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
@@ -52,13 +52,23 @@ function Purchase() -- TODO paper and coke
     else
         if WhatToBuy=="Paper" then
             yield("/pcall GrandCompanyExchange true 1 2")
-            yield("/pcall GrandCompanyExchange true ")
+            yield("/pcall GrandCompanyExchange true 2 1")
             yield("/pcall GrandCompanyExchange false 0 17 "..NumberToBuy.." 0 True False 0 0 0")
         else
             if WhatToBuy=="Coke" then
                 yield("/pcall GrandCompanyExchange true 1 2")
                 yield("/pcall GrandCompanyExchange true 2 4")
                 yield("/pcall GrandCompanyExchange false 0 31 "..NumberToBuy.." 0 True False 0 0 0")
+            else
+                if WhatToBuy=="MC3" then
+                    yield("/pcall GrandCompanyExchange true 1 2")
+                    yield("/pcall GrandCompanyExchange true 2 1")
+                    yield("/pcall GrandCompanyExchange false 0 38 "..NumberToBuy.." 0 True False 0 0 0")
+                else
+                    if WhatToBuy=="MC4" then
+                        yield("/pcall GrandCompanyExchange true 1 2")
+                        yield("/pcall GrandCompanyExchange true 2 1")
+                        yield("/pcall GrandCompanyExchange false 0 39 "..NumberToBuy.." 0 True False 0 0 0")
             end
         end
     end
@@ -127,7 +137,7 @@ function Validation()
         yield("/echo ERROR: Variable GC does not match expected options")
         step = "finish"
     else
-        if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" )==false then 
+        if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
             yield("/echo WhatToBuy = "..WhatToBuy)
             yield("/echo ERROR: Variable WhatToBuy does not match expected options")
             step = "finish"
