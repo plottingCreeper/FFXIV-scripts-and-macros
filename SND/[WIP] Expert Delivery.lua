@@ -88,7 +88,7 @@ end
 function Deliver()
     if Verbose==1 then yield("/echo Deliver") end
     ed = 1
-    while (ed == 1) then 
+    while (ed == 1) then do
         yield("/pcall GrandCompanySupplyList true 1 0 0")
         if IsAddonVisible("GrandcompanySupplyList") then
             ed = 0
@@ -155,7 +155,7 @@ Startup()
 
 if Verbose==1 then yield("/echo Entering main loop.") end
 step = run
-while (step~=finish) then 
+while (step~=finish) then do
     if step==OpenDeliver then OpenDeliver() end 
     if step==Deliver then Deliver() end 
     if step==QuitDeliver then QuitDeliver() end 
