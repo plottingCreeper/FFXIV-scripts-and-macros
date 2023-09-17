@@ -22,11 +22,10 @@ TODO LIST (not exhaustive)
     If the script doesn't work for you, double check your variables. 
 --]]
 
-GC = Flame -- Storm, Flame, Serpent
-WhatToBuy = Ventures --Ventures, Paper, Coke
+GC = "Flame" -- "Storm", "Flame", "Serpent"
+WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke"
 NumberToBuy = 390
-CompletionMessage = COMPLETED <se.1> -- Should be safe to leave this blank for no sound. Not tested. 
-CompletionCommand = -- Is this safe to leave blank? To be tested eventually.
+CompletionSound = 1 -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
 
 --[[
@@ -45,24 +44,29 @@ PurchaseThrottle = 2 -- Seconds to wait after buying. Mostly to not be super sus
 function OpenPurchase()
     if Verbose==1 then yield("/echo OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
-    yield("/pint")
-    yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle">")
-    step = Purchase
+    if IsAddonVisible("_TargetInfoMainTarget") then
+        yield("/pint")
+        yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle">")
+        step = "Purchase"
+    else
+        yield("/echo Target not found. Are you at the GC desk?")
+        step = "finish"
+    end
 end
 
 function Purchase() -- TODO paper and coke
     if Verbose==1 then yield("/echo Purchase "..NumberToBuy.." "..WhatToBuy) end
-    if WhatToBuy==Ventures then
+    if WhatToBuy=="Ventures" then
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
     end
-    if WhatToBuy==Paper then
+    if WhatToBuy=="Paper" then
         yield("/pcall GrandCompanyExchange true ")
         yield("/pcall GrandCompanyExchange true ")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
     end
-    if WhatToBuy==Coke then
+    if WhatToBuy=="Coke" then
         yield("/pcall GrandCompanyExchange true ")
         yield("/pcall GrandCompanyExchange true ")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
@@ -76,30 +80,34 @@ end
 
 function OpenDeliver()
     if Verbose==1 then yield("/echo OpenDeliver") end
-    yield("/target "..GC.." Personnel Officer")
-    yield("/wait 1")
-    yield("/pint")
-    yield("/waitaddon SelectString")
-    yield("/click select_string1")
-    yield("/wait 1")
-    step = Deliver
+    yield("/target "..GC.." Personnel Officer <wait.1>")
+    if IsAddonVisible("_TargetInfoMainTarget") then
+        yield("/pint")
+        yield("/waitaddon SelectString")
+        yield("/click select_string1")
+        yield("/wait 1")
+        step = "Deliver"
+    else
+        yield("/echo Target not found. Are you at the GC desk?")
+        step = "finish"
+    end
 end
 
 function Deliver()
     if Verbose==1 then yield("/echo Deliver") end
     ed = 1
-    while (ed == 1) then do
+    while (ed == 1) do
         yield("/pcall GrandCompanySupplyList true 1 0 0")
         if IsAddonVisible("GrandcompanySupplyList") then
             ed = 0
-            step = finish
+            step = "finish"
         else
             yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
         end
         if IsAddonVisible("SelectYesNo") then
             yield("/pcall SelectYesNo true -1")
             ed = 0
-            step = QuitDeliver
+            step = "QuitDeliver"
         end
     end    
 end
@@ -112,27 +120,31 @@ function QuitDeliver()
 end
 
 function Validation()
-    if Verbose==1 then yield("/echo Validation") end
-    if ( GC==Storm or GC==Flame or GC==Serpent )==false then 
-        yield("/echo GC = "..GC")
+    if Verbose==1 then yield("/echo Validation...") end
+    if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
+        yield("/echo GC = "..GC)
         yield("/echo ERROR: Variable GC does not match expected options")
-        break
-        else if ( WhatToBuy==Ventures or WhatToBuy==Paper or WhatToBuy==Coke )==false then 
-            yield("/echo WhatToBuy = "..WhatToBuy")
+        step = "finish"
+    else
+        if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" )==false then 
+            yield("/echo WhatToBuy = "..WhatToBuy)
             yield("/echo ERROR: Variable WhatToBuy does not match expected options")
-            break
-        else if ( NumberToBuy>0 )==false then
-                yield("/echo NumberToBuy = "..NumberToBuy")
+            step = "finish"
+        else
+            if ( NumberToBuy>0 )==false then
+                yield("/echo NumberToBuy = "..NumberToBuy)
                 yield("/echo ERROR: Variable NumberToBuy is invalid")
-                break
-            else if ( ExpertDeliveryThrottle>=0)==false then
-                    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle")
+                step = "finish"
+            else
+                if ( ExpertDeliveryThrottle>=0)==false then
+                    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
                     yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
-                    break
-                else if ( PurchaseThrottle>0)==false then
-                        yield("/echo PurchaseThrottle = "..PurchaseThrottle")
+                    step = "finish"
+                else
+                    if ( PurchaseThrottle>0)==false then
+                        yield("/echo PurchaseThrottle = "..PurchaseThrottle)
                         yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
-                        break
+                        step = "finish"
                     end
                 end
             end
@@ -142,11 +154,13 @@ end
 
 function Startup()
     if Verbose==1 then yield("/echo Startup...") end
-    step = Startup
+    step = "Startup"
     if IsAddonVisible("GrandCompanyExchange") then
-        step = Purchase
-    else if IsAddonVisible("GrandCompanySupplyList") then
-        step = Deliver
+        step = "Purchase"
+    else
+        if IsAddonVisible("GrandCompanySupplyList") then
+            step = "Deliver"
+        end
     end
 end
 
@@ -154,15 +168,17 @@ Validation()
 Startup()
 
 if Verbose==1 then yield("/echo Entering main loop.") end
-step = run
-while (step~=finish) then do
-    if step==OpenDeliver then OpenDeliver() end 
-    if step==Deliver then Deliver() end 
-    if step==QuitDeliver then QuitDeliver() end 
-    if step==OpenPurchase then OpenPurchase() end 
-    if step==Purchase then Purchase() end 
-    if step==QuitPurchase then QuitPurchase() end 
+
+while (step~=finish) do
+    if step=="OpenDeliver" then OpenDeliver() end 
+    if step=="Deliver" then Deliver() end 
+    if step=="QuitDeliver" then QuitDeliver() end 
+    if step=="OpenPurchase" then OpenPurchase() end 
+    if step=="Purchase" then Purchase() end 
+    if step=="QuitPurchase" then QuitPurchase() end 
+    if step=="Startup" then step = "OpenDeliver" end
+    yield("/echo "..step)
+    yield ("/wait 1")
 end
 
-yield("/echo "..CompletionMessage)
-yield(CompletionCommand)
+yield("/echo COMPLETED <se."..CompletionSound..">")
