@@ -50,30 +50,28 @@ function Purchase()
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
-    else
-        if WhatToBuy=="Paper" then
-            yield("/pcall GrandCompanyExchange true 1 2")
-            yield("/pcall GrandCompanyExchange true 2 1")
-            yield("/pcall GrandCompanyExchange false 0 17 "..NumberToBuy.." 0 True False 0 0 0")
-        else
-            if WhatToBuy=="Coke" then
-                yield("/pcall GrandCompanyExchange true 1 2")
-                yield("/pcall GrandCompanyExchange true 2 4")
-                yield("/pcall GrandCompanyExchange false 0 31 "..NumberToBuy.." 0 True False 0 0 0")
-            else
-                if WhatToBuy=="MC3" then
-                    yield("/pcall GrandCompanyExchange true 1 2")
-                    yield("/pcall GrandCompanyExchange true 2 1")
-                    yield("/pcall GrandCompanyExchange false 0 38 "..NumberToBuy.." 0 True False 0 0 0")
-                else
-                    if WhatToBuy=="MC4" then
-                        yield("/pcall GrandCompanyExchange true 1 2")
-                        yield("/pcall GrandCompanyExchange true 2 1")
-                        yield("/pcall GrandCompanyExchange false 0 39 "..NumberToBuy.." 0 True False 0 0 0")
-                    end
-                end
-            end
-        end
+    end
+    if WhatToBuy=="Paper" then
+        yield("/pcall GrandCompanyExchange true 1 2")
+        yield("/pcall GrandCompanyExchange true 2 1")
+        yield("/pcall GrandCompanyExchange false 0 17 "..NumberToBuy.." 0 True False 0 0 0")
+    end
+    if WhatToBuy=="Coke" then
+        yield("/pcall GrandCompanyExchange true 1 2")
+        yield("/pcall GrandCompanyExchange true 2 4")
+        yield("/pcall GrandCompanyExchange false 0 31 "..NumberToBuy.." 0 True False 0 0 0")
+    end
+    if WhatToBuy=="MC3" then
+        yield("/pcall GrandCompanyExchange true 1 2")
+        yield("/pcall GrandCompanyExchange true 2 1")
+        yield("/pcall GrandCompanyExchange false 0 38 "..NumberToBuy.." 0 True False 0 0 0")
+    end
+    if WhatToBuy=="MC4" then
+        yield("/pcall GrandCompanyExchange true 1 2")
+        yield("/pcall GrandCompanyExchange true 2 1")
+        yield("/pcall GrandCompanyExchange false 0 39 "..NumberToBuy.." 0 True False 0 0 0")
+    end
+
     end
     yield("/wait 0.3")
     if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
@@ -162,32 +160,34 @@ function Validation()
         yield("/echo GC = "..GC)
         yield("/echo ERROR: Variable GC does not match expected options")
         step = "finish"
-    else
-        if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
-            yield("/echo WhatToBuy = "..WhatToBuy)
-            yield("/echo ERROR: Variable WhatToBuy does not match expected options")
-            step = "finish"
-        else
-            if ( NumberToBuy>0 )==false then
-                yield("/echo NumberToBuy = "..NumberToBuy)
-                yield("/echo ERROR: Variable NumberToBuy is invalid")
-                step = "finish"
-            else
-                if ( ExpertDeliveryThrottle>=0)==false then
-                    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-                    yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
-                    step = "finish"
-                else
-                    if ( PurchaseThrottle>0)==false then
-                        yield("/echo PurchaseThrottle = "..PurchaseThrottle)
-                        yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
-                        step = "finish"
-                    end
-                end
-            end
-        end
+    end
+    if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
+        yield("/echo WhatToBuy = "..WhatToBuy)
+        yield("/echo ERROR: Variable WhatToBuy does not match expected options")
+        step = "finish"
+    end
+    if ( NumberToBuy>0 )==false then
+        yield("/echo NumberToBuy = "..NumberToBuy)
+        yield("/echo ERROR: Variable NumberToBuy is invalid")
+        step = "finish"
+    end
+    if ( SealBuff>0 )==false then
+        yield("/echo SealBuff = "..SealBuff)
+        yield("/echo ERROR: Variable SealBuff should be 0 or 1")
+        step = "finish"
+    end
+    if ( ExpertDeliveryThrottle>=0 )==false then
+        yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
+        yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
+        step = "finish"
+    end
+    if ( PurchaseThrottle>0 )==false then
+        yield("/echo PurchaseThrottle = "..PurchaseThrottle)
+        yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
+        step = "finish"
     end
 end
+
 
 
 yield("/echo AutoED is starting...")
