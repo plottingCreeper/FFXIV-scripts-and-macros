@@ -171,7 +171,7 @@ function Validation()
         yield("/echo ERROR: Variable NumberToBuy is invalid")
         step = "finish"
     end
-    if ( SealBuff>0 )==false then
+    if ( SealBuff~=0 or SealBuff~= 1 )==false then
         yield("/echo SealBuff = "..SealBuff)
         yield("/echo ERROR: Variable SealBuff should be 0 or 1")
         step = "finish"
