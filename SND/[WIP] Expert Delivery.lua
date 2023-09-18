@@ -43,7 +43,7 @@ function OpenPurchase()
     end
 end
 
-function Purchase() -- TODO paper and coke
+function Purchase()
     if Verbose==1 then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
     if WhatToBuy=="Ventures" then
         yield("/pcall GrandCompanyExchange true 1 0")
