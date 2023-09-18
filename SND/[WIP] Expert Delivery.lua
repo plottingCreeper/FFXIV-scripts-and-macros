@@ -1,6 +1,6 @@
 --[[
     Automagic grand company expert delivery and purchase script for SomethingNeedDoing
-    Written by plottingCreeper
+    Written by plottingCreeper, with help from Thee
     
     Requires:
         SomethingNeedDoing
