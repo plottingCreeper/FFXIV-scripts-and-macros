@@ -6,30 +6,20 @@
         SomethingNeedDoing
         Pandora testing
         Probably some other stuff too; good luck!
-
-    First section is the variables. Basically the settings for the script.
-    If the script doesn't work for you, double check your variables. 
 --]]
 
+-- CONFIGURE THESE BEFORE USE
 GC = "" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
-NumberToBuy = 390
+NumberToBuy = "390"
 CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
 SealBuff = 0
 
---[[
-    This second section is tunables. Hopefully you won't ever have to touch these.
-    Very high chance of breaking things here. Don't mess with these unless you understand the script.
---]]
-
-ExpertDeliveryThrottle = 0.2 -- Seconds to wait after handing in each item. This WILL break the script if set too low.
-PurchaseThrottle = 2 -- Seconds to wait after buying. Mostly to not be super suspicious to anyone who may be watching.
-
---[[
-    Functions and logic section; where the real work gets done. 
-    You shouldn't ever need to mess anything below this point.
---]]
+-- Advanced configuration. Will probably break things and/or get you banned.
+ExpertDeliveryThrottle = "0.2"
+PurchaseThrottle = "2"
+TargetThrottle = "1"
 
 function OpenPurchase()
     if Verbose==1 then yield("/echo Running OpenPurchase") end
@@ -75,7 +65,7 @@ function Purchase()
     end
     yield("/wait 0.3")
     if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
-    yield("/wait 1")
+    yield("/wait "..PurchaseThrottle..)
     QuitPurchase()
     step = "OpenDeliver"
 end
@@ -83,12 +73,12 @@ end
 function QuitPurchase()
     if Verbose==1 then yield("/echo Running QuitPurchase") end
     yield("/pcall GrandCompanyExchange true -1")
-    yield("/wait 1")
 end
 
 function OpenDeliver()
-    if SealBuff==1 then SealBuff() end
     if Verbose==1 then yield("/echo Running OpenDeliver") end
+    yield("/wait "..TargetThrottle)
+    if SealBuff==1 then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
         yield("/send NUMPAD0")
@@ -103,8 +93,8 @@ function OpenDeliver()
 end
 
 function Deliver()
-    if SealBuff==1 then SealBuff() end
     if Verbose==1 then yield("/echo Running Deliver") end
+    if SealBuff==1 then SealBuff() end
     ed = 1
     while (ed == 1) do
         yield("/pcall GrandCompanySupplyList true 1 0 0")
@@ -147,6 +137,32 @@ function SealBuff()
     end
 end
 
+function CheckSeals(input)
+    if IsAddonVisible("GrandCompanySupplyList") then
+        NextSealValue = string.gsub(GetNodeText("GrandCompanySupplyList", 5, 2, 4),",","")
+        RawSeals = string.gsub(GetNodeText("GrandCompanySupplyList", 23),",","")
+        CurrentSeals = tonumber(string.sub(RawSeals,1,-7))
+        MaxSeals = tonumber(string.sub(RawSeals,-5,-1))
+    end
+    if IsAddonVisible("GrandCompanyExchange") then
+        CurrentSeals = string.gsub(GetNodeText("GrandCompanyExchange", 52),",","")
+        CurrentSeals = tonumber(CurrentSeals)
+    end
+    if input == "current" then 
+        output = CurrentSeals
+    end
+    if input == "max" then
+        output = MaxSeals
+    end
+    return output
+end
+
+function CheckVentures()
+    CurrentVentures = string.gsub(GetNodeText("GrandCompanyExchange", 2, 1, 3),",","")
+    CurrentVentures = tonumber(CurrentVentures)
+    return CurrentVentures
+end
+
 function GetCloser()
     if IsAddonVisible("_TargetInfoMainTarget") then
         yield("/lockon on")
@@ -187,7 +203,6 @@ function Validation()
         step = "finish"
     end
 end
-
 
 
 yield("/echo AutoED is starting...")
