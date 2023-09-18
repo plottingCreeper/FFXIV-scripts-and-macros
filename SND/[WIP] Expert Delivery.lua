@@ -189,20 +189,18 @@ function Validation()
     end
 end
 
-function Startup()
-    if Verbose==1 then yield("/echo Running Startup...") end
-    step = "Startup"
-    if IsAddonVisible("GrandCompanyExchange") then
-        step = "Purchase"
-    else
-        if IsAddonVisible("GrandCompanySupplyList") then
-            step = "Deliver"
-        end
+
+yield("/echo AutoED is starting...")
+step = "Startup"
+if IsAddonVisible("GrandCompanyExchange") then
+    step = "Purchase"
+else
+    if IsAddonVisible("GrandCompanySupplyList") then
+        step = "Deliver"
     end
 end
 
 Validation()
-Startup()
 
 if Verbose==1 then yield("/echo Entering main loop.") end
 
