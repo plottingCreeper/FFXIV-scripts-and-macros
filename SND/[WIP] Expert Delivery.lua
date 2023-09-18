@@ -11,11 +11,12 @@
     If the script doesn't work for you, double check your variables. 
 --]]
 
-GC = "Serpent" -- "Storm", "Flame", "Serpent"
+GC = "" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = 390
-CompletionSound = 1 -- Should be safe to leave this blank for no sound. Not tested. 
+CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
+SealBuff = 0
 
 --[[
     This second section is tunables. Hopefully you won't ever have to touch these.
@@ -88,6 +89,7 @@ function QuitPurchase()
 end
 
 function OpenDeliver()
+    if SealBuff==1 then SealBuff() end
     if Verbose==1 then yield("/echo Running OpenDeliver") end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
@@ -103,6 +105,7 @@ function OpenDeliver()
 end
 
 function Deliver()
+    if SealBuff==1 then SealBuff() end
     if Verbose==1 then yield("/echo Running Deliver") end
     ed = 1
     while (ed == 1) do
@@ -135,6 +138,14 @@ function QuitDeliver()
     yield("/pcall GrandCompanySupplyList true -1")
     yield("/waitaddon SelectString")
     yield("/pcall SelectString true -1 <wait.1>")
+end
+
+function SealBuff()
+    if HasStatus("Priority Seal Allowance")==false then
+        if IsAddonVisible("GrandCompanySupplyList") then QuitDeliver() end
+        yield("/item Priority Seal Allowance")
+        step = "OpenDeliver"
+        yield("/wait 2")
 end
 
 function GetCloser()
