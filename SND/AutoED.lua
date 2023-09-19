@@ -9,7 +9,7 @@
 --]]
 
 -- CONFIGURE THESE BEFORE USE
-GC = "Serpent" -- "Storm", "Flame", "Serpent"
+GC = "" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
@@ -54,7 +54,7 @@ function Purchase()
     if WhatToBuy=="Paper" then
         Cost = 600
         if NumberToBuy=="max" then
-            Buy = CheckSeals(current) // Cost
+            Buy = CurrentSeals // Cost
         end
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
@@ -63,7 +63,7 @@ function Purchase()
     if WhatToBuy=="Coke" then
         Cost = 200
         if NumberToBuy=="max" then
-            Buy = CheckSeals(current) // Cost
+            Buy = CurrentSeals // Cost
         end
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 4")
@@ -72,7 +72,7 @@ function Purchase()
     if WhatToBuy=="MC3" then
         Cost = 20000
         if NumberToBuy=="max" then
-            Buy = CheckSeals(current) // Cost
+            Buy = CurrentSeals // Cost
         end
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
@@ -81,7 +81,7 @@ function Purchase()
     if WhatToBuy=="MC4" then
         Cost = 20000
         if NumberToBuy=="max" then
-            Buy = CheckSeals(current) // Cost
+            Buy = CurrentSeals // Cost
         end
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
@@ -129,10 +129,10 @@ function Deliver()
         end
         CheckSeals()
         if Debug then
-            yield("/echo Current:"..CurrentSeals)
-            yield("/echo Next:"..NextSealValue)
-            yield("/echo Current+Next:"..(CurrentSeals + NextSealValue))
-            yield("/echo Max:"..MaxSeals)
+            yield("/echo Current : "..CurrentSeals)
+            yield("/echo Next Item : "..NextSealValue)
+            yield("/echo Current+Next : "..(CurrentSeals + NextSealValue))
+            yield("/echo Seals Max : "..MaxSeals)
         end
         if ((CurrentSeals + NextSealValue) > MaxSeals) then
             yield("/echo Current+Next:"..(CurrentSeals + NextSealValue))
@@ -272,7 +272,7 @@ while (step~="finish") do
     if step=="Purchase" then Purchase() end 
     if step=="QuitPurchase" then QuitPurchase() end 
     if step=="Startup" then step = "OpenDeliver" end
-    if Verbose then yield("/echo DEGUG: step = "..step) end
+    if Debug then yield("/echo DEBUG: step = "..step) end
     yield ("/wait 1")
 end
 
