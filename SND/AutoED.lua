@@ -121,6 +121,12 @@ function Deliver()
     if SealBuff then SealBuff() end
     ed = 1
     while (ed == 1) do
+        if GetNodeText("GrandCompanySupplyList", 5, 2, 4)=="" then
+            yield("/echo No more items!")
+            ed = 0
+            step = "finish"
+            break
+        end
         CheckSeals()
         if Debug then
             yield("/echo Current:"..CurrentSeals)
@@ -133,11 +139,6 @@ function Deliver()
             ed = 0
             step = "OpenPurchase"
             break
-        end
-        if GetNodeText("GrandCompanySupplyList", 5, 2, 4)==false then
-            yield("/echo No more items!")
-            ed = 0
-            step = "finish"
         end
         yield("/pcall GrandCompanySupplyList true 1 0 0")
         yield("/wait 0.1")
