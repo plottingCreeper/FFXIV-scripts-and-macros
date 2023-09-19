@@ -15,7 +15,7 @@ NumberToBuy = "max" -- Can be a number or "max"
 SealBuff = true
 Turnin = "LITERALLY EVERYTHING, PROBABLY" --TODO: not currently implemented.
 CompletionMessage = true
-Verbose = true -- If something doesn't work, set this to 1 and try again before bothering me about it.
+Verbose = true
 Debug = true
 
 -- Advanced configuration. Will probably break things and/or get you banned.
