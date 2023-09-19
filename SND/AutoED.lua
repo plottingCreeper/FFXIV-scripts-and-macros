@@ -12,9 +12,9 @@
 GC = "" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
-CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
 SealBuff = true
 Turnin = "LITERALLY EVERYTHING, PROBABLY" --TODO: not currently implemented.
+CompletionMessage = true
 Verbose = true -- If something doesn't work, set this to 1 and try again before bothering me about it.
 Debug = true
 
@@ -276,4 +276,8 @@ while (step~="finish") do
     yield ("/wait 1")
 end
 
-yield("/echo COMPLETED <se."..CompletionSound..">")
+if CompletionMessage then
+    yield("/echo --------------------")
+    yield("/echo AutoED has finished!")
+    yield("/echo --------------------")
+end
