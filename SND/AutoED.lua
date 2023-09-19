@@ -118,8 +118,8 @@ end
 
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
-    if SealBuff then SealBuff() end
     ed = 1
+    if SealBuff then SealBuff() end
     while (ed == 1) do
         if GetNodeText("GrandCompanySupplyList", 5, 2, 4)=="" then
             yield("/echo No more items!")
@@ -166,7 +166,10 @@ end
 
 function SealBuff()
     if HasStatus("Priority Seal Allowance")==false then
-        if IsAddonVisible("GrandCompanySupplyList") then QuitDeliver() end
+        if IsAddonVisible("GrandCompanySupplyList") then 
+            QuitDeliver() 
+            ed = 0
+        end
         yield("/item Priority Seal Allowance")
         step = "OpenDeliver"
         yield("/wait 2")
@@ -256,6 +259,8 @@ else
 end
 
 Validation()
+
+if SealBuff then SealBuff() end
 
 if Verbose then yield("/echo Entering main loop.") end
 
