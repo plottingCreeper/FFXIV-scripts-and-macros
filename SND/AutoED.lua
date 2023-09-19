@@ -118,7 +118,7 @@ function Deliver()
             step = "finish"
         end
         if IsAddonVisible("SelectYesno") then
-            yield("/pcall SelectYesno true 1")
+            yield("/pcall SelectYesno true 0")
             ed = 0
             step = "OpenPurchase"
         end
