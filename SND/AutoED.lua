@@ -131,15 +131,13 @@ function Deliver()
         end
         if IsAddonVisible("SelectYesno") then
             yield("/pcall SelectYesno true 0")
-            ed = 0
-            step = "OpenPurchase"
         end
         if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
         yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
         CheckSeals()
         if ((CurrentSeals + NextSealValue) > MaxSeals) then
             ed = 0
-            step = "finish"
+            step = "OpenPurchase"
         end
     end
     QuitDeliver()
