@@ -216,10 +216,7 @@ function GetCloser()
     end
 end
 
-function Validation()
-end
-
-
+------------------------------------------------
 yield("/echo AutoED is starting...")
 step = "Startup"
 if IsAddonVisible("GrandCompanyExchange") then
