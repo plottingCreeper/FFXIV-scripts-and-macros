@@ -3,19 +3,19 @@
     Written by plottingCreeper, with help from Thee
     
     Requires:
-        SomethingNeedDoing
+        SomethingNeedDoing (requires expanded edition for auto GC)
         Pandora testing
         Probably some other stuff too; good luck!
 --]]
 
 -- CONFIGURE THESE BEFORE USE
-GC = "auto" -- "Storm", "Flame", "Serpent"
+GC = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 SealBuff = true
 VenturesUntil = 10000
 AfterVentures = "Paper"
-TurninArmoury = true
+TurninArmoury = true --Not working, so currently requires the expert delivery window to be set to "Hide Gear Set Items"
 CompletionMessage = true
 Verbose = true
 Debug = true
