@@ -28,14 +28,9 @@ TargetThrottle = "1"
 function OpenPurchase()
     if Verbose then yield("/echo Running OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
-    if IsAddonVisible("_TargetInfoMainTarget") then
-        yield("/send NUMPAD0")
-        yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle..">")
-        step = "Purchase"
-    else
-        yield("/echo Target not found. Are you at the GC desk?")
-        step = "finish"
-    end
+    yield("/send NUMPAD0")
+    yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle..">")
+    step = "Purchase"
 end
 
 function Purchase()
@@ -109,16 +104,11 @@ function OpenDeliver()
     yield("/wait "..TargetThrottle)
     if SealBuff then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
-    if IsAddonVisible("_TargetInfoMainTarget") then
-        yield("/send NUMPAD0")
-        yield("/waitaddon SelectString")
-        yield("/click select_string1")
-        yield("/waitaddon GrandCompanySupplyList <wait.1>")
-        step = "Deliver"
-    else
-        yield("/echo Target not found. Are you at the GC desk?")
-        step = "finish"
-    end
+    yield("/send NUMPAD0")
+    yield("/waitaddon SelectString")
+    yield("/click select_string1")
+    yield("/waitaddon GrandCompanySupplyList <wait.1>")
+    step = "Deliver"
 end
 
 function Deliver()
