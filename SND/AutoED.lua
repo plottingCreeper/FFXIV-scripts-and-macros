@@ -185,7 +185,7 @@ function SealBuff()
         end
         yield("/item Priority Seal Allowance")
         step = "OpenDeliver"
-        yield("/wait 2")
+        yield("/wait 4")
     end
 end
 
