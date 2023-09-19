@@ -11,13 +11,13 @@
 -- CONFIGURE THESE BEFORE USE
 GC = "" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
-NumberToBuy = "390"
+NumberToBuy = "390" -- Can be a number or "max"
 CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
 SealBuff = 0
 
 -- Advanced configuration. Will probably break things and/or get you banned.
-ExpertDeliveryThrottle = "0.2"
+ExpertDeliveryThrottle = "0.5"
 PurchaseThrottle = "2"
 TargetThrottle = "1"
 
@@ -36,30 +36,40 @@ end
 
 function Purchase()
     if Verbose==1 then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
+    if NumberToBuy ~= "max" then Buy = NumberToBuy end
     if WhatToBuy=="Ventures" then
+        Cost = 200
+        if NumberToBuy=="max" then
+            Buy = CheckSeals(current) // Cost
+        end
+        if ( CheckVentures() + Buy ) > 65000 then Buy = 65000 - CurrentVentures
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 0 "..NumberToBuy.." 0 True False 0 0 0")
+        yield("/pcall GrandCompanyExchange false 0 0 "..Buy.." 0 True False 0 0 0")
     end
     if WhatToBuy=="Paper" then
+        Cost = 600
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 17 "..NumberToBuy.." 0 True False 0 0 0")
+        yield("/pcall GrandCompanyExchange false 0 17 "..Buy.." 0 True False 0 0 0")
     end
     if WhatToBuy=="Coke" then
+        Cost = 200
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 4")
-        yield("/pcall GrandCompanyExchange false 0 31 "..NumberToBuy.." 0 True False 0 0 0")
+        yield("/pcall GrandCompanyExchange false 0 31 "..Buy.." 0 True False 0 0 0")
     end
     if WhatToBuy=="MC3" then
+        Cost = 20000
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 38 "..NumberToBuy.." 0 True False 0 0 0")
+        yield("/pcall GrandCompanyExchange false 0 38 "..Buy.." 0 True False 0 0 0")
     end
     if WhatToBuy=="MC4" then
+        Cost = 20000
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 39 "..NumberToBuy.." 0 True False 0 0 0")
+        yield("/pcall GrandCompanyExchange false 0 39 "..Buy.." 0 True False 0 0 0")
     end
 
     end
@@ -108,15 +118,17 @@ function Deliver()
             ed = 0
             step = "finish"
         else
-            if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
-            yield("/wait 0.5")
-            if IsAddonVisible("SelectYesno") then
-                yield("/pcall SelectYesno true 1")
-                ed = 0
-                step = "OpenPurchase"
-            end
-            yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 1")
+            ed = 0
+            step = "OpenPurchase"
         end
+        if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
+        if CheckSeals(current) + NextSealValue > MaxSeals then
+            ed = 0
+            step = "finish"
+        end
+        yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
     end
     QuitDeliver()
 end
