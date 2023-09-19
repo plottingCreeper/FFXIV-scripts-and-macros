@@ -15,6 +15,7 @@ NumberToBuy = "390" -- Can be a number or "max"
 CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
 Verbose = 1 -- If something doesn't work, set this to 1 and try again before bothering me about it.
 SealBuff = 0
+Turnin = "LITERALLY EVERYTHING, PROBABLY" --TODO: not currently implemented.
 
 -- Advanced configuration. Will probably break things and/or get you banned.
 ExpertDeliveryThrottle = "0.5"
@@ -42,7 +43,7 @@ function Purchase()
         if NumberToBuy=="max" then
             Buy = CheckSeals(current) // Cost
         end
-        if ( CheckVentures() + Buy ) > 65000 then Buy = 65000 - CurrentVentures end
+        if ((CheckVentures()+Buy)>65000) then Buy=(65000-CurrentVentures) end
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..Buy.." 0 True False 0 0 0")
@@ -115,14 +116,14 @@ function Deliver()
         if IsAddonVisible("GrandCompanySupplyList") then
             ed = 0
             step = "finish"
-        else
+        end
         if IsAddonVisible("SelectYesno") then
             yield("/pcall SelectYesno true 1")
             ed = 0
             step = "OpenPurchase"
         end
         if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
-        if CheckSeals(current) + NextSealValue > MaxSeals then
+        if (CheckSeals(current)+NextSealValue>MaxSeals) then
             ed = 0
             step = "finish"
         end
@@ -192,22 +193,22 @@ function Validation()
         yield("/echo ERROR: Variable WhatToBuy does not match expected options")
         step = "finish"
     end
-    if ( NumberToBuy>0 or NumberToBuy=="max" )==false then
+    if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
         yield("/echo NumberToBuy = "..NumberToBuy)
         yield("/echo ERROR: Variable NumberToBuy is invalid")
         step = "finish"
     end
-    if ( SealBuff~=0 or SealBuff~= 1 )==false then
+    if ( SealBuff~=0 or SealBuff~=1 )==false then
         yield("/echo SealBuff = "..SealBuff)
         yield("/echo ERROR: Variable SealBuff should be 0 or 1")
         step = "finish"
     end
-    if ( ExpertDeliveryThrottle>=0 )==false then
+    if ( ExpertDeliveryThrottle>"0" )==false then
         yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-        yield("/echo ERROR: Variable ExpertDeliveryThrottle is not a number")
+        yield("/echo ERROR: Variable ExpertDeliveryThrottle is too short is not a number")
         step = "finish"
     end
-    if ( PurchaseThrottle>0 )==false then
+    if ( PurchaseThrottle>"0" )==false then
         yield("/echo PurchaseThrottle = "..PurchaseThrottle)
         yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
         step = "finish"
