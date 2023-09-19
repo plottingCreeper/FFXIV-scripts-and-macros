@@ -9,11 +9,13 @@
 --]]
 
 -- CONFIGURE THESE BEFORE USE
-GC = "" -- "Storm", "Flame", "Serpent"
+GC = "auto" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 SealBuff = true
-Turnin = "LITERALLY EVERYTHING, PROBABLY" --TODO: not currently implemented.
+VenturesUntil = 10000
+AfterVentures = "Paper"
+TurninArmoury = true
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -40,13 +42,16 @@ function Purchase()
     if Verbose then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
     if NumberToBuy~="max" then Buy = tonumber(NumberToBuy) end
     CheckSeals()
+    if CheckVentures() >= VenturesUntil then
+        WhatToBuy = AfterVentures
+    end
     if WhatToBuy=="Ventures" then
         Cost = 200
         if NumberToBuy=="max" then
             Buy = CurrentSeals // Cost
             if Debug then yield("/echo Buying "..Buy) end
         end
-        if ((CheckVentures()+Buy)>65000) then Buy=(65000-CurrentVentures) end
+        if ((CurrentVentures+Buy)>65000) then Buy=(65000-CurrentVentures) end
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..Buy.." 0 True False 0 0 0")
@@ -108,7 +113,6 @@ function OpenDeliver()
         yield("/send NUMPAD0")
         yield("/waitaddon SelectString")
         yield("/click select_string1")
-        yield("/wait 1")
         step = "Deliver"
     else
         yield("/echo Target not found. Are you at the GC desk?")
@@ -118,8 +122,17 @@ end
 
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
-    ed = 1
     if SealBuff then SealBuff() end
+    yield("/wait 1")
+    if TurninArmoury then 
+        yield("/pcall GrandCompanySupplyList true 5 1 0")
+        if Debug then yield("/echo Armoury=yes") end
+    else
+        yield("/pcall GrandCompanySupplyList true 5 2 0")
+        if Debug then yield("/echo Armoury=yes") end
+    end
+    yield("/wait 0.5")
+    ed = 1
     while (ed == 1) do
         if GetNodeText("GrandCompanySupplyList", 5, 2, 4)=="" then
             yield("/echo No more items!")
@@ -214,37 +227,6 @@ function GetCloser()
 end
 
 function Validation()
-    if Verbose then yield("/echo Running Validation...") end
-    if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
-        yield("/echo GC = "..GC)
-        yield("/echo ERROR: Variable GC does not match expected options")
-        step = "finish"
-    end
-    if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
-        yield("/echo WhatToBuy = "..WhatToBuy)
-        yield("/echo ERROR: Variable WhatToBuy does not match expected options")
-        step = "finish"
-    end
-    if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
-        yield("/echo NumberToBuy = "..NumberToBuy)
-        yield("/echo ERROR: Variable NumberToBuy is invalid")
-        step = "finish"
-    end
-    if ( SealBuff~=0 or SealBuff~=1 )==false then
-        yield("/echo SealBuff = "..SealBuff)
-        yield("/echo ERROR: Variable SealBuff should be 0 or 1")
-        step = "finish"
-    end
-    if ( ExpertDeliveryThrottle>"0" )==false then
-        yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-        yield("/echo ERROR: Variable ExpertDeliveryThrottle is too short is not a number")
-        step = "finish"
-    end
-    if ( PurchaseThrottle>"0" )==false then
-        yield("/echo PurchaseThrottle = "..PurchaseThrottle)
-        yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
-        step = "finish"
-    end
 end
 
 
@@ -258,7 +240,49 @@ else
     end
 end
 
-Validation()
+if GC=="auto" then 
+    yield("/echo Autodetecting GC")
+    if IsInZone(128) then GC="Storm" end
+    if IsInZone(130) then GC="Flame" end
+    if IsInZone(132) then GC="Serpent" end
+    if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
+        yield("/echo GC = "..GC)
+        yield("/echo ERROR: Auto is set but you are not in a GC zone!")
+        step = "finish"
+    end
+end 
+
+if Verbose then yield("/echo Running Validation...") end
+if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
+    yield("/echo GC = "..GC)
+    yield("/echo ERROR: Variable GC does not match expected options")
+    step = "finish"
+end
+if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
+    yield("/echo WhatToBuy = "..WhatToBuy)
+    yield("/echo ERROR: Variable WhatToBuy does not match expected options")
+    step = "finish"
+end
+if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
+    yield("/echo NumberToBuy = "..NumberToBuy)
+    yield("/echo ERROR: Variable NumberToBuy is invalid")
+    step = "finish"
+end
+if ( SealBuff~=0 or SealBuff~=1 )==false then
+    yield("/echo SealBuff = "..SealBuff)
+    yield("/echo ERROR: Variable SealBuff should be 0 or 1")
+    step = "finish"
+end
+if ( ExpertDeliveryThrottle>"0" )==false then
+    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
+    yield("/echo ERROR: Variable ExpertDeliveryThrottle is too short is not a number")
+    step = "finish"
+end
+if ( PurchaseThrottle>"0" )==false then
+    yield("/echo PurchaseThrottle = "..PurchaseThrottle)
+    yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
+    step = "finish"
+end
 
 if SealBuff then SealBuff() end
 
