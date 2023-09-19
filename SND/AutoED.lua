@@ -13,9 +13,10 @@ GC = "Serpent" -- "Storm", "Flame", "Serpent"
 WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 CompletionSound = "1" -- Should be safe to leave this blank for no sound. Not tested. 
-Verbose = yes -- If something doesn't work, set this to 1 and try again before bothering me about it.
-SealBuff = yes
+SealBuff = true
 Turnin = "LITERALLY EVERYTHING, PROBABLY" --TODO: not currently implemented.
+Verbose = true -- If something doesn't work, set this to 1 and try again before bothering me about it.
+Debug = true
 
 -- Advanced configuration. Will probably break things and/or get you banned.
 ExpertDeliveryThrottle = "0.1"
@@ -23,7 +24,7 @@ PurchaseThrottle = "2"
 TargetThrottle = "1"
 
 function OpenPurchase()
-    if Verbose==yes then yield("/echo Running OpenPurchase") end
+    if Verbose then yield("/echo Running OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
         yield("/send NUMPAD0")
@@ -36,12 +37,14 @@ function OpenPurchase()
 end
 
 function Purchase()
-    if Verbose==yes then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
-    if NumberToBuy ~= "max" then Buy = NumberToBuy end
+    if Verbose then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
+    if NumberToBuy~="max" then Buy = tonumber(NumberToBuy) end
+    CheckSeals()
     if WhatToBuy=="Ventures" then
         Cost = 200
         if NumberToBuy=="max" then
-            Buy = CheckSeals(current) // Cost
+            Buy = CurrentSeals // Cost
+            if Debug then yield("/echo Buying "..Buy) end
         end
         if ((CheckVentures()+Buy)>65000) then Buy=(65000-CurrentVentures) end
         yield("/pcall GrandCompanyExchange true 1 0")
@@ -92,14 +95,14 @@ function Purchase()
 end
 
 function QuitPurchase()
-    if Verbose==yes then yield("/echo Running QuitPurchase") end
+    if Verbose then yield("/echo Running QuitPurchase") end
     yield("/pcall GrandCompanyExchange true -1")
 end
 
 function OpenDeliver()
-    if Verbose==yes then yield("/echo Running OpenDeliver") end
+    if Verbose then yield("/echo Running OpenDeliver") end
     yield("/wait "..TargetThrottle)
-    if SealBuff==yes then SealBuff() end
+    if SealBuff then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     if IsAddonVisible("_TargetInfoMainTarget") then
         yield("/send NUMPAD0")
@@ -114,18 +117,33 @@ function OpenDeliver()
 end
 
 function Deliver()
-    if Verbose==yes then yield("/echo Running Deliver") end
-    if SealBuff==yes then SealBuff() end
+    if Verbose then yield("/echo Running Deliver") end
+    if SealBuff then SealBuff() end
     ed = 1
     while (ed == 1) do
-        yield("/pcall GrandCompanySupplyList true 1 0 0")
-        yield("/wait 0.1")
-        if IsAddonVisible("Request") then
-            yield("/pcall Request true 1")
+        CheckSeals()
+        if Debug then
+            yield("/echo Current:"..CurrentSeals)
+            yield("/echo Next:"..NextSealValue)
+            yield("/echo Current+Next:"..(CurrentSeals + NextSealValue))
+            yield("/echo Max:"..MaxSeals)
+        end
+        if ((CurrentSeals + NextSealValue) > MaxSeals) then
+            yield("/echo Current+Next:"..(CurrentSeals + NextSealValue))
+            ed = 0
+            step = "OpenPurchase"
+            break
+        end
+        if GetNodeText("GrandCompanySupplyList", 5, 2, 4)==false then
+            yield("/echo No more items!")
             ed = 0
             step = "finish"
         end
-        if IsAddonVisible("GrandCompanySupplyList") then
+        yield("/pcall GrandCompanySupplyList true 1 0 0")
+        yield("/wait 0.1")
+        if IsAddonVisible("Request") then
+            yield("/echo Request window bug: probably no more items!")
+            yield("/pcall Request true 1")
             ed = 0
             step = "finish"
         end
@@ -134,17 +152,12 @@ function Deliver()
         end
         if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
         yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
-        CheckSeals()
-        if ((CurrentSeals + NextSealValue) > MaxSeals) then
-            ed = 0
-            step = "OpenPurchase"
-        end
     end
     QuitDeliver()
 end
 
 function QuitDeliver()
-    if Verbose==yes then yield("/echo Running QuitDeliver") end
+    if Verbose then yield("/echo Running QuitDeliver") end
     yield("/pcall GrandCompanySupplyList true -1")
     yield("/waitaddon SelectString")
     yield("/pcall SelectString true -1 <wait.1>")
@@ -163,8 +176,8 @@ function CheckSeals(input)
     if IsAddonVisible("GrandCompanySupplyList") then
         NextSealValue = string.gsub(GetNodeText("GrandCompanySupplyList", 5, 2, 4),",","")
         NextSealValue = tonumber(NextSealValue)
-        if SealBuff=="yes" then 
-            NextSealValue = NextSealValue * 1.15
+        if SealBuff then 
+            NextSealValue = math.floor(NextSealValue * 1.15) + 1
         end
         RawSeals = string.gsub(GetNodeText("GrandCompanySupplyList", 23),",","")
         CurrentSeals = tonumber(string.sub(RawSeals,1,-7))
@@ -197,7 +210,7 @@ function GetCloser()
 end
 
 function Validation()
-    if Verbose==yes then yield("/echo Running Validation...") end
+    if Verbose then yield("/echo Running Validation...") end
     if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
         yield("/echo GC = "..GC)
         yield("/echo ERROR: Variable GC does not match expected options")
@@ -243,7 +256,7 @@ end
 
 Validation()
 
-if Verbose==yes then yield("/echo Entering main loop.") end
+if Verbose then yield("/echo Entering main loop.") end
 
 while (step~="finish") do
     if step=="OpenDeliver" then OpenDeliver() end 
@@ -253,7 +266,7 @@ while (step~="finish") do
     if step=="Purchase" then Purchase() end 
     if step=="QuitPurchase" then QuitPurchase() end 
     if step=="Startup" then step = "OpenDeliver" end
-    if Verbose==yes then yield("/echo DEGUG: step = "..step) end
+    if Verbose then yield("/echo DEGUG: step = "..step) end
     yield ("/wait 1")
 end
 
