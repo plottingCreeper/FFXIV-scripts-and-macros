@@ -15,7 +15,7 @@ NumberToBuy = "max" -- Can be a number or "max"
 SealBuff = true
 VenturesUntil = 10000
 AfterVentures = "Paper"
-TurninArmoury = true --Not working, so currently requires the expert delivery window to be set to "Hide Gear Set Items"
+TurninArmoury = true -- MIght be dodgy if this doesn't align with your game setting.
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -113,6 +113,7 @@ function OpenDeliver()
         yield("/send NUMPAD0")
         yield("/waitaddon SelectString")
         yield("/click select_string1")
+        yield("/waitaddon GrandCompanySupplyList <wait.1>")
         step = "Deliver"
     else
         yield("/echo Target not found. Are you at the GC desk?")
@@ -123,17 +124,16 @@ end
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
     if SealBuff then SealBuff() end
-    yield("/wait 1")
-    if TurninArmoury then 
-        yield("/pcall GrandCompanySupplyList true 5 1 0")
-        if Debug then yield("/echo Armoury=yes") end
-    else
-        yield("/pcall GrandCompanySupplyList true 5 2 0")
-        if Debug then yield("/echo Armoury=yes") end
-    end
-    yield("/wait 0.5")
     ed = 1
     while (ed == 1) do
+        if TurninArmoury then 
+            yield("/pcall GrandCompanySupplyList true 5 1 0")
+            if Debug then yield("/echo Armoury=yes") end
+        else
+            yield("/pcall GrandCompanySupplyList true 5 2 0")
+            if Debug then yield("/echo Armoury=yes") end
+        end
+        yield("/wait 0.1")
         if GetNodeText("GrandCompanySupplyList", 5, 2, 4)=="" then
             yield("/echo No more items!")
             ed = 0
