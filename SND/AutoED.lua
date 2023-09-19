@@ -42,7 +42,7 @@ function Purchase()
         if NumberToBuy=="max" then
             Buy = CheckSeals(current) // Cost
         end
-        if ( CheckVentures() + Buy ) > 65000 then Buy = 65000 - CurrentVentures
+        if ( CheckVentures() + Buy ) > 65000 then Buy = 65000 - CurrentVentures end
         yield("/pcall GrandCompanyExchange true 1 0")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 0 "..Buy.." 0 True False 0 0 0")
@@ -71,11 +71,9 @@ function Purchase()
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 39 "..Buy.." 0 True False 0 0 0")
     end
-
-    end
     yield("/wait 0.3")
     if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
-    yield("/wait "..PurchaseThrottle..)
+    yield("/wait "..PurchaseThrottle)
     QuitPurchase()
     step = "OpenDeliver"
 end
@@ -194,7 +192,7 @@ function Validation()
         yield("/echo ERROR: Variable WhatToBuy does not match expected options")
         step = "finish"
     end
-    if ( NumberToBuy>0 )==false then
+    if ( NumberToBuy>0 or NumberToBuy=="max" )==false then
         yield("/echo NumberToBuy = "..NumberToBuy)
         yield("/echo ERROR: Variable NumberToBuy is invalid")
         step = "finish"
