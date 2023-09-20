@@ -260,14 +260,14 @@ if ( SealBuff~=0 or SealBuff~=1 )==false then
     yield("/echo ERROR: Variable SealBuff should be 0 or 1")
     step = "finish"
 end
-if ( ExpertDeliveryThrottle>"0" )==false then
+if ( ExpertDeliveryThrottle>="0" )==false then
     yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-    yield("/echo ERROR: Variable ExpertDeliveryThrottle is too short is not a number")
+    yield("/echo ERROR: Variable ExpertDeliveryThrottle not a number")
     step = "finish"
 end
-if ( PurchaseThrottle>"0" )==false then
+if ( PurchaseThrottle>="0" )==false then
     yield("/echo PurchaseThrottle = "..PurchaseThrottle)
-    yield("/echo ERROR: Variable PurchaseThrottle is too short or is not a number")
+    yield("/echo ERROR: Variable PurchaseThrottle is not a number")
     step = "finish"
 end
 
