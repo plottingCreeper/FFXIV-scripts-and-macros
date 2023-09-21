@@ -10,20 +10,37 @@
 
 -- CONFIGURE THESE BEFORE USE
 GC = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
-WhatToBuy = "Ventures" --"Ventures", "Paper", "Coke", "MC3", "MC4"
+WhatToBuy = "Ventures" -- "Ventures", "Paper", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
-SealBuff = true
+UseSealBuff = true  -- Whether to use Priority Seal Allowance
 VenturesUntil = 10000
-AfterVentures = "Paper"
+AfterVentures = "Paper" --"Paper", "Coke", "MC3", "MC4"
 TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
 CompletionMessage = true
 Verbose = true
 Debug = true
 
 -- Advanced configuration. Will probably break things and/or get you banned.
-ExpertDeliveryThrottle = "0.1"
+ExpertDeliveryThrottle = "0" -- Probably fine at 0, since I have to wait anyway.
 PurchaseThrottle = "2"
 TargetThrottle = "1"
+
+--[[
+    Super experimental character specific settings.
+    Probably not possible to idiot-proof, so if you're an idiot please fuck off.
+    
+check = ""
+CurrentChar = GetNodeText("_PartyList", 22, 27)
+if CurrentChar==27 then
+    CurrentChar = GetNodeText("_PartyList", 22, 18)
+end
+
+if Verbose then yield("/echo "..CurrentChar) end
+
+if string.find(CurrentChar, check) then
+    yield("/echo found "..CurrentChar)
+end
+--]]
 
 function OpenPurchase()
     if Verbose then yield("/echo Running OpenPurchase") end
@@ -102,7 +119,7 @@ end
 function OpenDeliver()
     if Verbose then yield("/echo Running OpenDeliver") end
     yield("/wait "..TargetThrottle)
-    if SealBuff then SealBuff() end
+    if UseSealBuff then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     yield("/send NUMPAD0")
     yield("/waitaddon SelectString")
@@ -113,7 +130,7 @@ end
 
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
-    if SealBuff then SealBuff() end
+    if UseSealBuff then SealBuff() end
     ed = 1
     while (ed == 1) do
         if TurninArmoury then 
@@ -145,6 +162,7 @@ function Deliver()
         end
         yield("/pcall GrandCompanySupplyList true 1 0 0")
         yield("/wait 0.1")
+        if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
         if IsAddonVisible("Request") then
             yield("/echo Request window bug: probably no more items!")
             yield("/pcall Request true 1")
@@ -154,7 +172,6 @@ function Deliver()
         if IsAddonVisible("SelectYesno") then
             yield("/pcall SelectYesno true 0")
         end
-        if IsAddonVisible("GrandCompanySupplyReward") then yield("/pcall GrandCompanySupplyReward true 0") end
         yield("/waitaddon GrandCompanySupplyList <wait."..ExpertDeliveryThrottle..">")
     end
     QuitDeliver()
@@ -183,8 +200,11 @@ function CheckSeals(input)
     if IsAddonVisible("GrandCompanySupplyList") then
         NextSealValue = string.gsub(GetNodeText("GrandCompanySupplyList", 5, 2, 4),",","")
         NextSealValue = tonumber(NextSealValue)
-        if SealBuff then 
+        if HasStatus("Priority Seal Allowance") then 
             NextSealValue = math.floor(NextSealValue * 1.15) + 1
+        else if HasStatus("Seal Sweetener") then 
+                NextSealValue = math.floor(NextSealValue * 1.10) + 1
+            end
         end
         RawSeals = string.gsub(GetNodeText("GrandCompanySupplyList", 23),",","")
         CurrentSeals = tonumber(string.sub(RawSeals,1,-7))
@@ -194,9 +214,7 @@ function CheckSeals(input)
         CurrentSeals = string.gsub(GetNodeText("GrandCompanyExchange", 52),",","")
         CurrentSeals = tonumber(CurrentSeals)
     end
-    if input == "current" then 
-        output = CurrentSeals
-    end
+    output = CurrentSeals
     if input == "max" then
         output = MaxSeals
     end
@@ -255,23 +273,41 @@ if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
     yield("/echo ERROR: Variable NumberToBuy is invalid")
     step = "finish"
 end
-if ( SealBuff~=0 or SealBuff~=1 )==false then
-    yield("/echo SealBuff = "..SealBuff)
-    yield("/echo ERROR: Variable SealBuff should be 0 or 1")
+if ( UseSealBuff==true or false )==false then
+    yield("/echo ERROR: UseSealBuff should be true or false")
+    step = "finish"
+end
+if ( VenturesUntil>0 and VenturesUntil<=65000 )==false then
+    yield("/echo NumberToBuy = "..NumberToBuy)
+    yield("/echo ERROR: Variable NumberToBuy is invalid")
+    step = "finish"
+end
+if ( AfterVentures=="Ventures" or "Paper" or "Coke" or "MC3" or "MC4" )==false then 
+    yield("/echo AfterVentures = "..AfterVentures)
+    yield("/echo ERROR: Variable AfterVentures does not match expected options")
+    step = "finish"
+end
+if ( TurninArmoury==true or false )==false then
+    yield("/echo ERROR: TurninArmoury should be true or false")
     step = "finish"
 end
 if ( ExpertDeliveryThrottle>="0" )==false then
     yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-    yield("/echo ERROR: Variable ExpertDeliveryThrottle not a number")
+    yield("/echo ERROR: Variable ExpertDeliveryThrottle not a valid number")
     step = "finish"
 end
 if ( PurchaseThrottle>="0" )==false then
     yield("/echo PurchaseThrottle = "..PurchaseThrottle)
-    yield("/echo ERROR: Variable PurchaseThrottle is not a number")
+    yield("/echo ERROR: Variable PurchaseThrottle is not a valid number")
+    step = "finish"
+end
+if ( TargetThrottle>="0" )==false then
+    yield("/echo TargetThrottle = "..TargetThrottle)
+    yield("/echo ERROR: Variable TargetThrottle is not a valid number")
     step = "finish"
 end
 
-if SealBuff then SealBuff() end
+if UseSealBuff then SealBuff() end
 
 if Verbose then yield("/echo Entering main loop.") end
 
