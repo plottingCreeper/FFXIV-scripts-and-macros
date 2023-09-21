@@ -16,6 +16,7 @@ UseSealBuff = true  -- Whether to use Priority Seal Allowance
 VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Coke", "MC3", "MC4"
 TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
+CharacterSpecificSettings = false
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -25,22 +26,44 @@ ExpertDeliveryThrottle = "0" -- Probably fine at 0, since I have to wait anyway.
 PurchaseThrottle = "2"
 TargetThrottle = "1"
 
---[[
-    Super experimental character specific settings.
-    Probably not possible to idiot-proof, so if you're an idiot please fuck off.
-    
-check = ""
-CurrentChar = GetNodeText("_PartyList", 22, 27)
-if CurrentChar==27 then
-    CurrentChar = GetNodeText("_PartyList", 22, 18)
+--    Super experimental character specific settings.
+if CharacterSpecificSettings then
+    Character = "" -- Character name as it appears in the party list
+    CurrentChar = GetNodeText("_PartyList", 22, 27)
+    if CurrentChar==27 then
+        CurrentChar = GetNodeText("_PartyList", 22, 18)
+    end
+    if Verbose then yield("/echo "..CurrentChar) end
+    if string.find(CurrentChar, Character) then
+        yield("/echo found "..Character)
+        WhatToBuy = "Ventures"
+        NumberToBuy = "max"
+        UseSealBuff = true
+        VenturesUntil = 65000
+        AfterVentures = "MC3"
+        TurninArmoury = true 
+        if Debug then
+            yield("/echo "..Character.." Specific setting: WhatToBuy = "..WhatToBuy)
+            yield("/echo "..Character.." Specific setting: NumberToBuy = "..NumberToBuy)
+            if UseSealBuff then 
+                yield("/echo "..Character.." Specific setting: UseSealBuff = true")
+            else
+                yield("/echo "..Character.." Specific setting: UseSealBuff = false")
+            end
+            yield("/echo "..Character.." Specific setting: VenturesUntil = "..VenturesUntil)
+            yield("/echo "..Character.." Specific setting: AfterVentures = "..AfterVentures)
+            if TurninArmoury then 
+                yield("/echo "..Character.." Specific setting: TurninArmoury = true")
+            else
+                yield("/echo "..Character.." Specific setting: TurninArmoury = false")
+            end
+            yield("/wait 3")
+        end
+    else
+        if Verbose then yield("/echo Using general settings") end
+        if Debug then yield("/wait 3") end
+    end
 end
-
-if Verbose then yield("/echo "..CurrentChar) end
-
-if string.find(CurrentChar, check) then
-    yield("/echo found "..CurrentChar)
-end
---]]
 
 function OpenPurchase()
     if Verbose then yield("/echo Running OpenPurchase") end
@@ -190,6 +213,7 @@ function SealBuff()
             QuitDeliver() 
             ed = 0
         end
+        yield("/wait 1")
         yield("/item Priority Seal Allowance")
         step = "OpenDeliver"
         yield("/wait 4")
@@ -289,6 +313,10 @@ if ( AfterVentures=="Ventures" or "Paper" or "Coke" or "MC3" or "MC4" )==false t
 end
 if ( TurninArmoury==true or false )==false then
     yield("/echo ERROR: TurninArmoury should be true or false")
+    step = "finish"
+end
+if ( CharacterSpecificSettings==true or false )==false then
+    yield("/echo ERROR: CharacterSpecificSettings should be true or false")
     step = "finish"
 end
 if ( ExpertDeliveryThrottle>="0" )==false then
