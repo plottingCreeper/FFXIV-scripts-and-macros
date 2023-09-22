@@ -3,8 +3,11 @@
     Written by plottingCreeper, with help from Thee
     
     Requires:
-        SomethingNeedDoing (requires expanded edition for auto GC)
+        SomethingNeedDoing
         Pandora testing
+    Advanced requirements
+        SomethingNeedDoing (Expanded Edition)
+        Island Sanctuary Automation
         Probably some other stuff too; good luck!
 --]]
 
@@ -28,7 +31,7 @@ TargetThrottle = "1"
 
 --    Super experimental character specific settings.
 if CharacterSpecificSettings then
-    Character = "" -- Character name as it appears in the party list
+    Character = "NAME" -- Character name as it appears in the party list
     CurrentChar = GetNodeText("_PartyList", 22, 27)
     if CurrentChar==27 then
         CurrentChar = GetNodeText("_PartyList", 22, 18)
