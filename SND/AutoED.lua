@@ -38,6 +38,7 @@ if CharacterSpecificSettings then
     end
     if Verbose then yield("/echo "..CurrentChar) end
     if string.find(CurrentChar, Character) then
+        UsingCharSpecific = true
         yield("/echo found "..Character)
         WhatToBuy = "Ventures"
         NumberToBuy = "max"
@@ -45,6 +46,8 @@ if CharacterSpecificSettings then
         VenturesUntil = 65000
         AfterVentures = "MC3"
         TurninArmoury = true 
+    end
+    if UsingCharSpecific then 
         if Debug then
             yield("/echo "..Character.." Specific setting: WhatToBuy = "..WhatToBuy)
             yield("/echo "..Character.." Specific setting: NumberToBuy = "..NumberToBuy)
