@@ -10,11 +10,11 @@
 
 -- CONFIGURE THESE BEFORE USE
 GC = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
-WhatToBuy = "Ventures" -- "Ventures", "Paper", "Coke", "MC3", "MC4"
+WhatToBuy = "Ventures" -- "Ventures", "Paper", "Sap", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 UseSealBuff = true  -- Whether to use Priority Seal Allowance
 VenturesUntil = 10000
-AfterVentures = "Paper" --"Paper", "Coke", "MC3", "MC4"
+AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = false
 CompletionMessage = true
@@ -99,6 +99,15 @@ function Purchase()
         yield("/pcall GrandCompanyExchange true 1 2")
         yield("/pcall GrandCompanyExchange true 2 1")
         yield("/pcall GrandCompanyExchange false 0 17 "..Buy.." 0 True False 0 0 0")
+    end
+    if WhatToBuy=="Sap" then
+        Cost = 200
+        if NumberToBuy=="max" then
+            Buy = CurrentSeals // Cost
+        end
+        yield("/pcall GrandCompanyExchange true 1 2")
+        yield("/pcall GrandCompanyExchange true 2 4")
+        yield("/pcall GrandCompanyExchange false 0 30 "..Buy.." 0 True False 0 0 0")
     end
     if WhatToBuy=="Coke" then
         Cost = 200
@@ -258,6 +267,17 @@ function GetCloser()
     end
 end
 
+function LeaveInn()
+    if IsInZone(177) or IsInZone(178) or IsInZone(179) then
+        yield("/target HeavyOaken Door")
+        yield("/lockon on")
+        yield("/automove on <wait.2>") --TODO check coordinates instead of wait?
+        yield("/send NUMPAD0")
+        yield("/waitaddon Nowloading <maxwait.15>")
+        yield("/waitaddon NamePlate <maxwait.15><wait.5>")
+    end
+end
+
 ------------------------------------------------
 yield("/echo AutoED is starting...")
 step = "Startup"
@@ -287,7 +307,7 @@ if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then
     yield("/echo ERROR: Variable GC does not match expected options")
     step = "finish"
 end
-if ( WhatToBuy=="Ventures" or WhatToBuy=="Paper" or WhatToBuy=="Coke" or WhatToBuy=="MC3" or WhatToBuy=="MC4" )==false then 
+if ( WhatToBuy=="Ventures" or "Paper" or "Sap" or "Coke" or "MC3" or "MC4" )==false then 
     yield("/echo WhatToBuy = "..WhatToBuy)
     yield("/echo ERROR: Variable WhatToBuy does not match expected options")
     step = "finish"
@@ -306,7 +326,7 @@ if ( VenturesUntil>0 and VenturesUntil<=65000 )==false then
     yield("/echo ERROR: Variable NumberToBuy is invalid")
     step = "finish"
 end
-if ( AfterVentures=="Ventures" or "Paper" or "Coke" or "MC3" or "MC4" )==false then 
+if ( AfterVentures=="Ventures" or "Paper" or "Sap" or "Coke" or "MC3" or "MC4" )==false then 
     yield("/echo AfterVentures = "..AfterVentures)
     yield("/echo ERROR: Variable AfterVentures does not match expected options")
     step = "finish"
