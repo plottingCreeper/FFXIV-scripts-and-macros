@@ -5,10 +5,9 @@
     Requires:
         SomethingNeedDoing
         Pandora testing
-    Advanced requirements
+    Advanced requirements:
         SomethingNeedDoing (Expanded Edition)
         Island Sanctuary Automation
-        Probably some other stuff too; good luck!
 --]]
 
 -- CONFIGURE THESE BEFORE USE
@@ -19,7 +18,7 @@ UseSealBuff = true  -- Whether to use Priority Seal Allowance
 VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
-CharacterSpecificSettings = false
+CharacterSpecificSettings = true
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -31,43 +30,44 @@ TargetThrottle = "1"
 
 --    Super experimental character specific settings.
 if CharacterSpecificSettings then
-    Character = "NAME" -- Character name as it appears in the party list
+    Characters = { --Character name is partial string match for how name appears in party list.
+        COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = true, VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = false },
+        p = { VenturesUntil = 65000, AfterVentures = "MC3" },
+        q = { UseSealBuff = false },
+        Name = { VenturesUntil = 65000 },
+    }
     CurrentChar = GetNodeText("_PartyList", 22, 27)
     if CurrentChar==27 then
         CurrentChar = GetNodeText("_PartyList", 22, 18)
     end
-    if Verbose then yield("/echo "..CurrentChar) end
-    if string.find(CurrentChar, Character) then
-        UsingCharSpecific = true
-        yield("/echo found "..Character)
-        WhatToBuy = "Ventures"
-        NumberToBuy = "max"
-        UseSealBuff = true
-        VenturesUntil = 65000
-        AfterVentures = "MC3"
-        TurninArmoury = true 
-    end
-    if UsingCharSpecific then 
-        if Debug then
-            yield("/echo "..Character.." Specific setting: WhatToBuy = "..WhatToBuy)
-            yield("/echo "..Character.." Specific setting: NumberToBuy = "..NumberToBuy)
-            if UseSealBuff then 
-                yield("/echo "..Character.." Specific setting: UseSealBuff = true")
-            else
-                yield("/echo "..Character.." Specific setting: UseSealBuff = false")
-            end
-            yield("/echo "..Character.." Specific setting: VenturesUntil = "..VenturesUntil)
-            yield("/echo "..Character.." Specific setting: AfterVentures = "..AfterVentures)
-            if TurninArmoury then 
-                yield("/echo "..Character.." Specific setting: TurninArmoury = true")
-            else
-                yield("/echo "..Character.." Specific setting: TurninArmoury = false")
-            end
-            yield("/wait 3")
+    CurrentChar = string.gsub(CurrentChar,"%W","")
+    if Verbose then yield("/echo Current character: "..CurrentChar) end
+    for CharTest, _ in pairs(Characters) do
+        if string.find(CurrentChar, CharTest) then
+            CharName = CharTest
+            CharSpecific = Characters[CharTest]
+            UsingCharSpecific = true
+            yield("/echo Found "..CharName)
         end
-    else
-        if Verbose then yield("/echo Using general settings") end
-        if Debug then yield("/wait 3") end
+    end
+    if UsingCharSpecific then
+        if CharSpecific.WhatToBuy then WhatToBuy = CharSpecific.WhatToBuy end
+        if CharSpecific.NumberToBuy then NumberToBuy = CharSpecific.NumberToBuy end
+        if CharSpecific.UseSealBuff then UseSealBuff = CharSpecific.UseSealBuff end
+        if CharSpecific.VenturesUntil then VenturesUntil = CharSpecific.VenturesUntil end
+        if CharSpecific.AfterVentures then AfterVentures = CharSpecific.AfterVentures end
+        if CharSpecific.TurninArmoury then TurninArmoury = CharSpecific.TurninArmoury end
+        if Debug then 
+            if CharSpecific.WhatToBuy then yield("/echo "..CharName.." specific setting: WhatToBuy = "..WhatToBuy) end
+            if CharSpecific.NumberToBuy then yield("/echo "..CharName.." specific setting: NumberToBuy = "..NumberToBuy) end
+            if CharSpecific.UseSealBuff then 
+                yield("/echo "..CharName.." specific setting: UseSealBuff = true") else 
+                yield("/echo "..CharName.." specific setting: UseSealBuff = false") end
+            if CharSpecific.VenturesUntil then yield("/echo "..CharName.." specific setting: VenturesUntil = "..VenturesUntil) end
+            if CharSpecific.AfterVentures then yield("/echo "..CharName.." specific setting: AfterVentures = "..AfterVentures) end
+            yield("/wait 3") 
+        end
+    else if Verbose then yield("/echo Using general settings") end
     end
 end
 
@@ -79,69 +79,32 @@ function OpenPurchase()
     step = "Purchase"
 end
 
+ItemsTable = { 
+    Ventures = { Cost = 200, Page = 0, Tab = 1, Position = 0 },
+    Paper = { Cost = 600, Page = 2, Tab = 1, Position = 17 },
+    Sap = { Cost = 200, Page = 2, Tab = 4, Position = 30 },
+    Coke = { Cost = 200, Page = 2, Tab = 4, Position = 31 },
+    MC3 = { Cost = 20000, Page = 2, Tab = 1, Position = 38 },
+    MC4 = { Cost = 20000, Page = 2, Tab = 1, Position = 39 },
+}
+
 function Purchase()
-    if Verbose then yield("/echo Running Purchase "..NumberToBuy.." "..WhatToBuy) end
-    if NumberToBuy~="max" then Buy = tonumber(NumberToBuy) end
+    if Verbose then yield("/echo Running purchase") end
     CheckSeals()
     if CheckVentures() >= VenturesUntil then
         WhatToBuy = AfterVentures
     end
-    if WhatToBuy=="Ventures" then
-        Cost = 200
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-            if Debug then yield("/echo Buying "..Buy) end
-        end
-        if ((CurrentVentures+Buy)>65000) then Buy=(65000-CurrentVentures) end
-        yield("/pcall GrandCompanyExchange true 1 0")
-        yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 0 "..Buy.." 0 True False 0 0 0")
+    Item = ItemsTable[WhatToBuy]
+    if NumberToBuy=="max" then
+        Amount = CurrentSeals // Item.Cost
+    else
+        Amount = tonumber(NumberToBuy)
     end
-    if WhatToBuy=="Paper" then
-        Cost = 600
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-        end
-        yield("/pcall GrandCompanyExchange true 1 2")
-        yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 17 "..Buy.." 0 True False 0 0 0")
-    end
-    if WhatToBuy=="Sap" then
-        Cost = 200
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-        end
-        yield("/pcall GrandCompanyExchange true 1 2")
-        yield("/pcall GrandCompanyExchange true 2 4")
-        yield("/pcall GrandCompanyExchange false 0 30 "..Buy.." 0 True False 0 0 0")
-    end
-    if WhatToBuy=="Coke" then
-        Cost = 200
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-        end
-        yield("/pcall GrandCompanyExchange true 1 2")
-        yield("/pcall GrandCompanyExchange true 2 4")
-        yield("/pcall GrandCompanyExchange false 0 31 "..Buy.." 0 True False 0 0 0")
-    end
-    if WhatToBuy=="MC3" then
-        Cost = 20000
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-        end
-        yield("/pcall GrandCompanyExchange true 1 2")
-        yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 38 "..Buy.." 0 True False 0 0 0")
-    end
-    if WhatToBuy=="MC4" then
-        Cost = 20000
-        if NumberToBuy=="max" then
-            Buy = CurrentSeals // Cost
-        end
-        yield("/pcall GrandCompanyExchange true 1 2")
-        yield("/pcall GrandCompanyExchange true 2 1")
-        yield("/pcall GrandCompanyExchange false 0 39 "..Buy.." 0 True False 0 0 0")
-    end
+    if WhatToBuy=="Ventures" and ((CurrentVentures+Amount)>65000) then Amount=(65000-CurrentVentures) end
+    if Verbose then yield("/echo "..NumberToBuy.." "..WhatToBuy) end
+    yield("/pcall GrandCompanyExchange true 1 " .. Item.Page)
+    yield("/pcall GrandCompanyExchange true 2 " .. Item.Tab)
+    yield("/pcall GrandCompanyExchange false 0 " .. Item.Position .. " " .. Amount .." 0 True False 0 0 0")
     yield("/wait 0.3")
     if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
     yield("/wait "..PurchaseThrottle)
@@ -168,8 +131,8 @@ end
 
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
-    if UseSealBuff then SealBuff() end
     ed = 1
+    if UseSealBuff then SealBuff() end
     while (ed == 1) do
         if TurninArmoury then 
             yield("/pcall GrandCompanySupplyList true 5 1 0")
@@ -323,7 +286,7 @@ if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
     yield("/echo ERROR: Variable NumberToBuy is invalid")
     step = "finish"
 end
-if ( UseSealBuff==true or false )==false then
+if ( UseSealBuff==true or CharacterSpecificSettings==false )==false then
     yield("/echo ERROR: UseSealBuff should be true or false")
     step = "finish"
 end
@@ -341,7 +304,7 @@ if ( TurninArmoury==true or false )==false then
     yield("/echo ERROR: TurninArmoury should be true or false")
     step = "finish"
 end
-if ( CharacterSpecificSettings==true or false )==false then
+if ( CharacterSpecificSettings==true or CharacterSpecificSettings==false )==false then
     yield("/echo ERROR: CharacterSpecificSettings should be true or false")
     step = "finish"
 end
@@ -360,8 +323,6 @@ if ( TargetThrottle>="0" )==false then
     yield("/echo ERROR: Variable TargetThrottle is not a valid number")
     step = "finish"
 end
-
-if UseSealBuff then SealBuff() end
 
 if Verbose then yield("/echo Entering main loop.") end
 
