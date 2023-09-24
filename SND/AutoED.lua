@@ -50,7 +50,7 @@ if CharacterSpecificSettings then
             yield("/echo Found "..CharName)
         end
     end
-    if UsingCharSpecific then
+    if UsingCharSpecific then --TODO learn about booleans and fix this garbage
         if CharSpecific.WhatToBuy then WhatToBuy = CharSpecific.WhatToBuy end
         if CharSpecific.NumberToBuy then NumberToBuy = CharSpecific.NumberToBuy end
         if CharSpecific.UseSealBuff then UseSealBuff = CharSpecific.UseSealBuff end
