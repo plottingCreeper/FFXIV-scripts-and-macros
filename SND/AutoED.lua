@@ -19,6 +19,7 @@ VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
+FinalPurchase = false
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -29,6 +30,17 @@ PurchaseThrottle = "2"
 TargetThrottle = "1"
 
 --    Super experimental character specific settings.
+if CharacterSpecificSettings then 
+    CurrentChar = GetNodeText("_PartyList", 22, 27) --TODO unfuck this shit
+    if CurrentChar==27 then
+        yield("/echo Haven't figured this out quite yet. Currently requires \"Hide party list when solo\" to be disabled.")
+        yield("/echo I do not currently know how to fix this.")
+        yield("/echo If anyone knows how the fuck to reliably read current chracter name from text nodes, please tell me!")
+        CharacterSpecificSettings = false
+    end
+    CurrentChar = string.gsub(CurrentChar,"%W","")
+    if Verbose then yield("/echo Current character: "..CurrentChar) end
+end
 if CharacterSpecificSettings then
     Characters = { --Character name is partial string match for how name appears in party list.
         COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = true, VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = false },
@@ -36,10 +48,11 @@ if CharacterSpecificSettings then
         q = { UseSealBuff = false },
         Name = { VenturesUntil = 65000 },
     }
-    CurrentChar = GetNodeText("NamePlate", 50, 9)
-    if CurrentChar==9 then
-        yield("/echo Well shit, it's still not working? Send me the error I guess.")
-        yield("/echo If anyone knows how the fuck to reliably read chracter name from text nodes, please tell me!")
+    CurrentChar = GetNodeText("_PartyList", 22, 27)
+    if CurrentChar==27 then
+        yield("/echo Haven't figured this out quite yet. Currently requires \"Hide party list when solo\" to be disabled.")
+        yield("/echo I do not currently know how to fix this.")
+        yield("/echo If anyone knows how the fuck to reliably read current chracter name from text nodes, please tell me!")
     end
     CurrentChar = string.gsub(CurrentChar,"%W","")
     if Verbose then yield("/echo Current character: "..CurrentChar) end
@@ -342,8 +355,14 @@ while (step~="finish") do
     yield ("/wait 1")
 end
 
+if FinalPurchase then
+    OpenPurchase()
+    Purchase()
+end
+
 if CompletionMessage then
     yield("/echo --------------------")
     yield("/echo AutoED has finished!")
     yield("/echo --------------------")
 end
+yield("/pcraft stop")
