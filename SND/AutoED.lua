@@ -36,9 +36,10 @@ if CharacterSpecificSettings then
         q = { UseSealBuff = false },
         Name = { VenturesUntil = 65000 },
     }
-    CurrentChar = GetNodeText("_PartyList", 22, 27)
-    if CurrentChar==27 then
-        CurrentChar = GetNodeText("_PartyList", 22, 18)
+    CurrentChar = GetNodeText("NamePlate", 50, 9)
+    if CurrentChar==9 then
+        yield("/echo Well shit, it's still not working? Send me the error I guess.")
+        yield("/echo If anyone knows how the fuck to reliably read chracter name from text nodes, please tell me!")
     end
     CurrentChar = string.gsub(CurrentChar,"%W","")
     if Verbose then yield("/echo Current character: "..CurrentChar) end
@@ -270,6 +271,8 @@ if GC=="auto" then
     end
 end 
 
+yield("/echo Fuck it, no validation. Good luck!")
+--[[ 
 if Verbose then yield("/echo Running Validation...") end
 if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
     yield("/echo GC = "..GC)
@@ -323,6 +326,7 @@ if ( TargetThrottle>="0" )==false then
     yield("/echo ERROR: Variable TargetThrottle is not a valid number")
     step = "finish"
 end
+]]
 
 if Verbose then yield("/echo Entering main loop.") end
 
