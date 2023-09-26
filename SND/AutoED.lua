@@ -16,12 +16,12 @@ DON'T FORGET TO PRESS LUA
 GC = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
 WhatToBuy = "Ventures" -- "Ventures", "Paper", "Sap", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
-UseSealBuff = true  -- Whether to use Priority Seal Allowance
+UseSealBuff = "yes"  -- Whether to use Priority Seal Allowance
 VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
-TurninArmoury = true -- Might be dodgy if this doesn't align with your game setting.
+TurninArmoury = "yes" -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
-FinalPurchase = false
+FinalPurchase = true
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -34,9 +34,9 @@ TargetThrottle = "1"
 --    Super experimental character specific settings.
 if CharacterSpecificSettings then
     Characters = { --Character name is partial string match for how name appears in party list.
-        COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = true, VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = false },
+        COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = "yes", VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = yes },
         p = { VenturesUntil = 65000, AfterVentures = "MC3" },
-        q = { UseSealBuff = false },
+        q = { UseSealBuff = "no" },
         Name = { VenturesUntil = 65000 },
     }
     CurrentChar = GetNodeText("_PartyList", 22, 27)
@@ -68,11 +68,10 @@ if CharacterSpecificSettings then
         if Debug then 
             if CharSpecific.WhatToBuy then yield("/echo "..CharName.." specific setting: WhatToBuy = "..WhatToBuy) end
             if CharSpecific.NumberToBuy then yield("/echo "..CharName.." specific setting: NumberToBuy = "..NumberToBuy) end
-            if CharSpecific.UseSealBuff then 
-                yield("/echo "..CharName.." specific setting: UseSealBuff = true") else 
-                yield("/echo "..CharName.." specific setting: UseSealBuff = false") end
+            if CharSpecific.UseSealBuff then yield("/echo "..CharName.." specific setting: UseSealBuff = "..UseSealBuff) end
             if CharSpecific.VenturesUntil then yield("/echo "..CharName.." specific setting: VenturesUntil = "..VenturesUntil) end
             if CharSpecific.AfterVentures then yield("/echo "..CharName.." specific setting: AfterVentures = "..AfterVentures) end
+            if CharSpecific.TurninArmoury then yield("/echo "..CharName.." specific setting: TurninArmoury = "..TurninArmoury) end
             yield("/wait 3") 
         end
     else if Verbose then yield("/echo Using general settings") end
@@ -128,7 +127,7 @@ end
 function OpenDeliver()
     if Verbose then yield("/echo Running OpenDeliver") end
     yield("/wait "..TargetThrottle)
-    if UseSealBuff then SealBuff() end
+    if UseSealBuff=="yes" then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     yield("/send NUMPAD0")
     yield("/waitaddon SelectString")
@@ -140,9 +139,9 @@ end
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
     ed = 1
-    if UseSealBuff then SealBuff() end
+    if UseSealBuff=="yes" then SealBuff() end
     while (ed == 1) do
-        if TurninArmoury then 
+        if TurninArmoury=="yes" then 
             yield("/pcall GrandCompanySupplyList true 5 1 0")
             if Debug then yield("/echo Armoury=yes") end
         else
@@ -278,8 +277,6 @@ if GC=="auto" then
     end
 end 
 
-yield("/echo Fuck it, no validation. Good luck!")
---[[ 
 if Verbose then yield("/echo Running Validation...") end
 if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
     yield("/echo GC = "..GC)
@@ -296,8 +293,8 @@ if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
     yield("/echo ERROR: Variable NumberToBuy is invalid")
     step = "finish"
 end
-if ( UseSealBuff==true or CharacterSpecificSettings==false )==false then
-    yield("/echo ERROR: UseSealBuff should be true or false")
+if ( UseSealBuff=="yes" or UseSealBuff=="no" )==false then
+    yield("/echo ERROR: UseSealBuff should be yes or no")
     step = "finish"
 end
 if ( VenturesUntil>0 and VenturesUntil<=65000 )==false then
@@ -310,12 +307,8 @@ if ( AfterVentures=="Ventures" or "Paper" or "Sap" or "Coke" or "MC3" or "MC4" )
     yield("/echo ERROR: Variable AfterVentures does not match expected options")
     step = "finish"
 end
-if ( TurninArmoury==true or false )==false then
-    yield("/echo ERROR: TurninArmoury should be true or false")
-    step = "finish"
-end
-if ( CharacterSpecificSettings==true or CharacterSpecificSettings==false )==false then
-    yield("/echo ERROR: CharacterSpecificSettings should be true or false")
+if ( TurninArmoury=="yes" or "no" )==false then
+    yield("/echo ERROR: TurninArmoury should be yes or no")
     step = "finish"
 end
 if ( ExpertDeliveryThrottle>="0" )==false then
@@ -333,7 +326,6 @@ if ( TargetThrottle>="0" )==false then
     yield("/echo ERROR: Variable TargetThrottle is not a valid number")
     step = "finish"
 end
-]]
 
 if Verbose then yield("/echo Entering main loop.") end
 
