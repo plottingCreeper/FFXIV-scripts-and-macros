@@ -1,6 +1,8 @@
 --[[
     Automagic grand company expert delivery and purchase script for SomethingNeedDoing
     Written by plottingCreeper, with help from Thee
+
+DON'T FORGET TO PRESS LUA
     
     Requires:
         SomethingNeedDoing
@@ -30,17 +32,6 @@ PurchaseThrottle = "2"
 TargetThrottle = "1"
 
 --    Super experimental character specific settings.
-if CharacterSpecificSettings then 
-    CurrentChar = GetNodeText("_PartyList", 22, 27) --TODO unfuck this shit
-    if CurrentChar==27 then
-        yield("/echo Haven't figured this out quite yet. Currently requires \"Hide party list when solo\" to be disabled.")
-        yield("/echo I do not currently know how to fix this.")
-        yield("/echo If anyone knows how the fuck to reliably read current chracter name from text nodes, please tell me!")
-        CharacterSpecificSettings = false
-    end
-    CurrentChar = string.gsub(CurrentChar,"%W","")
-    if Verbose then yield("/echo Current character: "..CurrentChar) end
-end
 if CharacterSpecificSettings then
     Characters = { --Character name is partial string match for how name appears in party list.
         COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = true, VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = false },
@@ -50,9 +41,12 @@ if CharacterSpecificSettings then
     }
     CurrentChar = GetNodeText("_PartyList", 22, 27)
     if CurrentChar==27 then
-        yield("/echo Haven't figured this out quite yet. Currently requires \"Hide party list when solo\" to be disabled.")
-        yield("/echo I do not currently know how to fix this.")
-        yield("/echo If anyone knows how the fuck to reliably read current chracter name from text nodes, please tell me!")
+        if IsAddonVisible("ConfigCharacter")==false then yield("/characterconfig") end
+        yield("/pcall ConfigCharacter true 10 0 6 0")
+        yield("/pcall ConfigCharacter true 10 0 7 1")
+        yield("/pcall ConfigCharacterHudPartyList true 18 384 0 0")
+        yield("/pcall ConfigCharacter true -1")
+        CurrentChar = GetNodeText("_PartyList", 22, 18)
     end
     CurrentChar = string.gsub(CurrentChar,"%W","")
     if Verbose then yield("/echo Current character: "..CurrentChar) end
