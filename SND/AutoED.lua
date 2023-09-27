@@ -1,8 +1,9 @@
 --[[
+/waitaddon DON'T_FORGET_TO_PRESS_LUA
+/waitaddon DON'T_FORGET_TO_PRESS_LUA
+/waitaddon DON'T_FORGET_TO_PRESS_LUA
     Automagic grand company expert delivery and purchase script for SomethingNeedDoing
     Written by plottingCreeper, with help from Thee
-
-DON'T FORGET TO PRESS LUA
     
     Requires:
         SomethingNeedDoing
@@ -13,7 +14,7 @@ DON'T FORGET TO PRESS LUA
 --]]
 
 -- CONFIGURE THESE BEFORE USE
-GC = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
+GrandCompany = "auto" -- "Storm", "Flame", "Serpent", "auto" (auto requires SND expanded)
 WhatToBuy = "Ventures" -- "Ventures", "Paper", "Sap", "Coke", "MC3", "MC4"
 NumberToBuy = "max" -- Can be a number or "max"
 UseSealBuff = "yes"  -- Whether to use Priority Seal Allowance
@@ -21,6 +22,7 @@ VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = "yes" -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
+UseVisland = "fuck no, it's not done yet"
 FinalPurchase = true
 CompletionMessage = true
 Verbose = true
@@ -32,22 +34,28 @@ PurchaseThrottle = "2"
 TargetThrottle = "1"
 
 --    Super experimental character specific settings.
-if CharacterSpecificSettings then
-    Characters = { --Character name is partial string match for how name appears in party list.
-        COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = "yes", VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = yes },
-        p = { VenturesUntil = 65000, AfterVentures = "MC3" },
-        q = { UseSealBuff = "no" },
-        Name = { VenturesUntil = 65000 },
-    }
+Characters = {
+    COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = "yes", VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = yes },
+    p = { VenturesUntil = 65000, AfterVentures = "MC4" },
+    q = { UseSealBuff = "no" },
+    Name = { VenturesUntil = 65000 },
+}
+
+function CharacterSpecific()
     CurrentChar = GetNodeText("_PartyList", 22, 27)
-    if CurrentChar==27 then
-        if IsAddonVisible("ConfigCharacter")==false then yield("/characterconfig") end
+    if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
+    if CurrentChar==18 or 27 then
+        yield("/characterconfig")
         yield("/pcall ConfigCharacter true 10 0 6 0")
         yield("/pcall ConfigCharacter true 10 0 7 1")
         yield("/pcall ConfigCharacterHudPartyList true 18 384 0 0")
+        yield("/wait 0.1")
+        CurrentChar = GetNodeText("_PartyList", 22, 27)
         yield("/pcall ConfigCharacter true -1")
-        CurrentChar = GetNodeText("_PartyList", 22, 18)
+        yield("/wait 0.1")
+        if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
     end
+    if CurrentChar==18 then yield("/echo Reading character name is hard.") end
     CurrentChar = string.gsub(CurrentChar,"%W","")
     if Verbose then yield("/echo Current character: "..CurrentChar) end
     for CharTest, _ in pairs(Characters) do
@@ -58,7 +66,7 @@ if CharacterSpecificSettings then
             yield("/echo Found "..CharName)
         end
     end
-    if UsingCharSpecific then --TODO learn about booleans and fix this garbage
+    if UsingCharSpecific then
         if CharSpecific.WhatToBuy then WhatToBuy = CharSpecific.WhatToBuy end
         if CharSpecific.NumberToBuy then NumberToBuy = CharSpecific.NumberToBuy end
         if CharSpecific.UseSealBuff then UseSealBuff = CharSpecific.UseSealBuff end
@@ -74,7 +82,8 @@ if CharacterSpecificSettings then
             if CharSpecific.TurninArmoury then yield("/echo "..CharName.." specific setting: TurninArmoury = "..TurninArmoury) end
             yield("/wait 3") 
         end
-    else if Verbose then yield("/echo Using general settings") end
+    else 
+        if Verbose then yield("/echo Using general settings") end
     end
 end
 
@@ -107,11 +116,27 @@ function Purchase()
     else
         Amount = tonumber(NumberToBuy)
     end
-    if WhatToBuy=="Ventures" and ((CurrentVentures+Amount)>65000) then Amount=(65000-CurrentVentures) end
+    if WhatToBuy=="Ventures" then 
+        SecondAmount = 0
+        if (CurrentVentures+Amount)>65000 then 
+            Amount=(65000-CurrentVentures) 
+        end
+    else
+        if Amount > 99 then 
+            SecondAmount = Amount - 99
+            Amount = 99
+        else 
+            SecondAmount = 0
+        end
+    end
     if Verbose then yield("/echo "..NumberToBuy.." "..WhatToBuy) end
     yield("/pcall GrandCompanyExchange true 1 " .. Item.Page)
     yield("/pcall GrandCompanyExchange true 2 " .. Item.Tab)
     yield("/pcall GrandCompanyExchange false 0 " .. Item.Position .. " " .. Amount .." 0 True False 0 0 0")
+    if SecondAmount > 0 then 
+        yield("/wait 1")
+        yield("/pcall GrandCompanyExchange false 0 " .. Item.Position .. " " .. SecondAmount .." 0 True False 0 0 0")
+    end
     yield("/wait 0.3")
     if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
     yield("/wait "..PurchaseThrottle)
@@ -254,7 +279,49 @@ function LeaveInn()
     end
 end
 
+function InnToGC()
+    if IsInZone(128) then 
+        yield("/visland moveto 12 40 12")
+        yield("/visland moveto 1.6 40 19.35")
+        yield("/visland moveto 2.4 40 73.2")
+        yield("/visland moveto 28 40 73.8")
+        yield("/visland moveto 94 40 75.2")
+    end
+    if IsInZone(130) then 
+        yield("/visland moveto ")
+    end
+    if IsInZone(132) then 
+    end
+end
+
+function GCToInn()
+    if IsInZone(128) then 
+        yield("/visland moveto 81.5 40 74.1")
+        yield("/visland moveto 1 40 71.1")
+        yield("/visland moveto 1.2 40 18.2")
+        yield("/visland moveto 13.2 40 12.6")
+    end
+    if IsInZone(130) then 
+    end
+    if IsInZone(132) then 
+    end
+end
+
+function EnterInn()
+    if IsInZone(128) then 
+        GC="Storm" 
+    end
+    if IsInZone(130) then 
+        GC="Flame" 
+        yield("/visland moveto ")
+    end
+    if IsInZone(132) then 
+        GC="Serpent" 
+    end
+end
+
 ------------------------------------------------
+yield("/waitaddon NamePlate <maxwait.600>")
 yield("/echo AutoED is starting...")
 step = "Startup"
 if IsAddonVisible("GrandCompanyExchange") then
@@ -265,7 +332,14 @@ else
     end
 end
 
-if GC=="auto" then 
+if CharacterSpecificSettings then CharacterSpecific() end
+
+if UseVisland=="yes" then 
+    LeaveInn() 
+    InnToGC()
+end
+
+if GrandCompany=="auto" then 
     yield("/echo Autodetecting GC")
     if IsInZone(128) then GC="Storm" end
     if IsInZone(130) then GC="Flame" end
@@ -275,8 +349,16 @@ if GC=="auto" then
         yield("/echo ERROR: Auto is set but you are not in a GC zone!")
         step = "finish"
     end
+else 
+    GC = GrandCompany
 end 
 
+--[[
+    This is growing out of control, but it's better than not having it. 
+    The plan is to add multicharacter mode, and that'll mean it'll take forever to run.
+    Better to check everything and fail immediately than to error halfway through an overnight run.
+    I guess? Still seems like shit code though. 
+]]
 if Verbose then yield("/echo Running Validation...") end
 if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
     yield("/echo GC = "..GC)
@@ -344,6 +426,11 @@ end
 if FinalPurchase then
     OpenPurchase()
     Purchase()
+end
+
+if UseVisland=="yes" then 
+    GCToInn()
+    EnterInn()
 end
 
 if CompletionMessage then
