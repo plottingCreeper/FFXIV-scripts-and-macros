@@ -22,6 +22,60 @@ function CloseRetainer()
     yield("/click talk")
 end
 
+function ItemList()
+    ItemList = {}
+    for i= 1, 20 do
+        RawText = GetNodeText("RetainerSellList", 10, i, 11)
+        TextLetters = string.gsub(RawText,"%W","")
+        TextTrimmed = string.sub(TextLetters,3,-3)
+        if TextTrimmed > "" then
+            ItemList[i] = TextTrimmed
+        end
+    end 
+    for i = 1,20 do
+        if ItemList[i] then
+            yield("/echo "..ItemList[i])
+        end
+    end 
+end
+
+function SearchPrices()
+    SearchPrices = {}
+    for i= 1, 20 do
+        RawPrice = GetNodeText("ItemSearchResult", 5, i, 10)
+        if RawPrice ~= 10 then
+            TrimmedPrice = string.gsub(RawPrice,"%D","")
+            SearchPrices[i] = TrimmedPrice
+        end
+    end 
+    for i = 1,20 do
+        if SearchPrices[i] then
+            yield("/echo "..SearchPrices[i])
+        end
+    end 
+end
+
+function RetainerName()
+    RetainerNames = {}
+    for i= 1, 20 do
+        ListName = GetNodeText("ItemSearchResult", 5, i, 5)
+        if ListName ~= 5 then
+            RetainerNames[i] = ListName
+        end
+    end 
+    for i = 1,20 do
+        if RetainerNames[i] then
+            yield("/echo "..RetainerNames[i])
+        end
+    end 
+end
+
+function SetPrice(price)
+    yield("/pcall ItemSearchResult true -1")
+    yield("/pcall RetainerSell true 2 "..price)
+    yield("/pcall RetainerSell true 0")
+end
+
 -------------------------------
 for retainer = 1, NumberOfRetainers do 
     OpenRetainer(retainer)

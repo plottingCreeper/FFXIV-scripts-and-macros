@@ -51,8 +51,11 @@ function CharacterSpecific()
         yield("/pcall ConfigCharacterHudPartyList true 18 384 0 0")
         yield("/wait 0.5")
         CurrentChar = GetNodeText("_PartyList", 22, 27)
+        if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
         yield("/wait 0.1")
         yield("/pcall ConfigCharacter true -1")
+        yield("/wait 0.1")
+        CurrentChar = GetNodeText("_PartyList", 22, 27)
         if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
     end
     if CurrentChar==(18 or 27) then yield("/echo Reading character name is hard."..CurrentChar) end
