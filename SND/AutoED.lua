@@ -44,18 +44,18 @@ Characters = {
 function CharacterSpecific()
     CurrentChar = GetNodeText("_PartyList", 22, 27)
     if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
-    if CurrentChar==18 or 27 then
+    if CurrentChar==(18 or 27) then
         yield("/characterconfig")
         yield("/pcall ConfigCharacter true 10 0 6 0")
         yield("/pcall ConfigCharacter true 10 0 7 1")
         yield("/pcall ConfigCharacterHudPartyList true 18 384 0 0")
-        yield("/wait 0.1")
+        yield("/wait 0.5")
         CurrentChar = GetNodeText("_PartyList", 22, 27)
-        yield("/pcall ConfigCharacter true -1")
         yield("/wait 0.1")
+        yield("/pcall ConfigCharacter true -1")
         if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
     end
-    if CurrentChar==18 then yield("/echo Reading character name is hard.") end
+    if CurrentChar==(18 or 27) then yield("/echo Reading character name is hard."..CurrentChar) end
     CurrentChar = string.gsub(CurrentChar,"%W","")
     if Verbose then yield("/echo Current character: "..CurrentChar) end
     for CharTest, _ in pairs(Characters) do
