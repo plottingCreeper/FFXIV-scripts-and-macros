@@ -7,7 +7,7 @@
     
     Requires:
         SomethingNeedDoing
-        Pandora testing
+        Pandora v69
     Advanced requirements:
         SomethingNeedDoing (Expanded Edition)
         Island Sanctuary Automation
@@ -22,8 +22,8 @@ VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = "yes" -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
-UseVisland = "fuck no, it's not done yet"
-FinalPurchase = true
+UseVisland = "fuck no, I haven't finished this part yet"
+FinalPurchase = false
 CompletionMessage = true
 Verbose = true
 Debug = true
@@ -42,27 +42,10 @@ Characters = {
 }
 
 function CharacterSpecific()
-    CurrentChar = GetNodeText("_PartyList", 22, 27)
-    if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
-    if CurrentChar==(18 or 27) then
-        yield("/characterconfig")
-        yield("/pcall ConfigCharacter true 10 0 6 0")
-        yield("/pcall ConfigCharacter true 10 0 7 1")
-        yield("/pcall ConfigCharacterHudPartyList true 18 384 0 0")
-        yield("/wait 0.5")
-        CurrentChar = GetNodeText("_PartyList", 22, 27)
-        if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
-        yield("/wait 0.1")
-        yield("/pcall ConfigCharacter true -1")
-        yield("/wait 0.1")
-        CurrentChar = GetNodeText("_PartyList", 22, 27)
-        if CurrentChar==27 then CurrentChar = GetNodeText("_PartyList", 22, 18) end
-    end
-    if CurrentChar==(18 or 27) then yield("/echo Reading character name is hard."..CurrentChar) end
-    CurrentChar = string.gsub(CurrentChar,"%W","")
+    CurrentChar = GetCharacterName()
     if Verbose then yield("/echo Current character: "..CurrentChar) end
     for CharTest, _ in pairs(Characters) do
-        if string.find(CurrentChar, CharTest) then
+        if string.find(string.gsub(CurrentChar,"%W",""), string.gsub(CharTest,"%W","")) then
             CharName = CharTest
             CharSpecific = Characters[CharTest]
             UsingCharSpecific = true
@@ -93,7 +76,7 @@ end
 function OpenPurchase()
     if Verbose then yield("/echo Running OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
-    yield("/send NUMPAD0")
+    yield("/pint")
     yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle..">")
     step = "Purchase"
 end
@@ -157,7 +140,7 @@ function OpenDeliver()
     yield("/wait "..TargetThrottle)
     if UseSealBuff=="yes" then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
-    yield("/send NUMPAD0")
+    yield("/pint")
     yield("/waitaddon SelectString")
     yield("/click select_string1")
     yield("/waitaddon GrandCompanySupplyList <wait.1>")
@@ -276,7 +259,7 @@ function LeaveInn()
         yield("/target HeavyOaken Door")
         yield("/lockon on")
         yield("/automove on <wait.2>") --TODO check coordinates instead of wait?
-        yield("/send NUMPAD0")
+        yield("/pint")
         yield("/waitaddon Nowloading <maxwait.15>")
         yield("/waitaddon NamePlate <maxwait.15><wait.5>")
     end
