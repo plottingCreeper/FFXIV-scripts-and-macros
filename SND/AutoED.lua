@@ -76,7 +76,8 @@ end
 function OpenPurchase()
     if Verbose then yield("/echo Running OpenPurchase") end
     yield("/target "..GC.." Quartermaster <wait.0.1>")
-    yield("/pint")
+    yield("/pint <wait.0.1>")
+    yield("/pint <wait.0.1>")
     yield("/waitaddon GrandCompanyExchange <wait."..PurchaseThrottle..">")
     step = "Purchase"
 end
@@ -93,8 +94,10 @@ ItemsTable = {
 function Purchase()
     if Verbose then yield("/echo Running purchase") end
     CheckSeals()
-    if CheckVentures() >= VenturesUntil then
-        WhatToBuy = AfterVentures
+    if WhatToBuy=="Ventures" then 
+        if CheckVentures() >= VenturesUntil then
+            WhatToBuy = AfterVentures
+        end
     end
     Item = ItemsTable[WhatToBuy]
     if NumberToBuy=="max" then
@@ -140,7 +143,8 @@ function OpenDeliver()
     yield("/wait "..TargetThrottle)
     if UseSealBuff=="yes" then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
-    yield("/pint")
+    yield("/pint <wait.0.1>")
+    yield("/pint <wait.0.1>")
     yield("/waitaddon SelectString")
     yield("/click select_string1")
     yield("/waitaddon GrandCompanySupplyList <wait.1>")
@@ -242,6 +246,9 @@ function CheckSeals(input)
 end
 
 function CheckVentures()
+    yield("/pcall GrandCompanyExchange true 1 0")
+    yield("/pcall GrandCompanyExchange true 2 1")
+    yield("/wait 0.1")
     CurrentVentures = string.gsub(GetNodeText("GrandCompanyExchange", 2, 1, 3),",","")
     CurrentVentures = tonumber(CurrentVentures)
     return CurrentVentures
