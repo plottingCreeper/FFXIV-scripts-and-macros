@@ -328,6 +328,8 @@ function EnterInn()
     end
 end
 
+c = 1
+
 :: Start ::
 yield("/waitaddon NamePlate <maxwait.600>")
 yield("/echo AutoED is starting...")
