@@ -22,9 +22,12 @@ VenturesUntil = 10000
 AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = "yes" -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
-UseVisland = "fuck no, I haven't finished this part yet"
+UseGCTicket = true
+ReturnTo = "FC" -- "FC", "Inn", "none"
+Multi = true
 FinalPurchase = false
 CompletionMessage = true
+EnableAR = true
 Verbose = true
 Debug = true
 
@@ -33,11 +36,23 @@ ExpertDeliveryThrottle = "0" -- Probably fine at 0, since I have to wait anyway.
 PurchaseThrottle = "2"
 TargetThrottle = "1"
 
+-- There's a better way to handle this, and I kinda know what it is, but I don't know how to do it. One day!
+MultiCharacters = {
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    'Character Name@Server',
+    } 
+
 --    Super experimental character specific settings.
 Characters = {
-    COPYME = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = "yes", VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = yes },
+    CharacterName = { WhatToBuy = "Ventures", NumberToBuy = "max", UseSealBuff = "yes", VenturesUntil = 65000, AfterVentures = "Sap", TurninArmoury = yes },
     p = { VenturesUntil = 65000, AfterVentures = "MC4" },
-    q = { UseSealBuff = "no" },
+    q = { UseSealBuff = "no", ReturnTo = "FC" },
     Name = { VenturesUntil = 65000 },
 }
 
@@ -313,7 +328,7 @@ function EnterInn()
     end
 end
 
-------------------------------------------------
+:: Start ::
 yield("/waitaddon NamePlate <maxwait.600>")
 yield("/echo AutoED is starting...")
 step = "Startup"
@@ -327,9 +342,17 @@ end
 
 if CharacterSpecificSettings then CharacterSpecific() end
 
-if UseVisland=="yes" then 
-    LeaveInn() 
+if IsInZone(177) or IsInZone(178) or IsInZone(179) then
+    LeaveInn()
     InnToGC()
+end
+if not (IsInZone(128) or IsInZone(130) or IsInZone(132)) then 
+    if UseGCTicket then
+        pcall(yield("/item Maelstrom Aetheryte Ticket"))
+        pcall(yield("/item Twin Adder Aetheryte Ticket"))
+        pcall(yield("/item Immortal Flames Aetheryte Ticket"))
+    else
+        yield("/return")
 end
 
 if GrandCompany=="auto" then 
@@ -345,62 +368,6 @@ if GrandCompany=="auto" then
 else 
     GC = GrandCompany
 end 
-
---[[
-    This is growing out of control, but it's better than not having it. 
-    The plan is to add multicharacter mode, and that'll mean it'll take forever to run.
-    Better to check everything and fail immediately than to error halfway through an overnight run.
-    I guess? Still seems like shit code though. 
-]]
-if Verbose then yield("/echo Running Validation...") end
-if ( GC=="Storm" or GC=="Flame" or GC=="Serpent" )==false then 
-    yield("/echo GC = "..GC)
-    yield("/echo ERROR: Variable GC does not match expected options")
-    step = "finish"
-end
-if ( WhatToBuy=="Ventures" or "Paper" or "Sap" or "Coke" or "MC3" or "MC4" )==false then 
-    yield("/echo WhatToBuy = "..WhatToBuy)
-    yield("/echo ERROR: Variable WhatToBuy does not match expected options")
-    step = "finish"
-end
-if ( NumberToBuy>"0" or NumberToBuy=="max" )==false then
-    yield("/echo NumberToBuy = "..NumberToBuy)
-    yield("/echo ERROR: Variable NumberToBuy is invalid")
-    step = "finish"
-end
-if ( UseSealBuff=="yes" or UseSealBuff=="no" )==false then
-    yield("/echo ERROR: UseSealBuff should be yes or no")
-    step = "finish"
-end
-if ( VenturesUntil>0 and VenturesUntil<=65000 )==false then
-    yield("/echo NumberToBuy = "..NumberToBuy)
-    yield("/echo ERROR: Variable NumberToBuy is invalid")
-    step = "finish"
-end
-if ( AfterVentures=="Ventures" or "Paper" or "Sap" or "Coke" or "MC3" or "MC4" )==false then 
-    yield("/echo AfterVentures = "..AfterVentures)
-    yield("/echo ERROR: Variable AfterVentures does not match expected options")
-    step = "finish"
-end
-if ( TurninArmoury=="yes" or "no" )==false then
-    yield("/echo ERROR: TurninArmoury should be yes or no")
-    step = "finish"
-end
-if ( ExpertDeliveryThrottle>="0" )==false then
-    yield("/echo ExpertDeliveryThrottle = "..ExpertDeliveryThrottle)
-    yield("/echo ERROR: Variable ExpertDeliveryThrottle not a valid number")
-    step = "finish"
-end
-if ( PurchaseThrottle>="0" )==false then
-    yield("/echo PurchaseThrottle = "..PurchaseThrottle)
-    yield("/echo ERROR: Variable PurchaseThrottle is not a valid number")
-    step = "finish"
-end
-if ( TargetThrottle>="0" )==false then
-    yield("/echo TargetThrottle = "..TargetThrottle)
-    yield("/echo ERROR: Variable TargetThrottle is not a valid number")
-    step = "finish"
-end
 
 if Verbose then yield("/echo Entering main loop.") end
 
@@ -421,9 +388,27 @@ if FinalPurchase then
     Purchase()
 end
 
-if UseVisland=="yes" then 
+if ReturnTo = "Inn" then
     GCToInn()
     EnterInn()
+end
+if ReturnTo = "FC" then
+    yield("/tp Estate Hall")
+    yield("/wait 10")
+    yield("/waitaddon NamePlate <maxwait.600><wait.5>")
+    yield("/automove on <wait.1>")
+    yield("/target Entrance <wait.0.1>")
+    yield("/lockon on <wait.1>")
+end
+
+if Multi then
+    if string.find(string.gsub(GetCharacterName(),"%W",""), string.gsub(MultiCharacters[c],"%W","")) then
+        c = c + 1
+    end
+    if MultiCharacters[c] then 
+        yield("/ays relog "..MultiCharacters[c])
+        goto Start
+    end
 end
 
 if CompletionMessage then
@@ -431,4 +416,7 @@ if CompletionMessage then
     yield("/echo AutoED has finished!")
     yield("/echo --------------------")
 end
+
+if EnableAR then yield("/ays multi") end
+
 yield("/pcraft stop")
