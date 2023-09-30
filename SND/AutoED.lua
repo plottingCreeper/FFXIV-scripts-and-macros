@@ -355,6 +355,7 @@ if not (IsInZone(128) or IsInZone(130) or IsInZone(132)) then
         pcall(yield("/item Immortal Flames Aetheryte Ticket"))
     else
         yield("/return")
+    end
 end
 
 if GrandCompany=="auto" then 
@@ -390,11 +391,11 @@ if FinalPurchase then
     Purchase()
 end
 
-if ReturnTo = "Inn" then
+if ReturnTo == "Inn" then
     GCToInn()
     EnterInn()
 end
-if ReturnTo = "FC" then
+if ReturnTo == "FC" then
     yield("/tp Estate Hall")
     yield("/wait 10")
     yield("/waitaddon NamePlate <maxwait.600><wait.5>")
