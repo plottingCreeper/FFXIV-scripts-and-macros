@@ -23,11 +23,11 @@ AfterVentures = "Paper" --"Paper", "Sap", "Coke", "MC3", "MC4"
 TurninArmoury = "yes" -- Might be dodgy if this doesn't align with your game setting.
 CharacterSpecificSettings = true
 UseGCTicket = true
-ReturnTo = "FC" -- "FC", "Inn", "none"
-Multi = true
+ReturnTo = "none" -- "FC", "Inn", "none"
+Multi = false
 FinalPurchase = false
 CompletionMessage = true
-EnableAR = true
+EnableAR = false
 Verbose = true
 Debug = true
 
@@ -156,7 +156,6 @@ end
 function OpenDeliver()
     if Verbose then yield("/echo Running OpenDeliver") end
     yield("/wait "..TargetThrottle)
-    if UseSealBuff=="yes" then SealBuff() end
     yield("/target "..GC.." Personnel Officer <wait.1>")
     yield("/pint <wait.0.1>")
     yield("/pint <wait.0.1>")
@@ -169,7 +168,6 @@ end
 function Deliver()
     if Verbose then yield("/echo Running Deliver") end
     ed = 1
-    if UseSealBuff=="yes" then SealBuff() end
     while (ed == 1) do
         if TurninArmoury=="yes" then 
             yield("/pcall GrandCompanySupplyList true 5 1 0")
@@ -231,7 +229,10 @@ function SealBuff()
         yield("/wait 1")
         yield("/item Priority Seal Allowance")
         step = "OpenDeliver"
-        yield("/wait 4")
+        yield("/target "..GC.." Personnel Officer <wait.1>")
+        yield("/target "..GC.." Personnel Officer <wait.1>")
+        yield("/target "..GC.." Personnel Officer <wait.1>")
+        yield("/target "..GC.." Personnel Officer <wait.1>")
     end
 end
 
@@ -324,7 +325,8 @@ function EnterInn()
         yield("/visland moveto ")
     end
     if IsInZone(132) then 
-        GC="Serpent" 
+        yield("/target Antoinaut")
+        yield("/pint")
     end
 end
 
@@ -371,6 +373,8 @@ if GrandCompany=="auto" then
 else 
     GC = GrandCompany
 end 
+
+if UseSealBuff=="yes" then SealBuff() end
 
 if Verbose then yield("/echo Entering main loop.") end
 
