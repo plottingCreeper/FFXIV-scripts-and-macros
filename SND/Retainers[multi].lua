@@ -47,9 +47,16 @@ chars = {
             for list = 0, 19 do
                 yield("/waitaddon RetainerSellList")
                 yield("/pcall RetainerSellList true 0 "..list.." 1 <wait.0.1>")
-                if IsAddonVisible("ContextMenu") then yield("/pcall ContextMenu true 0 0 <wait.1>") else break end
-            yield("/send NUMPAD0")
-            yield("/send NUMPAD0")
+                if IsAddonVisible("ContextMenu") then yield("/pcall ContextMenu true 0 0 <wait.2>") else break end
+                if IsAddonVisible("ItemHistory") then yield("/pcall ItemHistory true -1 <wait.0.1>") end
+                yield("/send NUMPAD0")
+                yield("/send NUMPAD0")
+                yield("/wait 0.3")
+                if IsAddonVisible("ItemSearchResult") then 
+                    yield("/wait 2")
+                    yield("/send NUMPAD0")
+                    yield("/send NUMPAD0")
+                end
             end
         
             yield("/pcall RetainerSellList true -2")
