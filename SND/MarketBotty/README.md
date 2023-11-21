@@ -1,5 +1,6 @@
 # MarketBotty!
 Automatic sale undercutting script. Requires `Something Need Doing (Expanded Edition)`. Multimode currently requires `AutoRetainer`.
+Requires Pandora for /pcall, but that's being moved to SND at some point(?) so good luck I guess.
 <br>
 
 ## Starting conditions
