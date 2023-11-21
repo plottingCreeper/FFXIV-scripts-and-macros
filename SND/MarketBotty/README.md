@@ -22,6 +22,7 @@ If the 10th search result is lower than the item `minimum` set in `item_override
 Unless `minimum` is used, the target listings retainer name will be checked. If it's on the `my_retainers` list, the price will be matched rather than undercut.  
 If after all this the price is somehow only 1, it will be set to 69 instead. That's an old bit of code, but it seemed nice enough, so it's staying in.  
 
+If there are no search results, the price is set to history trimmed mean multiplied by `10` (configurable).
 
 <br>
 
