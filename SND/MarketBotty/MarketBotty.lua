@@ -1,10 +1,21 @@
 --[[
+/echo Don't forget to click lua!
+/pcraft stop
     WORK IN PROGRESS (that means it doesn't work yet)
     MarketBotty! Fuck it, I'm going there. Don't @ me. 
 ]]
 
-NumberOfRetainers = 9
 
+yield("/echo You've loaded the first skeleton of MarketBotty.")
+yield("/echo Development is continuing offline for now, because people are fucking stupid.")
+yield("/echo MarketBotty 1.0 will be uploaded when it's done.")
+yield("/pcraft stop")
+yield("/pcraft stop")
+yield("/pcraft stop")
+
+
+
+NumberOfRetainers = 9
 ------------------------------
 function OpenRetainer(r)
     yield("/waitaddon RetainerList")
