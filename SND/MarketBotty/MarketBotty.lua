@@ -1,7 +1,4 @@
 --[[
-/echo Don't forget to click lua!
-/pcraft stop
-
     MarketBotty! Fuck it, I'm going there. Don't @ me.
 ]]
 
@@ -18,30 +15,35 @@ blacklist_retainers = { --Do not run script on these retainers
   'Or-this-one',
 }
 item_overrides = {
-  Sap = { minimum = 200 },
+  Sap = { minimum = 450 },
   Coke = { minimum = 450 },
 }
-is_multimode = false --Not tested, but might sorta work. High chance of infinite loop!
-is_blind = false --Undercut the lowest price with no additional logic. Overrides next 2 options.
+
+is_blind = false --Undercut the lowest price with no additional logic. Overrides most other options.
 is_dont_undercut_my_retainers = true --Working!
 is_price_sanity_checking = true --Ignores market results below half the trimmed mean of historical prices.
 is_using_blacklist = true --Whether or not to use the blacklist_retainers list.
 undercut = 1 --There's no reason to change this. 1 gil undercut is life.
 history_multiplier = 10 --if no active sales then get average historical price and multiply
-is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
-is_verbose = true --Basic info in chat about what's going on.
-is_debug = true --Absolutely flood your chat with all sorts of shit you don't need to know.
-multimode_ending_command = "/ays multi"
-name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
 is_using_overrides = true --item_overrides table. Currently just minimum price, but expansion are coming soon:tm:!
-is_postrun_one_gil_report = true
-is_postrun_sanity_report = true
+is_postrun_one_gil_report = true  --Requires is_verbose
+is_postrun_sanity_report = true  --Requires is_verbose
 history_trim_amount = 5 --Trims this many from highest and lowest in history list
 
+is_verbose = true --Basic info in chat about what's going on.
+is_debug = true --Absolutely flood your chat with all sorts of shit you don't need to know.
+name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
+
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
-file_characters = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\my_characters.txt"
-file_retainers = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\my_retainers.txt"
-file_blacklist = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\blacklist_retainers.txt"
+config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+characters_file = "my_characters.txt"
+retainers_file = "my_retainers.txt"
+blacklist_file = "blacklist_retainers.txt"
+
+is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
+log_after_multi = "logout"  --"logout" to logout, number to switch to character in my_characters list
+multimode_ending_command = "/ays multi"
+is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
 
 ------------------------------------------------------------------------------------------------------
 
@@ -99,6 +101,8 @@ function CloseRetainer()
 end
 
 function CountItems()
+  yield("/waitaddon RetainerSellList")
+  yield("/wait 0.5")
   raw_item_count = GetNodeText("RetainerSellList", 3)
   item_count_trimmed = string.sub(raw_item_count,1,2)
   item_count = string.gsub(item_count_trimmed,"%D","")
@@ -229,6 +233,9 @@ function HistoryAverage()
   history_tm_count = 0
   history_tm_running = 0
   history_list = {}
+  while GetNodeText("ItemHistory", 3, 2, 6)==6 do
+    yield("/wait 0.1")
+  end
   for i= 2, 21 do
     raw_history_price = GetNodeText("ItemHistory", 3, i, 6)
     if raw_history_price ~= 6 and raw_history_price ~= "" then
@@ -286,20 +293,20 @@ function SetPrice(price)
   if IsAddonVisible("RetainerSell") then yield("/pcall RetainerSell true -1") end
 end
 
-function WellNamedFunction()
-  current_character = GetCharacterName()
+function NextCharacter()
+  current_character = GetCharacterName(true)
   next_character = ""
   debug("Current character: "..current_character)
   for character_number, character_name in pairs(my_characters) do
-    if string.find(string.gsub(my_characters[character_number],"%W",""), string.gsub(current_character,"%W","")) then
-      next_character = character_name
+    if character_name == current_character then
+      next_character = my_characters[character_number+1]
       break
     end
   end
-  if next_character == "" then
-    echo("Unable to find next_character")
-    yield("/pcraft stop")
-  end
+--   if not next_character then
+--     echo("Unable to find next_character")
+--     yield("/pcraft stop")
+--   end
   return next_character
 end
 
@@ -325,7 +332,7 @@ end
 
 function OpenBell()
   yield("/ays het")
-  yield("/wait 0.3")
+  yield("/wait 0.5")
   if IsAddonVisible("_TargetInfoMainTarget") then
     while GetCharacterCondition(45, false) do
       yield("/wait 0.1")
@@ -383,6 +390,7 @@ end
 
 -- Functions don't pass to the array in a way that makes sense to me, so this is repeating blocks.
 if is_read_from_files then
+  file_characters = config_folder..characters_file
   if file_exists(file_characters) and is_multimode then
     my_characters = {}
     file_characters = io.input(file_characters)
@@ -399,6 +407,7 @@ if is_read_from_files then
   else
     echo(file_characters.." not found!")
   end
+  file_retainers = config_folder..retainers_file
   if file_exists(file_retainers) and is_dont_undercut_my_retainers then
     my_retainers = {}
     file_retainers = io.input(file_retainers)
@@ -415,6 +424,7 @@ if is_read_from_files then
   else
     echo(file_retainers.." not found!")
   end
+  file_blacklist = config_folder..blacklist_file
   if file_exists(file_blacklist) and is_using_blacklist then
     blacklist_retainers = {}
     file_blacklist = io.input(file_blacklist)
@@ -446,8 +456,8 @@ end
 Clear()
 if GetCharacterCondition(1, false) then
   echo("Not logged in?")
-  first_character = my_characters[1]
-  Relog(first_character)
+  yield("/wait 1")
+  Relog(my_characters[1])
   goto Startup
 elseif GetCharacterCondition(50, false) then
   echo("Not at a summoning bell.")
@@ -524,14 +534,14 @@ if (string.find(GetNodeText("ItemSearchResult", 26), "No items found.")) then
 end
 target_price = 1
 SearchPrices()
-SearchRetainers()
-HistoryAverage()
+if is_blind then
+  goto Apply
+else
+  SearchRetainers()
+  HistoryAverage()
+end
 
 ::PricingLogic::
-if is_blind then
-  target_price = 1
-  goto FinalPrice
-end
 if is_price_sanity_checking and target_price < prices_list_length then
   if prices_list[target_price] == 1 then
     target_price = target_price + 1
@@ -543,8 +553,7 @@ if is_price_sanity_checking and target_price < prices_list_length then
   end
   debug("Price sanity checking results:")
   debug("target_price "..target_price)
-  debug("prices_list[target_price]"..prices_list[target_price])
-  echo("is_price_sanity_checking isn't finished")
+  debug("prices_list[target_price] "..prices_list[target_price])
 end
 if is_using_overrides then
   for item_test, _ in pairs(item_overrides) do
@@ -563,7 +572,7 @@ if is_dont_undercut_my_retainers then
     --if string.find(my_retainers[retainer_test], search_retainers[target_price]) then
     if retainer_test == search_retainers[target_price] then
       actual_undercut = 0
-      debug("Matching price with own retainer: "..retainer_test)
+      echo("Matching price with own retainer: "..retainer_test)
       break
     end
   end
@@ -572,15 +581,25 @@ end
 ::FinalPrice::
 price = prices_list[target_price] - actual_undercut
 if price <= 1 then
-  echo("Blind mode on? Should probably vendor this crap instead of setting it to 1. Since this script isn't *that* good yet, I'm just going to set it to...69. That's a nice number. You can deal with it yourself.")
+  echo("Should probably vendor this crap instead of setting it to 1. Since this script isn't *that* good yet, I'm just going to set it to...69. That's a nice number. You can deal with it yourself.")
   price = 69
   if is_postrun_one_gil_report then
-    one_gil_items_count = one_gil_items_count + 1
-    one_gil_report[one_gil_items_count] = open_item
+    if is_multimode then
+      one_gil_items_count = one_gil_items_count + 1
+      one_gil_report[one_gil_items_count] = open_item.." on "..GetCharacterName()
+    else
+      one_gil_items_count = one_gil_items_count + 1
+      one_gil_report[one_gil_items_count] = open_item
+    end
   end
 elseif is_postrun_sanity_report and target_price ~= 1 then
-  sanity_items_count = sanity_items_count + 1
-  sanity_report[sanity_items_count] = open_item.." set: "..price..". Low: "..prices_list[1]
+  if is_multimode then
+    sanity_items_count = sanity_items_count + 1
+    sanity_report[sanity_items_count] = open_item.." on "..GetCharacterName().." set: "..price..". Low: "..prices_list[1]
+  else
+    sanity_items_count = sanity_items_count + 1
+    sanity_report[sanity_items_count] = open_item.." set: "..price..". Low: "..prices_list[1]
+  end
 end
 
 ::Apply::
@@ -595,6 +614,8 @@ elseif is_single_item_mode then
 elseif not (tonumber(item_count) <= target_sale_slot) then
   target_sale_slot = target_sale_slot + 1
   goto NextItem
+elseif is_single_retainer_mode then
+  goto EndOfScript
 elseif is_single_retainer_mode==false then
   CloseRetainer()
   goto Retainer
@@ -602,10 +623,12 @@ end
 
 ::MultiMode::
 if is_multimode then
-  yield("/pcall RetainerList true -1")
-  yield("/wait 1")
-  WellNamedFunction()
-  if current_character == next_character then goto EndingCommand end
+  while IsAddonVisible("RetainerList") do
+    yield("/pcall RetainerList true -1")
+    yield("/wait 1")
+  end
+  NextCharacter()
+  if not next_character then goto EndingCommand end
   Relog(next_character)
   OpenBell()
   goto Startup
@@ -615,7 +638,16 @@ end
 
 ::EndingCommand::
 yield("/wait 3")
-if GetCharacterCondition(50, false) then
+if log_after_multi=="logout" then
+  yield("/logout")
+  yield("/waitaddon SelectYesno")
+  yield("/wait 0.5")
+  yield("/pcall SelectYesno true 0")
+elseif type(log_after_multi) == "number" then
+  Relog(my_characters[log_after_multi])
+end
+if GetCharacterCondition(50, false) and multimode_ending_command then
+  yield("/wait 3")
   yield(multimode_ending_command)
 end
 
