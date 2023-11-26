@@ -14,8 +14,8 @@ blacklist_retainers = { --Do not run script on these retainers
   'Dont-run-this-retainer',
   'Or-this-one',
 }
-item_overrides = {
-  Sap = { minimum = 450 },
+item_overrides = { --Item names with no spaces or symbols
+  Sap = { minimum = 450, maximum = 450 },
   Coke = { minimum = 450 },
 }
 
@@ -223,19 +223,20 @@ function SearchRetainers()
 end
 
 function HistoryAverage()
-  if IsAddonVisible("ItemHistory")==false then
-    yield("/wait 0.1")
-    if IsAddonVisible("ItemHistory")==false then
-      yield("/pcall ItemSearchResult true 0")
-    end
+  while IsAddonVisible("ItemHistory")==false do
+    yield("/pcall ItemSearchResult true 0")
+    yield("/wait 0.3")
   end
   yield("/waitaddon ItemHistory")
   history_tm_count = 0
   history_tm_running = 0
   history_list = {}
-  while GetNodeText("ItemHistory", 3, 2, 6)==6 do
+  first_history = string.gsub(GetNodeText("ItemHistory", 3, 2, 6),"%d","")
+  while first_history=="" do
     yield("/wait 0.1")
+    first_history = string.gsub(GetNodeText("ItemHistory", 3, 2, 6),"%d","")
   end
+  debug(first_history)
   for i= 2, 21 do
     raw_history_price = GetNodeText("ItemHistory", 3, i, 6)
     if raw_history_price ~= 6 and raw_history_price ~= "" then
@@ -258,29 +259,6 @@ function HistoryAverage()
   history_trimmed_mean = history_tm_running // history_tm_count
   debug("History trimmed mean:" .. history_trimmed_mean)
   return history_trimmed_mean
-end
-
-function HistoryAverageOld()
-  if IsAddonVisible("ItemHistory")==false then
-    yield("/wait 0.1")
-    if IsAddonVisible("ItemHistory")==false then
-      yield("/pcall ItemSearchResult true 0")
-    end
-  end
-  yield("/waitaddon ItemHistory <wait.0.2>")
-  history_running = 0
-  history_count = 0
-  for i= 2, 21 do
-    raw_history_price = GetNodeText("ItemHistory", 3, i, 6)
-    if raw_history_price ~= 6 and raw_history_price ~= "" then
-      trimmed_history_price = string.gsub(raw_history_price,"%D","")
-      history_running = history_running + trimmed_history_price
-      history_count = history_count + 1
-    end
-  end
-  history_average = history_running // history_count
-  debug("History average:" .. history_average)
-  return history_average
 end
 
 function SetPrice(price)
@@ -389,6 +367,7 @@ end
 ------------------------------------------------------------------------------------------------------
 
 -- Functions don't pass to the array in a way that makes sense to me, so this is repeating blocks.
+--function LoadFiles()
 if is_read_from_files then
   file_characters = config_folder..characters_file
   if file_exists(file_characters) and is_multimode then
@@ -465,10 +444,15 @@ elseif GetCharacterCondition(50, false) then
   goto Startup
 elseif IsAddonVisible("RecommendList") then
   helper_mode = true
+  while IsAddonVisible("RecommendList") do
+    yield("/pcall RecommendList true -1")
+    yield("/wait 0.1")
+  end
   echo("Starting in helper mode!")
   goto Helper
 elseif IsAddonVisible("RetainerList") then
-  goto Retainer
+  CountRetainers()
+  goto NextRetainer
 elseif IsAddonVisible("RetainerSell") then
   echo("Starting in single item mode!")
   is_single_item_mode = true
@@ -485,15 +469,14 @@ elseif IsAddonVisible("RetainerSellList") then
   goto Sales
 else
   echo("Unexpected starting conditions!")
-  echo("Either send me a screenshot, or give up and shut up.")
-  echo("Just telling me \"it no workie\" is not helpful.")
+  echo("You broke it. It's your fault.")
+  echo("Do not message me asking for help.")
   yield("/pcraft stop")
 end
 
 ------------------------------------------------------------------------------------------------------
 
-::Retainer::
-CountRetainers()
+::NextRetainer::
 if next_retainer < total_retainers then
   next_retainer = next_retainer + 1
 else
@@ -511,7 +494,7 @@ ClickItem(target_sale_slot)
 ::Helper::
 while IsAddonVisible("RetainerSell")==false do
   yield("/wait 0.5")
-  if GetCharacterCondition(50, false) then
+  if GetCharacterCondition(50, false) or IsAddonVisible("RecommendList") then
     goto EndOfScript
   end
 end
@@ -557,11 +540,16 @@ if is_price_sanity_checking and target_price < prices_list_length then
 end
 if is_using_overrides then
   for item_test, _ in pairs(item_overrides) do
-    if string.find(string.gsub(open_item,"%W",""), string.gsub(item_test,"%W","")) then
-      item_min = item_overrides[item_test]
-      if prices_list[target_price] < item_min.minimum then
-        price = item_min.minimum
-        debug(open_item.." minimum price: "..item_min.minimum.." applied!")
+    if open_item == string.gsub(item_test,"%W","") then
+      itemor = item_overrides[item_test]
+      if prices_list[target_price] < itemor.minimum then
+        price = itemor.minimum
+        debug(open_item.." minimum price: "..itemor.minimum.." applied!")
+        goto Apply
+      end
+      if prices_list[target_price] > itemor.maximum then
+        price = itemor.maximum
+        debug(open_item.." maximum price: "..itemor.maximum.." applied!")
         goto Apply
       end
     end
@@ -618,7 +606,7 @@ elseif is_single_retainer_mode then
   goto EndOfScript
 elseif is_single_retainer_mode==false then
   CloseRetainer()
-  goto Retainer
+  goto NextRetainer
 end
 
 ::MultiMode::
@@ -652,6 +640,10 @@ if GetCharacterCondition(50, false) and multimode_ending_command then
 end
 
 ::EndOfScript::
+while IsAddonVisible("RecommendList") do
+  yield("/pcall RecommendList true -1")
+  yield("/wait 0.1")
+end
 echo("---------------------")
 echo("MarketBotty finished!")
 echo("---------------------")
