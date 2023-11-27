@@ -28,6 +28,12 @@ If there are no search results, the price is set to history trimmed mean multipl
 
 ## Script options
 
+### after_multi
+`"logout"` to logout
+`"wait 10"` to wait `10` minutes (configurable)
+`1` to relog to first character in `my_characters` list.
+
+
 ### `my_characters`  
 Used for multimode. First in the list should be main character, which will be switched back to before running `multimode_ending_command`  
 Will probably cause an infinite wait loop if your character isn't known to AutoRetainer. Rework planned eventually to remove dependency, but it's still going to require you to spell your own characters name correctly.  
