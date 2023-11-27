@@ -15,8 +15,9 @@ blacklist_retainers = { --Do not run script on these retainers
   'Or-this-one',
 }
 item_overrides = { --Item names with no spaces or symbols
-  Sap = { minimum = 450, maximum = 450 },
-  Coke = { minimum = 450 },
+  StuffedAlpha = { maximum = 450 },
+  StuffedBomBoko = { minimum = 450 },
+  Coke = { minimum = 450, maximum = 5000 },
 }
 
 is_blind = false --Undercut the lowest price with no additional logic. Overrides most other options.
@@ -41,7 +42,8 @@ retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
-log_after_multi = "logout"  --"logout" to logout, number to switch to character in my_characters list
+after_multi = "wait logout"  --"logout", "wait 10", number. See readme.
+is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
 
@@ -118,8 +120,6 @@ function ClickItem(item)
   yield("/waitaddon RetainerSellList")
   yield("/pcall RetainerSellList true 0 ".. item - 1 .." 1 <wait.0.05>")
   yield("/pcall ContextMenu true 0 0")
-  --yield("/wait 0.1")
-  --if not IsAddonVisible("RetainerSell") then goto RetryClick end
   yield("/waitaddon RetainerSell")
 end
 
@@ -281,10 +281,6 @@ function NextCharacter()
       break
     end
   end
---   if not next_character then
---     echo("Unable to find next_character")
---     yield("/pcraft stop")
---   end
   return next_character
 end
 
@@ -292,18 +288,18 @@ function Relog(relog_character)
   echo(relog_character)
   yield("/ays relog " .. relog_character)
   while GetCharacterCondition(1) do
-    yield("/wait 0.1")
+    yield("/wait 1")
   end
   yield("/wait 0.5")
   while GetCharacterCondition(45, false) do
-    yield("/wait 0.1")
+    yield("/wait 1")
   end
   while GetCharacterCondition(45) do
-    yield("/wait 0.1")
+    yield("/wait 1")
   end
   yield("/wait 0.5")
   while GetCharacterCondition(35) do
-    yield("/wait 0.1")
+    yield("/wait 1")
   end
   yield("/wait 2")
 end
@@ -366,8 +362,7 @@ end
 
 ------------------------------------------------------------------------------------------------------
 
--- Functions don't pass to the array in a way that makes sense to me, so this is repeating blocks.
---function LoadFiles()
+-- Tried to do this as functions, but it was too hard. Oh well.
 if is_read_from_files then
   file_characters = config_folder..characters_file
   if file_exists(file_characters) and is_multimode then
@@ -421,7 +416,7 @@ if is_read_from_files then
     echo(file_blacklist.." not found!")
   end
 end
-
+uc=1
 if is_postrun_one_gil_report then
   one_gil_items_count = 0
   one_gil_report = {}
@@ -429,6 +424,13 @@ end
 if is_postrun_sanity_report then
   sanity_items_count = 0
   sanity_report = {}
+end
+
+::MultiWait::
+if string.find(after_multi, "wait logout") then
+elseif string.find(after_multi, "wait") then
+  multi_wait = string.gsub(after_multi,"%D","") * 60
+  wait_until = os.time() + multi_wait
 end
 
 ::Startup::
@@ -456,7 +458,7 @@ elseif IsAddonVisible("RetainerList") then
 elseif IsAddonVisible("RetainerSell") then
   echo("Starting in single item mode!")
   is_single_item_mode = true
-  goto ReadPrices
+  goto RepeatItem
 elseif IsAddonVisible("SelectString") then
   echo("Starting in single retainer mode!")
   yield("/click select_string3")
@@ -503,23 +505,31 @@ end
 ReadOpenItem()
 if last_item~="" then
   if open_item == last_item then
-    echo("Repeat: "..open_item.." set to "..price)
+    debug("Repeat: "..open_item.." set to "..price)
     goto Apply
   end
 end
 
 ::ReadPrices::
-actual_undercut = undercut
+au = uc
 SearchResults()
 if (string.find(GetNodeText("ItemSearchResult", 26), "No items found.")) then
   price = HistoryAverage() * history_multiplier
   goto Apply
 end
 target_price = 1
-SearchPrices()
 if is_blind then
-  goto Apply
+  raw_price = GetNodeText("ItemSearchResult", 5, i, 10)
+  if raw_price~="" and raw_price~=10 then
+    trimmed_price = string.gsub(raw_price,"%D","")
+    price = trimmed_price - uc
+    goto Apply
+  else
+    echo("Price not found")
+    yield("/pcraft stop")
+  end
 else
+  SearchPrices()
   SearchRetainers()
   HistoryAverage()
 end
@@ -542,32 +552,35 @@ if is_using_overrides then
   for item_test, _ in pairs(item_overrides) do
     if open_item == string.gsub(item_test,"%W","") then
       itemor = item_overrides[item_test]
-      if prices_list[target_price] < itemor.minimum then
-        price = itemor.minimum
-        debug(open_item.." minimum price: "..itemor.minimum.." applied!")
-        goto Apply
+      if itemor.minimum then
+        if prices_list[target_price] < itemor.minimum then
+          price = itemor.minimum
+          debug(open_item.." minimum price: "..itemor.minimum.." applied!")
+          goto Apply
+        end
       end
-      if prices_list[target_price] > itemor.maximum then
-        price = itemor.maximum
-        debug(open_item.." maximum price: "..itemor.maximum.." applied!")
-        goto Apply
+      if itemor.maximum then
+        if prices_list[target_price] > itemor.maximum then
+          price = itemor.maximum
+          debug(open_item.." maximum price: "..itemor.maximum.." applied!")
+          goto Apply
+        end
       end
     end
   end
 end
 if is_dont_undercut_my_retainers then
   for _, retainer_test in pairs(my_retainers) do
-    --if string.find(my_retainers[retainer_test], search_retainers[target_price]) then
     if retainer_test == search_retainers[target_price] then
-      actual_undercut = 0
-      echo("Matching price with own retainer: "..retainer_test)
+      au = 0
+      debug("Matching price with own retainer: "..retainer_test)
       break
     end
   end
 end
 
 ::FinalPrice::
-price = prices_list[target_price] - actual_undercut
+price = prices_list[target_price] - au
 if price <= 1 then
   echo("Should probably vendor this crap instead of setting it to 1. Since this script isn't *that* good yet, I'm just going to set it to...69. That's a nice number. You can deal with it yourself.")
   price = 69
@@ -626,13 +639,44 @@ end
 
 ::EndingCommand::
 yield("/wait 3")
-if log_after_multi=="logout" then
+if string.find(after_multi, "logout") then
   yield("/logout")
   yield("/waitaddon SelectYesno")
   yield("/wait 0.5")
   yield("/pcall SelectYesno true 0")
-elseif type(log_after_multi) == "number" then
-  Relog(my_characters[log_after_multi])
+  while GetCharacterCondition(1) do
+    yield("/wait 1")
+  end
+elseif wait_until then
+  if is_autoretainer_while_waiting then yield("/ays multi") end
+  while os.time() < wait_until do
+    yield("/wait 60")
+  end
+  if is_autoretainer_while_waiting then yield("/ays multi") end
+  goto MultiWait
+elseif type(after_multi) == "number" then
+  Relog(my_characters[after_multi])
+end
+if string.find(after_multi, "wait logout") then
+  title_wait = 0
+  if is_autoretainer_while_waiting then
+    yield("/ays multi")
+    while GetCharacterCondition(1, false) do
+      yield("/wait 1")
+    end
+  end
+  while true do
+    if IsAddonVisible("_TitleMenu") then
+      title_wait = title_wait + 1
+    else
+      title_wait = 0
+    end
+    if title_wait > 60 then
+      if is_autoretainer_while_waiting then yield("/ays multi") end
+      goto MultiWait
+    end
+    yield("/wait 1")
+  end
 end
 if GetCharacterCondition(50, false) and multimode_ending_command then
   yield("/wait 3")
