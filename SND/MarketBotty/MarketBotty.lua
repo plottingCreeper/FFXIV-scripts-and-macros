@@ -42,7 +42,7 @@ retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
-after_multi = "wait logout"  --"logout", "wait 10", number. See readme.
+after_multi = "logout"  --"logout", "wait 10", number. See readme.
 is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
@@ -55,9 +55,11 @@ function file_exists(name)
 end
 
 function CountRetainers()
+  yield("/waitaddon RetainerList")
+  yield("/wait 0.5")
   total_retainers = 0
   retainers_to_run = {}
-  for i= 1, 12 do
+  for i= 1, 10 do
     include_retainer = true
     retainer_name = GetNodeText("RetainerList", 2, i, 13)
     if retainer_name~="" and retainer_name~=13 then
@@ -85,10 +87,15 @@ end
 
 function OpenRetainer(r)
   yield("/waitaddon RetainerList")
-  yield("/click select_retainer"..r.." <wait.0.5>")
-  if IsAddonVisible("SelectString")==false then yield("/click talk <wait.0.5>") end
-  if IsAddonVisible("SelectString")==false then yield("/click talk <wait.0.5>") end
+  yield("/wait 0.3")
+  yield("/click select_retainer"..r)
+  yield("/wait 0.5")
+  while IsAddonVisible("SelectString")==false do
+    yield("/click talk")
+    yield("/wait 0.5")
+  end
   yield("/waitaddon SelectString")
+  yield("/wait 0.3")
   yield("/click select_string3")
   yield("/waitaddon RetainerSellList")
 end
@@ -335,6 +342,25 @@ function OpenBell()
   yield("/lockon off")
 end
 
+function WaitARFinish(ar_time)
+  title_wait = 0
+  if not ar_time then ar_time = 60 end
+  while IsAddonVisible("_TitleMenu")==false do
+    yield("/wait 10")
+  end
+  while true do
+    if IsAddonVisible("_TitleMenu") then
+      title_wait = title_wait + 1
+    else
+      title_wait = 0
+    end
+    if title_wait > ar_time then
+      break
+    end
+    yield("/wait 1")
+  end
+end
+
 function echo(input)
   if is_verbose then
     yield("/echo [MarketBotty] "..input)
@@ -378,6 +404,9 @@ if is_read_from_files then
     end
     file_characters:close()
     echo("Characters loaded from file: "..i)
+    if i <= 1 then
+      is_multimode = false
+    end
   else
     echo(file_characters.." not found!")
   end
@@ -629,7 +658,7 @@ if is_multimode then
     yield("/wait 1")
   end
   NextCharacter()
-  if not next_character then goto EndingCommand end
+  if not next_character then goto AfterMulti end
   Relog(next_character)
   OpenBell()
   goto Startup
@@ -637,7 +666,7 @@ else
   goto EndOfScript
 end
 
-::EndingCommand::
+::AfterMulti::
 yield("/wait 3")
 if string.find(after_multi, "logout") then
   yield("/logout")
@@ -648,36 +677,34 @@ if string.find(after_multi, "logout") then
     yield("/wait 1")
   end
 elseif wait_until then
-  if is_autoretainer_while_waiting then yield("/ays multi") end
+  if is_autoretainer_while_waiting then
+    yield("/ays multi")
+    while GetCharacterCondition(1, false) do
+      yield("/wait 10")
+    end
+  end
   while os.time() < wait_until do
     yield("/wait 60")
   end
+  WaitARFinish()
   if is_autoretainer_while_waiting then yield("/ays multi") end
   goto MultiWait
 elseif type(after_multi) == "number" then
   Relog(my_characters[after_multi])
 end
+
 if string.find(after_multi, "wait logout") then
-  title_wait = 0
   if is_autoretainer_while_waiting then
     yield("/ays multi")
     while GetCharacterCondition(1, false) do
-      yield("/wait 1")
+      yield("/wait 10")
     end
   end
-  while true do
-    if IsAddonVisible("_TitleMenu") then
-      title_wait = title_wait + 1
-    else
-      title_wait = 0
-    end
-    if title_wait > 60 then
-      if is_autoretainer_while_waiting then yield("/ays multi") end
-      goto MultiWait
-    end
-    yield("/wait 1")
-  end
+  WaitARFinish()
+  if is_autoretainer_while_waiting then yield("/ays multi") end
+  goto MultiWait
 end
+
 if GetCharacterCondition(50, false) and multimode_ending_command then
   yield("/wait 3")
   yield(multimode_ending_command)
