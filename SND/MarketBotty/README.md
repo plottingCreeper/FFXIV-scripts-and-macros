@@ -1,3 +1,7 @@
+Working! Still have some stuff left to do. All the important stuff is done.
+Don't message me. I don't care what you have to say.
+In case you're blind and/or stupid, here's another link to the script itself https://github.com/plottingCreeper/FFXIV-scripts-and-macros/blob/main/SND/MarketBotty/MarketBotty.lua
+
 # MarketBotty!
 Automatic sale undercutting script. Requires `Something Need Doing (Expanded Edition)`. Multimode currently requires `AutoRetainer`.
 Requires Pandora for /pcall, but that's being moved to SND at some point(?) so good luck I guess.
