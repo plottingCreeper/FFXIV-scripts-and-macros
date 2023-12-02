@@ -32,7 +32,9 @@ If there are no search results, the price is set to history trimmed mean multipl
 
 <br>
 
-## Script options
+## Arrays
+
+If your characters or retainers have a `'` in their name, it needs to be escaped with `\`. `R'etainer` needs to be entered into the array as `R\'etainer`. This does not apply to the files, only the array in the script.
 
 ### after_multi
 `"logout"` to logout
