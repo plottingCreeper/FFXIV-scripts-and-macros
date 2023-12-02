@@ -34,12 +34,8 @@ If there are no search results, the price is set to history trimmed mean multipl
 
 ## Arrays
 
-If your characters or retainers have a `'` in their name, it needs to be escaped with `\`. `R'etainer` needs to be entered into the array as `R\'etainer`. This does not apply to the files, only the array in the script.
-
-### after_multi
-`"logout"` to logout
-`"wait 10"` to wait `10` minutes (configurable)
-`1` to relog to first character in `my_characters` list.
+### `'`
+If your characters or retainers have a `'` in their name, it needs to be escaped with `\`. `R'etainer` needs to be entered into the array as `R\'etainer`. This does not apply to the files, only the array in the script.  
 
 
 ### `my_characters`  
@@ -77,8 +73,17 @@ blacklist_retainers = { --Do not run script on these retainers
 ```
 
 <br>
-<br>
+
 
 `my_characters`, `my_retainers`, and `blacklist_retainers` arrays are **replaced** be the contents of `file_characters`, `file_retainers`, and `file_blacklist`, if found.  
 Files should be one entry per line, with no additional quotes, escape characters, or formatting of any kind.  
 Default file location is `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`  
+
+<br>
+
+## Script Options  
+
+### after_multi
+`"logout"` to logout
+`"wait 10"` to wait `10` minutes (configurable)
+`1` to relog to first character in `my_characters` list.
