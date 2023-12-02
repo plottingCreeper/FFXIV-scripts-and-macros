@@ -1,4 +1,4 @@
-Working! Still have some stuff left to do. All the important stuff is done.  
+Working! Still have some fancy features left to do. All the important stuff is done.  
 Don't message me. I don't care what you have to say.  
 In case you're blind and/or stupid, here's another link to the script itself https://github.com/plottingCreeper/FFXIV-scripts-and-macros/blob/main/SND/MarketBotty/MarketBotty.lua  
 This readme isn't finished yet either. I'm sure you'll figure it out though.  
