@@ -81,9 +81,58 @@ Default file location is `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing
 
 <br>
 
+
+### `item_overrides`  
+Item names have all non-word characters stripped out of them. Currently only supports `minimum` and `maximum` for setting prices. Hope to add some kind of `autolist` if I can figure out how to click on specific items from inventory.  
+
+
+<br>
+
 ## Script Options  
 
-### after_multi
-`"logout"` to logout
-`"wait 10"` to wait `10` minutes (configurable)
-`1` to relog to first character in `my_characters` list.
+### `is_blind`  
+Undercut the lowest price with no additional logic. Overrides most other options.  
+
+### `is_dont_undercut_my_retainers`  
+
+  
+### `is_price_sanity_checking`  
+Ignores market results below half the trimmed mean of historical prices.  
+
+### `is_using_blacklist`  
+Whether or not to use the blacklist_retainers list.  
+
+### `undercut`  
+There's no reason to change this. 1 gil undercut is life.  
+
+### `history_multiplier`  
+if no active sales then get average historical price and multiply  
+
+### `is_using_overrides`  
+item_overrides table. Currently just minimum price, but expansion are coming soon:tm:!  
+
+### `is_postrun_one_gil_report`  
+Requires is_verbose  
+
+### `is_postrun_sanity_report`  
+Requires is_verbose  
+
+### `history_trim_amount`  
+Trims this many from highest and lowest in history list  
+
+### `is_verbose`  
+Basic info in chat about what's going on.  
+
+### `is_debug`  
+Absolutely flood your chat with all sorts of shit you don't need to know.  
+
+### `name_rechecks`  
+Latency sensitive tunable. Probably sets wrong price if below 5  
+
+
+### `after_multi`  
+Intent of this is to stop and wait for AutoRetainer to run. It mostly works, but this isn't the super graceful end result I had in mind.  
+`"logout"` to logout  
+`"wait 10"` to wait `10` minutes (configurable)  
+`1` to relog to first character in `my_characters` list.  
+`wait logout` logs out and waits for a character to be logged in, then waits to be sitting back at the title screen for a while. Crappy AutoRetainer compatibility attempt.  
