@@ -35,7 +35,9 @@ If there are no search results, the price is set to history trimmed mean multipl
 ## Arrays
 
 ### `'`
-If your characters or retainers have a `'` in their name, it needs to be escaped with `\`. `R'etainer` needs to be entered into the array as `R\'etainer`. This does not apply to the files, only the array in the script.  
+If your characters or retainers have a `'` in their name, it needs to be escaped with `\`.  
+For example, `R'etainer` would be entered into the array as `R\'etainer`.  
+This does not apply to the files, only the arrays in the script.  
 
 
 ### `my_characters`  
