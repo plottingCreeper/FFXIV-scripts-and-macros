@@ -44,8 +44,8 @@ retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
-start_wait = true
-after_multi = "logout"  --"logout", "wait 10", number. See readme.
+start_wait = true --For when starting script during AR operation.
+after_multi = "logout"  --"logout", "wait 10", "wait logout", number. See readme.
 is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
@@ -59,7 +59,7 @@ end
 
 function CountRetainers()
   yield("/waitaddon RetainerList")
-  while string.gsub(GetNodeText("RetainerList", 2, 1, 13),"%D","")=="" do
+  while string.gsub(GetNodeText("RetainerList", 2, 1, 13),"%d","")=="" do
     yield("/wait 0.1")
   end
   yield("/wait 0.1")
@@ -327,25 +327,26 @@ function Relog(relog_character)
 end
 
 function OpenBell()
-  yield("/ays het")
-  yield("/wait 0.5")
-  if IsAddonVisible("_TargetInfoMainTarget") then
-    while GetCharacterCondition(45, false) do
-      yield("/wait 0.1")
+  if IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) or IsInZone(136) then
+    debug("Entering house")
+    yield("/ays het")
+    yield("/wait 0.5")
+    if IsAddonVisible("_TargetInfoMainTarget") then
+      while GetCharacterCondition(45, false) do
+        yield("/wait 0.15")
+      end
+      while GetCharacterCondition(45) do
+        yield("/wait 0.16")
+      end
+      yield("/wait 2")
+    else
+      debug("Not entering house?")
     end
-    while GetCharacterCondition(45) do
-      yield("/wait 0.2")
-    end
-    yield("/wait 2")
-    yield("/target Summoning Bell <wait.0.3>")
-  else
-    yield("/target Summoning Bell <wait.0.3>")
   end
-  if IsAddonVisible("_TargetInfoMainTarget")==false then
-    echo("Target not found!")
-    echo("Either send me a screenshot, or give up and shut up.")
-    echo("Just telling me \"it no workie\" is not helpful.")
-    yield("/pcraft stop")
+  while IsAddonVisible("_TargetInfoMainTarget")==false do
+    debug("Finding summoning bell")
+    yield("/target Summoning Bell")
+    yield("/wait 0.17")
   end
   yield("/lockon on")
   yield("/automove on")
@@ -364,7 +365,7 @@ function WaitARFinish(ar_time)
     yield("/wait 10")
   end
   while true do
-    if IsAddonVisible("_TitleMenu") then
+    if IsAddonVisible("_TitleMenu") and IsAddonVisible("NowLoading")==false then
       title_wait = title_wait + 1
     else
       title_wait = 0
