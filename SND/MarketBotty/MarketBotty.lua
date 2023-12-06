@@ -1,5 +1,6 @@
 --[[
     MarketBotty! Fuck it, I'm going there. Don't @ me.
+    https://github.com/plottingCreeper/FFXIV-scripts-and-macros/tree/main/SND/MarketBotty
 ]]
 
 my_characters = { --Characters to switch to in multimode
@@ -36,12 +37,14 @@ is_debug = true --Absolutely flood your chat with all sorts of shit you don't ne
 name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
+is_echo_during_read = false --Echo each character and retainer name as they're read, to see how you screwed up.
 config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 characters_file = "my_characters.txt"
 retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
+start_wait = true
 after_multi = "logout"  --"logout", "wait 10", number. See readme.
 is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
@@ -56,10 +59,14 @@ end
 
 function CountRetainers()
   yield("/waitaddon RetainerList")
-  yield("/wait 0.5")
+  while string.gsub(GetNodeText("RetainerList", 2, 1, 13),"%D","")=="" do
+    yield("/wait 0.1")
+  end
+  yield("/wait 0.1")
   total_retainers = 0
   retainers_to_run = {}
   for i= 1, 10 do
+    yield("/wait 0.01")
     include_retainer = true
     retainer_name = GetNodeText("RetainerList", 2, i, 13)
     if retainer_name~="" and retainer_name~=13 then
@@ -91,22 +98,28 @@ function OpenRetainer(r)
   yield("/click select_retainer"..r)
   yield("/wait 0.5")
   while IsAddonVisible("SelectString")==false do
-    yield("/click talk")
-    yield("/wait 0.5")
+    if IsAddonVisible("Talk") then yield("/click talk") end
+    yield("/wait 0.1")
   end
   yield("/waitaddon SelectString")
   yield("/wait 0.3")
-  yield("/click select_string3")
+  yield("/click select_string4")
   yield("/waitaddon RetainerSellList")
 end
 
 function CloseRetainer()
-  yield("/pcall RetainerSellList true -2")
-  yield("/pcall RetainerSellList true -1")
-  yield("/waitaddon SelectString")
-  yield("/pcall SelectString true -1 <wait.1>")
-  yield("/click talk")
-  yield("/waitaddon RetainerList")
+  while not IsAddonVisible("RetainerList") do
+    if IsAddonVisible("RetainerSellList") then yield("/pcall RetainerSellList true -1") end
+    if IsAddonVisible("SelectString") then yield("/pcall SelectString true -1") end
+    if IsAddonVisible("Talk") then yield("/click talk") end
+    yield("/wait 0.1")
+  end
+--   yield("/pcall RetainerSellList true -2")
+--   yield("/pcall RetainerSellList true -1")
+--   yield("/waitaddon SelectString")
+--   yield("/pcall SelectString true -1 <wait.1>")
+--   yield("/click talk")
+--   yield("/waitaddon RetainerList")
 end
 
 function CountItems()
@@ -243,7 +256,7 @@ function HistoryAverage()
     yield("/wait 0.1")
     first_history = string.gsub(GetNodeText("ItemHistory", 3, 2, 6),"%d","")
   end
-  debug(first_history)
+  yield("/wait 0.1")
   for i= 2, 21 do
     raw_history_price = GetNodeText("ItemHistory", 3, i, 6)
     if raw_history_price ~= 6 and raw_history_price ~= "" then
@@ -252,12 +265,15 @@ function HistoryAverage()
       history_tm_count = history_tm_count + 1
     end
   end
+  debug("History items: "..history_tm_count)
   table.sort(history_list)
   for i=1, history_trim_amount do
     if history_tm_count > 2 then
       table.remove(history_list, history_tm_count)
       table.remove(history_list, 1)
       history_tm_count = history_tm_count - 2
+    else
+      break
     end
   end
   for history_tm_count, history_tm_price in pairs(history_list) do
@@ -295,18 +311,17 @@ function Relog(relog_character)
   echo(relog_character)
   yield("/ays relog " .. relog_character)
   while GetCharacterCondition(1) do
-    yield("/wait 1")
+    yield("/wait 1.01")
   end
-  yield("/wait 0.5")
-  while GetCharacterCondition(45, false) do
-    yield("/wait 1")
+  while GetCharacterCondition(1, false) do
+    yield("/wait 1.02")
   end
-  while GetCharacterCondition(45) do
-    yield("/wait 1")
+  while GetCharacterCondition(45) or GetCharacterCondition(35) do
+    yield("/wait 1.03")
   end
   yield("/wait 0.5")
   while GetCharacterCondition(35) do
-    yield("/wait 1")
+    yield("/wait 1.04")
   end
   yield("/wait 2")
 end
@@ -344,7 +359,7 @@ end
 
 function WaitARFinish(ar_time)
   title_wait = 0
-  if not ar_time then ar_time = 60 end
+  if not ar_time then ar_time = 20 end
   while IsAddonVisible("_TitleMenu")==false do
     yield("/wait 10")
   end
@@ -357,7 +372,7 @@ function WaitARFinish(ar_time)
     if title_wait > ar_time then
       break
     end
-    yield("/wait 1")
+    yield("/wait 1.0"..ar_time - title_wait)
   end
 end
 
@@ -399,7 +414,7 @@ if is_read_from_files then
     while next_line do
       i = i + 1
       my_characters[i] = next_line
-      debug("Character "..i.." from file: "..next_line)
+      if is_echo_during_read then debug("Character "..i.." from file: "..next_line) end
       next_line = file_characters:read("l")
     end
     file_characters:close()
@@ -419,7 +434,7 @@ if is_read_from_files then
     while next_line do
       i = i + 1
       my_retainers[i] = next_line
-      debug("Retainer "..i.." from file: "..next_line)
+      if is_echo_during_read then debug("Retainer "..i.." from file: "..next_line) end
       next_line = file_retainers:read("l")
     end
     file_retainers:close()
@@ -436,7 +451,7 @@ if is_read_from_files then
     while next_line do
       i = i + 1
       blacklist_retainers[i] = next_line
-      debug("Blacklist "..i.." from file: "..next_line)
+      if is_echo_during_read then debug("Blacklist "..i.." from file: "..next_line) end
       next_line = file_blacklist:read("l")
     end
     file_blacklist:close()
@@ -456,6 +471,10 @@ if is_postrun_sanity_report then
 end
 
 ::MultiWait::
+if start_wait then
+  WaitARFinish()
+  if is_autoretainer_while_waiting then yield("/ays multi") end
+end
 if string.find(after_multi, "wait logout") then
 elseif string.find(after_multi, "wait") then
   multi_wait = string.gsub(after_multi,"%D","") * 60
@@ -513,6 +532,7 @@ if next_retainer < total_retainers then
 else
   goto MultiMode
 end
+yield("/wait 0.1")
 target_sale_slot = 1
 OpenRetainer(retainers_to_run[next_retainer])
 
