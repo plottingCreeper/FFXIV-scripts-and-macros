@@ -19,18 +19,21 @@ item_overrides = { --Item names with no spaces or symbols
   StuffedAlpha = { maximum = 450 },
   StuffedBomBoko = { minimum = 450 },
   Coke = { minimum = 450, maximum = 5000 },
+  RamieTabard = { default = 25000 },
 }
 
+undercut = 1 --There's no reason to change this. 1 gil undercut is life.
 is_blind = false --Undercut the lowest price with no additional logic. Overrides most other options.
 is_dont_undercut_my_retainers = true --Working!
 is_price_sanity_checking = true --Ignores market results below half the trimmed mean of historical prices.
 is_using_blacklist = true --Whether or not to use the blacklist_retainers list.
-undercut = 1 --There's no reason to change this. 1 gil undercut is life.
+history_trim_amount = 5 --Trims this many from highest and lowest in history list
 history_multiplier = 10 --if no active sales then get average historical price and multiply
-is_using_overrides = true --item_overrides table. Currently just minimum price, but expansion are coming soon:tm:!
+is_using_overrides = true --item_overrides table.
+
+is_override_report = true
 is_postrun_one_gil_report = true  --Requires is_verbose
 is_postrun_sanity_report = true  --Requires is_verbose
-history_trim_amount = 5 --Trims this many from highest and lowest in history list
 
 is_verbose = true --Basic info in chat about what's going on.
 is_debug = true --Absolutely flood your chat with all sorts of shit you don't need to know.
@@ -44,7 +47,7 @@ retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
-start_wait = true --For when starting script during AR operation.
+start_wait = false --For when starting script during AR operation.
 after_multi = "logout"  --"logout", "wait 10", "wait logout", number. See readme.
 is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
@@ -114,17 +117,19 @@ function CloseRetainer()
     if IsAddonVisible("Talk") then yield("/click talk") end
     yield("/wait 0.1")
   end
---   yield("/pcall RetainerSellList true -2")
---   yield("/pcall RetainerSellList true -1")
---   yield("/waitaddon SelectString")
---   yield("/pcall SelectString true -1 <wait.1>")
---   yield("/click talk")
---   yield("/waitaddon RetainerList")
 end
 
 function CountItems()
   yield("/waitaddon RetainerSellList")
-  yield("/wait 0.5")
+  while string.gsub(GetNodeText("RetainerSellList", 3),"%d","")=="" do
+    yield("/wait 0.1")
+  end
+  count_wait_tick = 0
+  while GetNodeText("RetainerSellList", 3)==raw_item_count and count_wait_tick < 5 do
+    count_wait_tick = count_wait_tick + 1
+    yield("/wait 0.1")
+  end
+  yield("/wait 0.1")
   raw_item_count = GetNodeText("RetainerSellList", 3)
   item_count_trimmed = string.sub(raw_item_count,1,2)
   item_count = string.gsub(item_count_trimmed,"%D","")
@@ -133,10 +138,7 @@ function CountItems()
 end
 
 function ClickItem(item)
-  ::RetryClick::
-  if IsAddonVisible("ItemSearchResult") then yield("/pcall ItemSearchResult true -1") end
-  if IsAddonVisible("ItemHistory") then yield("/pcall ItemHistory true -1") end
-  if IsAddonVisible("RetainerSell") then yield("/pcall RetainerSell true -1") end
+  CloseSales()
   yield("/waitaddon RetainerSellList")
   yield("/pcall RetainerSellList true 0 ".. item - 1 .." 1 <wait.0.05>")
   yield("/pcall ContextMenu true 0 0")
@@ -284,14 +286,59 @@ function HistoryAverage()
   return history_trimmed_mean
 end
 
+function ItemOverride(mode)
+  if is_using_overrides then
+    is_price_overridden = false
+    for item_test, _ in pairs(item_overrides) do
+      if open_item == string.gsub(item_test,"%W","") then
+        itemor = item_overrides[item_test]
+        break
+      end
+    end
+    if itemor.default and mode == "default" then
+      price = tonumber(itemor.default)
+      is_price_overridden = true
+      debug(open_item.." default price: "..itemor.default.." applied!")
+    end
+    if itemor.minimum then
+      if price < itemor.minimum then
+        price = tonumber(itemor.minimum)
+        is_price_overridden = true
+        debug(open_item.." minimum price: "..itemor.minimum.." applied!")
+      end
+    end
+    if itemor.maximum then
+      if price > itemor.maximum then
+        price = tonumber(itemor.maximum)
+        is_price_overridden = true
+        debug(open_item.." maximum price: "..itemor.maximum.." applied!")
+      end
+    end
+  end
+end
+
 function SetPrice(price)
   debug("Setting price to: "..price)
   yield("/pcall ItemSearchResult true -1")
   yield("/pcall RetainerSell true 2 "..price)
   yield("/pcall RetainerSell true 0")
-  if IsAddonVisible("ItemSearchResult") then yield("/pcall ItemSearchResult true -1") end
-  if IsAddonVisible("ItemHistory") then yield("/pcall ItemHistory true -1") end
-  if IsAddonVisible("RetainerSell") then yield("/pcall RetainerSell true -1") end
+  CloseSales()
+end
+
+function CloseSearch()
+  while IsAddonVisible("ItemSearchResult") or IsAddonVisible("ItemHistory") do
+    yield("/wait 0.1")
+    if IsAddonVisible("ItemSearchResult") then yield("/pcall ItemSearchResult true -1") end
+    if IsAddonVisible("ItemHistory") then yield("/pcall ItemHistory true -1") end
+  end
+end
+
+function CloseSales()
+  CloseSearch()
+  while IsAddonVisible("RetainerSell") do
+    yield("/wait 0.1")
+    if IsAddonVisible("RetainerSell") then yield("/pcall RetainerSell true -1") end
+  end
 end
 
 function NextCharacter()
@@ -462,6 +509,10 @@ if is_read_from_files then
   end
 end
 uc=1
+if is_override_report then
+  override_items_count = 0
+  override_report = {}
+end
 if is_postrun_one_gil_report then
   one_gil_items_count = 0
   one_gil_report = {}
@@ -544,6 +595,7 @@ if CountItems() == 0 then goto Loop end
 ClickItem(target_sale_slot)
 
 ::Helper::
+au = uc
 while IsAddonVisible("RetainerSell")==false do
   yield("/wait 0.5")
   if GetCharacterCondition(50, false) or IsAddonVisible("RecommendList") then
@@ -561,11 +613,18 @@ if last_item~="" then
 end
 
 ::ReadPrices::
-au = uc
 SearchResults()
+current_price = string.gsub(GetNodeText("RetainerSell",6),"%D","")
 if (string.find(GetNodeText("ItemSearchResult", 26), "No items found.")) then
   price = HistoryAverage() * history_multiplier
-  goto Apply
+  CloseSearch()
+  ItemOverride("default")
+  if price <= tonumber(current_price) then
+    CloseSales()
+    goto Loop
+  else
+    goto Apply
+  end
 end
 target_price = 1
 if is_blind then
@@ -582,6 +641,7 @@ else
   SearchPrices()
   SearchRetainers()
   HistoryAverage()
+  CloseSearch()
 end
 
 ::PricingLogic::
@@ -598,27 +658,6 @@ if is_price_sanity_checking and target_price < prices_list_length then
   debug("target_price "..target_price)
   debug("prices_list[target_price] "..prices_list[target_price])
 end
-if is_using_overrides then
-  for item_test, _ in pairs(item_overrides) do
-    if open_item == string.gsub(item_test,"%W","") then
-      itemor = item_overrides[item_test]
-      if itemor.minimum then
-        if prices_list[target_price] < itemor.minimum then
-          price = itemor.minimum
-          debug(open_item.." minimum price: "..itemor.minimum.." applied!")
-          goto Apply
-        end
-      end
-      if itemor.maximum then
-        if prices_list[target_price] > itemor.maximum then
-          price = itemor.maximum
-          debug(open_item.." maximum price: "..itemor.maximum.." applied!")
-          goto Apply
-        end
-      end
-    end
-  end
-end
 if is_dont_undercut_my_retainers then
   for _, retainer_test in pairs(my_retainers) do
     if retainer_test == search_retainers[target_price] then
@@ -628,33 +667,40 @@ if is_dont_undercut_my_retainers then
     end
   end
 end
-
-::FinalPrice::
 price = prices_list[target_price] - au
-if price <= 1 then
+ItemOverride()
+if is_override_report and is_price_overridden then
+  override_items_count = override_items_count + 1
+  if is_multimode then
+    override_report[override_items_count] = open_item.." on "..GetCharacterName().." set: "..price..". Low: "..prices_list[1]
+  else
+    override_report[override_items_count] = open_item.." set: "..price..". Low: "..prices_list[1]
+  end
+elseif price <= 1 then
   echo("Should probably vendor this crap instead of setting it to 1. Since this script isn't *that* good yet, I'm just going to set it to...69. That's a nice number. You can deal with it yourself.")
   price = 69
   if is_postrun_one_gil_report then
+    one_gil_items_count = one_gil_items_count + 1
     if is_multimode then
-      one_gil_items_count = one_gil_items_count + 1
       one_gil_report[one_gil_items_count] = open_item.." on "..GetCharacterName()
     else
-      one_gil_items_count = one_gil_items_count + 1
       one_gil_report[one_gil_items_count] = open_item
     end
   end
 elseif is_postrun_sanity_report and target_price ~= 1 then
+  sanity_items_count = sanity_items_count + 1
   if is_multimode then
-    sanity_items_count = sanity_items_count + 1
     sanity_report[sanity_items_count] = open_item.." on "..GetCharacterName().." set: "..price..". Low: "..prices_list[1]
   else
-    sanity_items_count = sanity_items_count + 1
     sanity_report[sanity_items_count] = open_item.." set: "..price..". Low: "..prices_list[1]
   end
 end
 
 ::Apply::
-SetPrice(price)
+if price ~= tonumber(string.gsub(GetNodeText("RetainerSell",6),"%D","")) then
+  SetPrice(price)
+end
+CloseSales()
 
 ::Loop::
 if helper_mode then
@@ -739,6 +785,13 @@ end
 echo("---------------------")
 echo("MarketBotty finished!")
 echo("---------------------")
+if is_override_report then
+  echo("Items that triggered override: "..override_items_count)
+  for i = 1, override_items_count do
+    echo(override_report[i])
+  end
+  echo("---------------------")
+end
 if is_postrun_one_gil_report then
   echo("Items that triggered 1 gil check: "..one_gil_items_count)
   for i = 1, one_gil_items_count do
