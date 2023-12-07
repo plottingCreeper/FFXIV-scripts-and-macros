@@ -295,6 +295,7 @@ function ItemOverride(mode)
         break
       end
     end
+    if not itemor then return false end
     if itemor.default and mode == "default" then
       price = tonumber(itemor.default)
       is_price_overridden = true
