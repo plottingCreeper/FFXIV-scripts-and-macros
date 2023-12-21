@@ -40,6 +40,7 @@ is_debug = true --Absolutely flood your chat with all sorts of shit you don't ne
 name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
+is_write_to_files = true --Adds characters and retainers to characters_file and retainers_file
 is_echo_during_read = false --Echo each character and retainer name as they're read, to see how you screwed up.
 config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 characters_file = "my_characters.txt"
@@ -51,6 +52,7 @@ start_wait = false --For when starting script during AR operation.
 after_multi = "logout"  --"logout", "wait 10", "wait logout", number. See readme.
 is_autoretainer_while_waiting = true
 multimode_ending_command = "/ays multi"
+is_use_ar_to_enter_house = true --Breaks if you have subs ready.
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
 
 ------------------------------------------------------------------------------------------------------
@@ -288,6 +290,7 @@ end
 
 function ItemOverride(mode)
   if is_using_overrides then
+    itemor = nil
     is_price_overridden = false
     for item_test, _ in pairs(item_overrides) do
       if open_item == string.gsub(item_test,"%W","") then
@@ -374,10 +377,15 @@ function Relog(relog_character)
   yield("/wait 2")
 end
 
-function OpenBell()
+function EnterHouse()
   if IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) or IsInZone(136) then
     debug("Entering house")
-    yield("/ays het")
+    if is_use_ar_to_enter_house then
+      yield("/ays het")
+    else
+      yield("/target Entrance")
+      yield("/target Apartment Building Entrance")
+    end
     yield("/wait 0.5")
     if IsAddonVisible("_TargetInfoMainTarget") then
       while GetCharacterCondition(45, false) do
@@ -391,8 +399,12 @@ function OpenBell()
       debug("Not entering house?")
     end
   end
+end
+
+function OpenBell()
+  EnterHouse()
   while IsAddonVisible("_TargetInfoMainTarget")==false do
-    debug("Finding summoning bell")
+    debug("Finding summoning bell...")
     yield("/target Summoning Bell")
     yield("/wait 0.17")
   end
@@ -408,7 +420,7 @@ end
 
 function WaitARFinish(ar_time)
   title_wait = 0
-  if not ar_time then ar_time = 20 end
+  if not ar_time then ar_time = 10 end
   while IsAddonVisible("_TitleMenu")==false do
     yield("/wait 10")
   end
@@ -510,6 +522,7 @@ if is_read_from_files then
   end
 end
 uc=1
+au=1
 if is_override_report then
   override_items_count = 0
   override_report = {}
@@ -522,6 +535,8 @@ if is_postrun_sanity_report then
   sanity_items_count = 0
   sanity_report = {}
 end
+
+if IsAddonVisible("RetainerList") then is_multimode = false end
 
 ::MultiWait::
 if start_wait then
@@ -786,21 +801,21 @@ end
 echo("---------------------")
 echo("MarketBotty finished!")
 echo("---------------------")
-if is_override_report then
+if is_override_report and override_items_count ~= 0 then
   echo("Items that triggered override: "..override_items_count)
   for i = 1, override_items_count do
     echo(override_report[i])
   end
   echo("---------------------")
 end
-if is_postrun_one_gil_report then
+if is_postrun_one_gil_report and one_gil_items_count ~= 0 then
   echo("Items that triggered 1 gil check: "..one_gil_items_count)
   for i = 1, one_gil_items_count do
     echo(one_gil_report[i])
   end
   echo("---------------------")
 end
-if is_postrun_sanity_report then
+if is_postrun_sanity_report and sanity_items_count ~= 0 then
   echo("Items that triggered sanity check: "..sanity_items_count)
   for i = 1, sanity_items_count do
     echo(sanity_report[i])
