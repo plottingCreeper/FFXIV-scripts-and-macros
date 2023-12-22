@@ -4,6 +4,10 @@ In case you're blind and/or stupid, here's another link to the script itself htt
 This readme isn't finished yet either. I'm sure you'll figure it out though.  
 <br>
 
+Look, this is dodgy as hell. A lot of FFXIV plugin communities will have opinions on shit like this. I don't agree with those opinions, but regardless, I want to respect them, and especially respect the rules in those communities. DO NOT discuss this in places that ban discussion of market automation. Check the damn rules before saying anything.  
+
+<br>
+
 # MarketBotty!
 Automatic sale undercutting script. Requires `Something Need Doing (Expanded Edition)`. Multimode currently requires `AutoRetainer`.
 Requires Pandora for /pcall, but that's being moved to SND at some point(?) so good luck I guess.
