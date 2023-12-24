@@ -83,7 +83,11 @@ blacklist_retainers = { --Do not run script on these retainers
 
 `my_characters`, `my_retainers`, and `blacklist_retainers` arrays are **replaced** be the contents of `file_characters`, `file_retainers`, and `file_blacklist`, if found.  
 Files should be one entry per line, with no additional quotes, escape characters, or formatting of any kind.  
-Default file location is `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`  
+Default file location is `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\` 
+Default file names are:  
+`characters_file` = "my_characters.txt"  
+`retainers_file` = "my_retainers.txt"  
+`blacklist_file` = "blacklist_retainers.txt"  
 
 <br>
 
