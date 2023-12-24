@@ -38,6 +38,12 @@ function MoveNear(near_x, near_z, near_y, radius, timeout)
   move_tick = 0
   while IsMoving() and move_tick <= timeout do
     move_tick = move_tick + 0.1
+    if near_z == false then
+      if move_tick > timeout / 2 and move_tick < timeout * 0.9 then
+        move_z = GetPlayerRawZPos()
+        yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
+      end
+    end
     yield("/wait 0.1")
   end
   yield("/visland stop")
@@ -64,7 +70,7 @@ end
 
 if is_tickets_claimed then
   is_tickets_claimed = false
-  MoveNear(121, 13, -11, 3, 2)
+  MoveNear(121, false, -11, 2, 1.5)
   yield("/target Jumbo Cactpot Broker")
   yield("/wait 0.1")
   yield("/pinteract")
@@ -98,8 +104,34 @@ if IsAddonVisible("LotteryWeeklyInput") then
   end
 end
 
+if IsAddonVisible("SelectString") then
+  yield("/wait 0.1")
+  for i=0, 5 do
+    yield("/wait 0.01")
+    string = GetSelectStringText(i)
+    if string=="Present yourself for judging." or string=="Purchase a Jumbo Cactpot ticket." then
+      Select(i+1)
+      Yesno()
+      break
+    end
+  end
+end
+
+if IsAddonVisible("Talk") then Talk() end
+
 if IsAddonVisible("FashionCheck") then
   yield("/pcall FashionCheck true -1")
+end
+
+if HasStatus("Gold Saucer VIP Card")==false then
+  if IsAddonVisible("GrandCompanySupplyList") then
+    QuitDeliver()
+    ed = 0
+  end
+  if GetItemCount(14947) > 0 then
+    yield("/wait 1")
+    yield("/item Gold Saucer VIP Card")
+  end
 end
 
 ::Loop::
