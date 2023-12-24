@@ -53,6 +53,12 @@ function MoveNear(near_x, near_z, near_y, radius, timeout)
   if is_debug then
     yield("/echo Aimed for: X:"..move_x.." Z:"..move_z.." Y:"..move_y)
     yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
+    if move_tick < timeout then 
+      reason = "arrived" 
+    else 
+      reason = "timeout" 
+    end
+    yield("/echo Reason: "..reason)
   end
   return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
 end
