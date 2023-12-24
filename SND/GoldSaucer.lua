@@ -30,8 +30,13 @@ end
 
 function MoveNear(near_x, near_z, near_y, radius, timeout)
   if not radius then radius = 3 end
+  if not timeout then timeout = 60 end
   move_x = math.random((near_x-radius)*1000, (near_x+radius)*1000)/1000
-  move_z = near_z
+  if near_z then
+    move_z = near_z
+  else
+    move_z = math.floor(GetPlayerRawYPos()*1000)/1000
+  end
   move_y = math.random((near_y-radius)*1000, (near_y+radius)*1000)/1000
   yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
   yield("/wait 0.5")
@@ -39,14 +44,16 @@ function MoveNear(near_x, near_z, near_y, radius, timeout)
   while IsMoving() and move_tick <= timeout do
     move_tick = move_tick + 0.1
     if near_z == false then
-      if move_tick > timeout / 2 and move_tick < timeout * 0.9 then
-        move_z = GetPlayerRawZPos()
+        move_z = math.floor(GetPlayerRawYPos()*1000)/1000
         yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
-      end
     end
     yield("/wait 0.1")
   end
   yield("/visland stop")
+  if is_debug then
+    yield("/echo Aimed for: X:"..move_x.." Z:"..move_z.." Y:"..move_y)
+    yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
+  end
   return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
 end
 
