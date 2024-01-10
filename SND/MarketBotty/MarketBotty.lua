@@ -28,8 +28,9 @@ is_dont_undercut_my_retainers = true --Working!
 is_price_sanity_checking = true --Ignores market results below half the trimmed mean of historical prices.
 is_using_blacklist = true --Whether or not to use the blacklist_retainers list.
 history_trim_amount = 5 --Trims this many from highest and lowest in history list
-history_multiplier = 10 --if no active sales then get average historical price and multiply
+history_multiplier = "round" --if no active sales then get average historical price and multiply
 is_using_overrides = true --item_overrides table.
+is_check_for_hq = false
 
 is_override_report = true
 is_postrun_one_gil_report = true  --Requires is_verbose
@@ -46,6 +47,7 @@ config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNe
 characters_file = "my_characters.txt"
 retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
+overrides_file = "item_overrides.txt"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
 start_wait = false --For when starting script during AR operation.
@@ -70,6 +72,7 @@ function CountRetainers()
   yield("/wait 0.1")
   total_retainers = 0
   retainers_to_run = {}
+  yield("/wait 0.1")
   for i= 1, 10 do
     yield("/wait 0.01")
     include_retainer = true
@@ -90,6 +93,20 @@ function CountRetainers()
       if include_retainer then
         total_retainers = total_retainers + 1
         retainers_to_run[total_retainers] = i
+      end
+      if is_write_to_files and type(file_retainers)=="userdata" then
+        is_add_to_file = true
+        for _, known_retainer in pairs(my_retainers) do
+          if retainer_name==known_retainer then
+            is_add_to_file = false
+            break
+          end
+        end
+        if is_add_to_file then
+          file_retainers = io.open(config_folder..retainers_file,"a")
+          file_retainers:write("\n"..retainer_name)
+          io.close(file_retainers)
+        end
       end
     end
   end
@@ -520,6 +537,25 @@ if is_read_from_files then
   else
     echo(file_blacklist.." not found!")
   end
+--[[
+  file_overrides = config_folder..overrides_file
+  if file_exists(file_overrides) and is_using_overrides then
+    item_overrides = {}
+    file_overrides = io.input(file_overrides)
+    next_line = file_overrides:read("l")
+    i = 0
+    while next_line do
+      i = i + 1
+      item_overrides[i] = next_line
+      if is_echo_during_read then debug("Overrides "..i.." from file: "..next_line) end
+      next_line = file_overrides:read("l")
+    end
+    file_overrides:close()
+    echo("Overrides loaded from file: "..i)
+  else
+    echo(file_overrides.." not found!")
+  end
+]]
 end
 uc=1
 au=1
@@ -547,6 +583,22 @@ if string.find(after_multi, "wait logout") then
 elseif string.find(after_multi, "wait") then
   multi_wait = string.gsub(after_multi,"%D","") * 60
   wait_until = os.time() + multi_wait
+end
+
+if is_write_to_files then
+  is_add_to_file = true
+  current_character = GetCharacterName(true)
+  for _, character_name in pairs(my_characters) do
+    if character_name == current_character then
+      is_add_to_file = false
+      break
+    end
+  end
+  if is_add_to_file then
+    file_characters = io.open(config_folder..characters_file,"a")
+    file_characters:write("\n"..current_character)
+    io.close(file_characters)
+  end
 end
 
 ::Startup::
@@ -632,15 +684,20 @@ end
 SearchResults()
 current_price = string.gsub(GetNodeText("RetainerSell",6),"%D","")
 if (string.find(GetNodeText("ItemSearchResult", 26), "No items found.")) then
-  price = HistoryAverage() * history_multiplier
+  if type(history_multiplier)=="number" then
+    price = HistoryAverage() * history_multiplier
+    price_length = string.len(tostring(price))
+    if price_length >= 5 then
+      exp = 10 ^ math.ceil(price_length * 0.6)
+      price = math.tointeger(math.floor(price // exp) * exp)
+    end
+  else
+    price_length = string.len(tostring(HistoryAverage()))
+    price = math.tointeger(10 ^ price_length)
+  end
   CloseSearch()
   ItemOverride("default")
-  if price <= tonumber(current_price) then
-    CloseSales()
-    goto Loop
-  else
-    goto Apply
-  end
+  goto Apply
 end
 target_price = 1
 if is_blind then
@@ -673,6 +730,12 @@ if is_price_sanity_checking and target_price < prices_list_length then
   debug("Price sanity checking results:")
   debug("target_price "..target_price)
   debug("prices_list[target_price] "..prices_list[target_price])
+end
+if is_check_for_hq then
+  hq = GetNodeText("RetainerSell",18)
+  hq = string.gsub(hq,"%g","")
+  hq = string.gsub(hq,"%s","")
+  if string.len(hq)==25 then is_hq = true end
 end
 if is_dont_undercut_my_retainers then
   for _, retainer_test in pairs(my_retainers) do
