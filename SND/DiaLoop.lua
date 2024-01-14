@@ -9,6 +9,19 @@ yield("/wait 3")
 
 ::Enter::
 if IsInZone(886) then
+  if NeedsRepair() then
+    yield("/generalaction repair")
+    yield("/waitaddon Repair")
+    yield("/pcall Repair true 0")
+    yield("/wait 0.1")
+    if IsAddonVisible("SelectYesno") then
+      yield("/pcall SelectYesno true 0")
+      yield("/wait 0.1")
+    end
+    while GetCharacterCondition(39) do yield("/wait 1") end
+    yield("/wait 1")
+    yield("/pcall Repair true -1")
+  end
   while GetCharacterCondition(34, false) and GetCharacterCondition(45, false) do
     if IsAddonVisible("ContentsFinderConfirm") then
       yield("/pcall ContentsFinderConfirm true 8")
