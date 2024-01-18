@@ -72,7 +72,7 @@ is_entering = true
 random_x = math.random(1,2)
 if random_x == 1 then move_x = 7.5
 else move_x = -7.5 end
-move_y = math.random(1,9000)/1000
+move_y = math.random(-11000,5000)/1000
 move_z = 6.750
 
 ::OnBoat::
