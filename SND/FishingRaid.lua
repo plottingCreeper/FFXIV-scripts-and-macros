@@ -2,6 +2,20 @@
   Ocean fishing spam, using AutoHook, Pandora, and Visland
   Some bits borrowed and/or stolen from Curio Salso's feeshing script
 ]]
+
+start_fishing = {
+  "/wait 0.1",
+  "/ac cast",
+  "/ahon",
+}
+
+back_in_limsa = {
+  "/wait 5",
+}
+
+countdown_timer = false
+adjust_z = true
+
 ::Start::
 if IsInZone(900) then goto OnBoat end
 
@@ -15,9 +29,13 @@ last_boat = os.time() - elapsed
 wait_time = math.floor(7200-os.difftime(os.time(), last_boat))
 while wait_time >= 1 do
   wait_time = math.floor(7200-os.difftime(os.time(), last_boat))
-  minutes = wait_time // 60
-  seconds = wait_time % 60
-  yield("/echo Waiting "..minutes.." minutes and "..seconds.." seconds for the next boat")
+  if type(countdown_timer)=="number" then
+    if wait_time % countdown_timer == 0 then
+      minutes = wait_time // 60
+      seconds = wait_time % 60
+      yield("/echo Waiting "..minutes.." minutes and "..seconds.." seconds for the next boat")
+    end
+  end
   yield("/wait 1.0")
 end
 
@@ -48,35 +66,19 @@ while IsInZone(129) do
   yield("/wait 1.01")
 end
 while GetCharacterCondition(35, false) do yield("/wait 1.02") end
-random_move = math.random(1,8)
+
+::PrepareRandom::
+is_entering = true
+random_x = math.random(1,2)
+if random_x == 1 then move_x = 7.5
+else move_x = -7.5 end
+move_y = math.random(1,9000)/1000
+move_z = 6.750
 
 ::OnBoat::
 while not IsInZone(129) do
-  if GetCharacterCondition(35) then
-    while GetCharacterCondition(35) do yield("/wait 1.03") end
-    yield("/wait 3")
-  elseif IsAddonVisible("NowLoading") then
-    yield("/wait 1.04")
-  elseif IsAddonVisible("IKDResult") then
-    yield("/pcall IKDResult true 0")
-    yield("/wait 1.08")
-  elseif random_move then --These next lines written by Curio Salso, then modified to cram in here.
-    if random_move == 1 then yield("/visland moveto 6.641 6.711 -0.335")
-      elseif random_move == 2 then yield("/visland moveto 7.451 6.750 -4.043")
-      elseif random_move == 3 then yield("/visland moveto 7.421 6.750 -5.462")
-      elseif random_move == 4 then yield("/visland moveto 7.391 6.711 -7.936")
-      elseif random_move == 5 then yield("/visland moveto -7.450 6.711 -8.982")
-      elseif random_move == 6 then yield("/visland moveto -7.548 6.750 -6.590")
-      elseif random_move == 7 then yield("/visland moveto -7.482 6.739 -2.633")
-      elseif random_move == 8 then yield("/visland moveto -7.419 6.711 -0.113")
-    end
-    yield("/wait 1.06")
-    while IsMoving() do yield("/wait 1.07") end
-    random_move = nil
-  elseif not ( GetCharacterCondition(6) or GetCharacterCondition(42) or GetCharacterCondition(43) ) then
-    yield("/ac cast")
-    yield("/ahon")
-  elseif IsAddonVisible("IKDFishingLog") then
+  if IsAddonVisible("IKDFishingLog") then
+    yield("/wait 0.11")
     timer = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
     timer = tonumber(timer)
     while timer < 030 or timer > 698 do
@@ -85,8 +87,48 @@ while not IsInZone(129) do
       timer = tonumber(timer)
       if IsAddonVisible("IKDFishingLog")==false then timer = 500 end
     end
+    if is_entering then
+      is_move = true
+      is_entering = false
+    end
+  end
+  if GetCharacterCondition(35) then
+    while GetCharacterCondition(35) do yield("/wait 1.03") end
+    yield("/wait 3")
+  elseif IsAddonVisible("NowLoading") then
+    yield("/wait 1.04")
+  elseif IsAddonVisible("IKDResult") then
+    yield("/pcall IKDResult true 0")
+    yield("/wait 1.08")
+  elseif is_move then
+    yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
+    yield("/wait 0.5")
+    move_tick = 0
+    while IsMoving() and move_tick <= 10 do
+      move_tick = move_tick + 0.1
+      if adjust_z then
+        move_z = math.floor(GetPlayerRawYPos()*1000)/1000
+        yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
+      end
+      yield("/wait 0.1")
+    end
+    if random_x == 1 then yield("/visland moveto 9 "..move_z.." "..move_y)
+    else yield("/visland moveto -9 "..move_z.." "..move_y) end
+    yield("/wait 0.2")
+    yield("/visland stop")
+    is_move = false
+  elseif not ( GetCharacterCondition(6) or GetCharacterCondition(42) or GetCharacterCondition(43) ) then
+    for _, command in pairs(start_fishing) do
+      yield("/echo Running: "..command)
+      yield(command)
+    end
   end
   yield("/wait 1.09")
+end
+
+for _, command in pairs(back_in_limsa) do
+  yield("/echo Running: "..command)
+  yield(command)
 end
 
 GetNodeText("_BattleTalk", 4)
