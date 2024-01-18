@@ -79,12 +79,20 @@ move_z = 6.750
 while not IsInZone(129) do
   if IsAddonVisible("IKDFishingLog") then
     yield("/wait 0.11")
-    timer = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
-    timer = tonumber(timer)
+    timer_string = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
+    while timer_string=="" do
+      timer_string = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
+      yield("/wait 0.111")
+    end
+    timer = tonumber(timer_string)
     while timer < 030 or timer > 698 do
       yield("/wait 1.05")
-      timer = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
-      timer = tonumber(timer)
+      timer_string = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
+      while timer_string=="" do
+        timer_string = string.gsub(GetNodeText("IKDFishingLog", 18),"%D","")
+        yield("/wait 0.112")
+      end
+      timer = tonumber(timer_string)
       if IsAddonVisible("IKDFishingLog")==false then timer = 500 end
     end
     if is_entering then
