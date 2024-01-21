@@ -9,9 +9,11 @@ yield("/wait 3")
 
 ::Enter::
 if IsInZone(886) then
-  if NeedsRepair() then
-    yield("/generalaction repair")
-    yield("/waitaddon Repair")
+  if NeedsRepair(99) then
+    while not IsAddonVisible("Repair") do
+      yield("/generalaction repair")
+      yield("/wait 0.5")
+    end
     yield("/pcall Repair true 0")
     yield("/wait 0.1")
     if IsAddonVisible("SelectYesno") then
@@ -29,10 +31,13 @@ if IsInZone(886) then
       yield("/target Aurvael")
     elseif GetCharacterCondition(32, false) then
       yield("/pinteract")
+    elseif IsAddonVisible("Talk") then
+      yield("/click talk")
+    elseif IsAddonVisible("SelectString") then
+      yield("/pcall SelectString true 0")
+    elseif IsAddonVisible("SelectYesno") then
+      yield("/pcall SelectYesno true 0")
     end
-    if IsAddonVisible("Talk") then yield("/click talk") end
-    if IsAddonVisible("SelectString") then yield("/pcall SelectString true 0") end
-    if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
     yield("/wait 0.5")
   end
   while GetCharacterCondition(35, false) do yield("/wait 1") end
