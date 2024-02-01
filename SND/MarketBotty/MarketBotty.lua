@@ -30,7 +30,7 @@ is_using_blacklist = true --Whether or not to use the blacklist_retainers list.
 history_trim_amount = 5 --Trims this many from highest and lowest in history list
 history_multiplier = "round" --if no active sales then get average historical price and multiply
 is_using_overrides = true --item_overrides table.
-is_check_for_hq = false
+is_check_for_hq = false --Not working yet :(
 
 is_override_report = true
 is_postrun_one_gil_report = true  --Requires is_verbose
