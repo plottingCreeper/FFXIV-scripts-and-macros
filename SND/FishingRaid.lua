@@ -1,18 +1,21 @@
 --[[
   Automatic ocean fishing script. Options for AutoRetainer and returning to inn room between trips.
   Required plugins:
-    Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
+    Autohook (Auto Casts): https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
     Pandora: https://love.puni.sh/ment.json
     Visland: https://puni.sh/api/repository/veyn
-  Recommended plugins:
+  Optional plugins:
+    AutoRetainer (Multi Mode): https://love.puni.sh/ment.json
     Teleporter: main repository
+    Simple Tweaks (/bait command): main repository
 ]]
 
 is_ar_while_waiting = false --AutoRetainer multimode enabled in between fishing trips.
 wait_location = false
 fishing_character = "auto" --"auto" requires starting the script while on your fishing character.
 is_adjust_z = true --true might cause stuttery movement, false might cause infinite movement. Good luck.
-is_desynth = false
+is_desynth = false --Not done yet
+bait_and_switch = true
 
 start_fishing = {
   "/wait 0.1",
@@ -38,15 +41,15 @@ is_debug = true
 baits = {
   [1] = {id = 237, name = "Galadion Bay", normal_bait = "Plump Worm", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
   [2] = {id = 239, name = "Southern Merlthor", normal_bait = "Krill", daytime = "Krill", sunset = "Ragworm", nighttime = "Plump Worm"},
-  [3] = {id = 241, name = "Rhotano Sea", normal_bait = "Plump Worm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
-  [4] = {id = 243, name = "Northern Merlthor", normal_bait = "Ragworm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
+  [3] = {id = 243, name = "Northern Merlthor", normal_bait = "Ragworm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
+  [4] = {id = 241, name = "Rhotano Sea", normal_bait = "Plump Worm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
   [5] = {id = 246, name = "The Ciedalaes", normal_bait = "Ragworm", daytime = "Krill", sunset = "Plump Worm", nighttime = "Krill"},
   [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = "Krill", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
   [7] = {id = 250, name = "Rothlyt Sound", normal_bait = "Plump Worm", daytime = "Krill", sunset = "Krill", nighttime = "Krill"},
-  [8] = {id = 286, name = "Sirensong Sea", normal_bait = "Plump Worm", daytime = "", sunset = "", nighttime = ""},
-  [9] = {id = 288, name = "Kugane Coast", normal_bait = "Ragworm", daytime = "", sunset = "", nighttime = ""},
-  [10] = {id = 290, name = "Ruby Sea", normal_bait = "Krill", daytime = "", sunset = "", nighttime = ""},
-  [11] = {id = 292, name = "Lower One River", normal_bait = "Krill", daytime = "", sunset = "", nighttime = ""},
+  [8] = {id = 286, name = "Sirensong Sea", normal_bait = "Plump Worm", daytime = "Krill", sunset = "Krill", nighttime = "Krill"},
+  [9] = {id = 288, name = "Kugane Coast", normal_bait = "Ragworm", daytime = "Krill", sunset = "Ragworm", nighttime = "Plump Worm"},
+  [10] = {id = 290, name = "Ruby Sea", normal_bait = "Krill", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
+  [11] = {id = 292, name = "Lower One River", normal_bait = "Krill", daytime = "Ragworm", sunset = "Krill", nighttime = "Krill"},
 }
 
 routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by SND.
@@ -89,6 +92,8 @@ elseif IsInZone(177) and wait_location=="inn" then
   goto StartAR
 elseif fishing_character ~= "auto" then
   goto ARWait
+elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
+  goto ReturnFromWait
 else
   yield("/echo Zone: "..GetZoneID())
   if IsInZone(129) then yield("/echo Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
@@ -112,12 +117,35 @@ if is_ar_while_waiting then
     end
     yield("/wait 1.009")
   end
-  if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
-    yield("/tp Limsa")
-  end
 end
 
-::ReturnFromInn::
+::ReturnFromWait::
+if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
+  yield("/tp Limsa")
+  yield("/wait 30")
+end
+if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
+  while GetDistanceToPoint(-84,19,0)<20 do
+    if IsAddonVisible("TelepotTown") then
+      yield("/pcall TelepotTown true 11 3u")
+    elseif GetTargetName()~="aetheryte" or IsAddonVisible("_TargetInfoMainTarget")==false then
+      yield("/target aetheryte")
+    elseif IsAddonVisible("SelectString") then
+      yield("/pcall SelectString true 0")
+    elseif GetDistanceToTarget()<8 then
+      yield("/pinteract")
+    else
+      yield("/lockon on")
+      yield("/automove on")
+    end
+    yield("/wait 0.5")
+  end
+  yield("/wait 3")
+  while GetCharacterCondition(32) or GetCharacterCondition(45) do
+      yield("/wait 1")
+  end
+  yield("/wait 3")
+end
 ::ExitInn::
 if wait_location=="inn" and IsInZone(177) then
   while IsInZone(177) do
@@ -209,7 +237,7 @@ end
 while GetCharacterCondition(35, false) do yield("/wait 1.021") end
 
 ::PrepareRandom::
-movement = "enter"
+movement = true
 if tostring(math.random(2))=="1" then move_x = 7.5
 else move_x = -7.5 end
 move_y = math.random(-11000,5000)/1000
@@ -225,12 +253,18 @@ while IsInZone(900) do
       if IsAddonVisible("NowLoading") then loading_tick = 0
       elseif GetCharacterCondition(35) then loading_tick = 0
       elseif GetCharacterCondition(45) then loading_tick = 0
-      else loading_tick = loading_tick + 0.1 end
+      else
+        loading_tick = loading_tick + 0.1
+        yield("/wait 1")
+      end
       yield("/wait 0.1")
     end
   elseif IsAddonVisible("IKDResult") then
     results_tick = results_tick + 1
-    if results_tick>= 10 then yield("/pcall IKDResult true 0") end
+    if results_tick>= 10 then
+      yield("/pcall IKDResult true 0")
+      yield("/wait 3")
+    end
     yield("/wait 1.08")
   elseif GetCurrentOceanFishingZoneTimeLeft()<0 then
     yield("/wait 1.08")
@@ -240,9 +274,7 @@ while IsInZone(900) do
       yield("/echo Running: "..command)
       yield(command)
     end
-  elseif movement=="enter" and GetCurrentOceanFishingZoneTimeLeft()<420 then
-    movement = "move"
-  elseif movement=="move" then
+  elseif movement and GetCurrentOceanFishingZoneTimeLeft()<420 then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.5")
     move_tick = 0
@@ -259,16 +291,22 @@ while IsInZone(900) do
     yield("/wait 0.2")
     yield("/visland stop")
     movement = false
-  elseif false and GetCurrentOceanFishingRoute()~=current_bait then
-    while GetCharacterCondition(6, false) do yield("/wait 1") end
+  elseif bait_and_switch and correct_bait~=current_bait then
+    yield("/echo Switching bait to: "..correct_bait)
+    while GetCharacterCondition(42, false) do yield("/wait 1") end
     yield("/ahoff")
-    while GetCharacterCondition(6) do yield("/wait 1") end
-    yield("/bait "..spectral_bait)
-  elseif GetCurrentOceanFishingZoneTimeLeft()>30 and not ( GetCharacterCondition(6) or GetCharacterCondition(42) or GetCharacterCondition(43) ) then
-    yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
-    for _, command in pairs(start_fishing) do
-      yield("/echo Running: "..command)
-      yield(command)
+    while GetCharacterCondition(43) do yield("/wait 1") end
+    --yield("/wait 1")
+    yield("/bait "..correct_bait)
+    current_bait = correct_bait
+  elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
+    yield("/wait 0.5")
+    if GetCharacterCondition(43, false) then
+      yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
+      for _, command in pairs(start_fishing) do
+        yield("/echo Running: "..command)
+        yield(command)
+      end
     end
   end
   current_route = routes[GetCurrentOceanFishingRoute()]
@@ -277,6 +315,7 @@ while IsInZone(900) do
   if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = baits[current_zone].daytime end
   if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = baits[current_zone].sunset end
   if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = baits[current_zone].nighttime end
+  if OceanFishingIsSpectralActive() then correct_bait = spectral_bait else correct_bait = normal_bait end
   if is_debug then
     debug_tick = debug_tick + 1
     if debug_tick>=0 then
@@ -359,6 +398,7 @@ end
 
 ::Desynth::
 if is_desynth then
+  yield("/echo Nope! Desynth isn't implemented yet.")
 end
 
 ::StartAR::
