@@ -1,34 +1,39 @@
 --[[
+
   Automatic ocean fishing script. Options for AutoRetainer and returning to inn room between trips.
-  Required plugins:
-    Autohook (Auto Casts): https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
-    Pandora: https://love.puni.sh/ment.json
-    Visland: https://puni.sh/api/repository/veyn
-  Optional plugins:
-    AutoRetainer (Multi Mode): https://love.puni.sh/ment.json
-    Teleporter: main repository
-    Simple Tweaks (/bait command): main repository
+
+    Script runs using:
+      SomethingNeedDoing (Expanded Edition): https://puni.sh/api/repository/croizat
+    Required plugins:
+      Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
+      Pandora: https://love.puni.sh/ment.json
+      Visland: https://puni.sh/api/repository/veyn
+    Optional plugins:
+      AutoRetainer: https://love.puni.sh/ment.json
+      Teleporter: main repository
+      Simple Tweaks: main repository
+      Discard Helper: https://plugins.carvel.li/
+      YesAlready: https://love.puni.sh/ment.json
 ]]
 
-is_ar_while_waiting = false --AutoRetainer multimode enabled in between fishing trips.
+is_ar_while_waiting = false  --AutoRetainer multimode enabled in between fishing trips.
 wait_location = false
-fishing_character = "auto" --"auto" requires starting the script while on your fishing character.
-is_wait_to_move = true --Wait for the barrier to drop before moving to the side of the boat.
-is_adjust_z = true --true might cause stuttery movement, false might cause infinite movement. Good luck.
-is_discard = false --Not done yet
-is_desynth = false --Not done yet
-bait_and_switch = true
+fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
+is_wait_to_move = true  --Wait for the barrier to drop before moving to the side of the boat.
+is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
+is_discard = false  --Requires Discard Helper
+is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
+bait_and_switch = true  --Uses /bait command from SimpleTweaks
+
+is_spend_scrips = false
+scrip_category = 1
+scrip_subcategory = 6
+scrip_item_to_buy = "RegionalFolkloreTrader'sTokenC"
 
 start_fishing = {
   "/wait 0.1",
   "/ac cast",
   "/ahon",
-}
-
-back_in_limsa = {
-  "/wait 5",
-  "/discardall",
-  "/wait 5",
 }
 
 bags_full = {
@@ -276,23 +281,13 @@ while IsInZone(900) do
   if OceanFishingIsSpectralActive() then correct_bait = spectral_bait else correct_bait = normal_bait end
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     WaitReady()
---     loading_tick = 0
---     while loading_tick<3 do
---       if IsAddonVisible("NowLoading") then loading_tick = 0
---       elseif GetCharacterCondition(35) then loading_tick = 0
---       elseif GetCharacterCondition(45) then loading_tick = 0
---       else
---         loading_tick = loading_tick + 0.1
---       end
---       yield("/wait 0.1")
---     end
   elseif IsAddonVisible("IKDResult") then
     while IsAddonVisible("IKDResult") do
       yield("/wait 10")
       yield("/pcall IKDResult true 0")
     end
     break
-  elseif GetCurrentOceanFishingZoneTimeLeft()<0 then
+  elseif GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move then
     yield("/wait 1.08")
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
@@ -300,12 +295,14 @@ while IsInZone(900) do
       yield("/echo Running: "..command)
       yield(command)
     end
-  elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 and is_wait_to_move ) then
+  elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.5")
     move_tick = 0
     while IsMoving() and move_tick <= 5 do
-      move_tick = move_tick + 0.1
+      if GetCurrentOceanFishingZoneTimeLeft()<420 and GetCurrentOceanFishingZoneTimeLeft()>0 then
+        move_tick = move_tick + 0.1
+      end
       if is_adjust_z then
         move_z = math.floor(GetPlayerRawYPos()*1000)/1000
         yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
@@ -363,21 +360,39 @@ while IsInZone(900) do
   yield("/wait 1.039")
 end
 
-if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
-  loading_tick = 0
-  while loading_tick<3 do
-    if IsAddonVisible("NowLoading") then loading_tick = 0
-    elseif GetCharacterCondition(35) then loading_tick = 0
-    elseif GetCharacterCondition(45) then loading_tick = 0
+WaitReady()
+
+if is_spend_scrips then
+  yield("/visland moveto -407 71 4")
+  while IsAddonVisible("InclusionShop")==false do
+    if GetTargetName()~="Scrip Exchange" or IsAddonVisible("_TargetInfoMainTarget")==false then
+      yield("/target Scrip Exchange")
+    elseif IsAddonVisible("SelectIconString")==false then
+      yield("/pinteract")
+      yield("/visland stop")
     else
-      loading_tick = loading_tick + 0.1
+      yield("/pcall SelectIconString true 0")
     end
-    yield("/wait 0.1")
+    yield("/wait 0.5")
   end
-end
-for _, command in pairs(back_in_limsa) do
-  yield("/echo Running: "..command)
-  yield(command)
+  yield("/pcall InclusionShop true 12 "..scrip_category)
+  yield("/wait 0.1")
+  yield("/pcall InclusionShop true 13 "..scrip_subcategory)
+  yield("/wait 1")
+  scrips_raw = string.gsub(GetNodeText("InclusionShop", 21),"%D","")
+  scrips_owned = tonumber(scrips_raw)
+  for item=21, 36 do
+    scrip_shop_item_name = string.sub(string.gsub(GetNodeText("InclusionShop", 5, item, 12),"%G",""),5,-3)
+    if scrip_shop_item_name==string.gsub(scrip_item_to_buy,"%G","") then
+      price_raw = string.gsub(GetNodeText("InclusionShop", 5, item, 5, 1),"%D","")
+      scrip_shop_item_price = tonumber(price_raw)
+      scrip_number_to_buy = scrips_owned//scrip_shop_item_price
+      yield("/pcall InclusionShop true 14 "..item-21 .." "..scrip_number_to_buy)
+      yield("/wait 0.1")
+      if IsAddonVisible("ShopExchangeItemDialog") then yield("/pcall ShopExchangeItemDialog true 0") end
+      break
+    end
+  end
 end
 
 ::WaitLocation::
@@ -441,9 +456,68 @@ elseif wait_location=="fc" then
   WaitReady()
 end
 
+WaitReady()
+
 ::Desynth::
 if is_desynth then
-  yield("/echo Nope! Desynth isn't implemented yet.")
+  is_doing_desynth = true
+  failed_click_tick = 0
+  open_desynth_attempts = 0
+  while is_doing_desynth do
+    if not IsAddonVisible("SalvageItemSelector") then
+      yield("/generalaction desynthesis")
+      open_desynth_attempts = open_desynth_attempts + 1
+      if open_desynth_attempts>5 then
+        is_doing_desynth = false
+        is_desynth = false
+        yield("/echo Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
+      end
+    elseif IsAddonVisible("SalvageDialog") then
+      yield("/pcall SalvageDialog true 0 false")
+      is_clicked_desynth = false
+    elseif IsAddonVisible("SalvageResult") then
+      yield("/pcall SalvageResult true 1")
+    elseif IsAddonVisible("SalvageAutoDialog") then
+      is_clicked_desynth = false
+      if string.sub(GetNodeText("SalvageAutoDialog", 27),1,1)=="0" then yield("/pcall SalvageAutoDialog true -1") end
+    elseif is_clicked_desynth then
+      failed_click_tick = failed_click_tick + 1
+      if failed_click_tick>4 then
+        yield("/pcall SalvageItemSelector true -1")
+        yield("/wait 2")
+      end
+    elseif GetCharacterCondition(39, false) then
+      for list=2, 16 do
+        item_name_raw = string.gsub(GetNodeText("SalvageItemSelector", 3, list, 8),"%W","")
+        item_name = string.sub(item_name_raw, 3,-3)
+        item_level_raw = string.sub(GetNodeText("SalvageItemSelector", 3, list, 2),1,3)
+        item_level = string.gsub(item_level_raw,"%D","")
+        item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
+        if item_level=="1" and item_type=="Culinarian" then
+          if is_debug then
+            yield("/echo item_name: "..item_name)
+            yield("/echo item_level: "..item_level)
+            yield("/echo item_type: "..item_type)
+          end
+          yield("/pcall SalvageItemSelector true 12 "..list-2)
+          is_clicked_desynth = true
+          break
+        elseif list==16 then
+          is_doing_desynth = false
+          break
+        end
+      end
+    end
+    yield("/wait 0.5")
+  end
+  yield("/pcall SalvageItemSelector true -1")
+end
+
+::Discard::
+if is_discard then
+  yield("/discardall")
+  yield("/echo Waiting 10 seconds to give Discard Helper time to run.")
+  yield("/wait 10")
 end
 
 ::StartAR::
@@ -457,9 +531,5 @@ if is_ar_while_waiting then
 else
   goto WaitForBoat
 end
-
-GetNodeText("_BattleTalk", 4)
-
-if is_debug then yield("/echo ".. "") end
 
 goto Start
