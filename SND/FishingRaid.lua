@@ -13,7 +13,9 @@
 is_ar_while_waiting = false --AutoRetainer multimode enabled in between fishing trips.
 wait_location = false
 fishing_character = "auto" --"auto" requires starting the script while on your fishing character.
+is_wait_to_move = true --Wait for the barrier to drop before moving to the side of the boat.
 is_adjust_z = true --true might cause stuttery movement, false might cause infinite movement. Good luck.
+is_discard = false --Not done yet
 is_desynth = false --Not done yet
 bait_and_switch = true
 
@@ -73,6 +75,23 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
+function WaitReady(delay, is_not_ready)
+  if is_not_ready then loading_tick = -1
+    else loading_tick = 0 end
+  if not delay then delay = 3 end
+  while loading_tick<delay do
+    if IsAddonVisible("NowLoading") then loading_tick = 0
+    elseif GetCharacterCondition(1, false) then loading_tick = 0
+    elseif GetCharacterCondition(27) then loading_tick = 0
+    elseif GetCharacterCondition(32) then loading_tick = 0
+    elseif GetCharacterCondition(35) then loading_tick = 0
+    elseif GetCharacterCondition(45) then loading_tick = 0
+    elseif loading_tick == -1 then yield("/wait 0.01")
+    else loading_tick = loading_tick + 0.1 end
+    yield("/wait 0.1")
+  end
+end
+
 ::Start::
 if IsInZone(900) then
   goto OnBoat
@@ -122,7 +141,8 @@ end
 ::ReturnFromWait::
 if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
   yield("/tp Limsa")
-  yield("/wait 30")
+  yield("/wait 10")
+  WaitReady()
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
   while GetDistanceToPoint(-84,19,0)<20 do
@@ -247,25 +267,31 @@ move_z = 6.750
 results_tick = 0
 debug_tick = 0
 while IsInZone(900) do
+  current_route = routes[GetCurrentOceanFishingRoute()]
+  current_zone = current_route[GetCurrentOceanFishingZone()+1]
+  normal_bait = baits[current_zone].normal_bait
+  if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = baits[current_zone].daytime end
+  if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = baits[current_zone].sunset end
+  if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = baits[current_zone].nighttime end
+  if OceanFishingIsSpectralActive() then correct_bait = spectral_bait else correct_bait = normal_bait end
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
-    loading_tick = 0
-    while loading_tick<3 do
-      if IsAddonVisible("NowLoading") then loading_tick = 0
-      elseif GetCharacterCondition(35) then loading_tick = 0
-      elseif GetCharacterCondition(45) then loading_tick = 0
-      else
-        loading_tick = loading_tick + 0.1
-        yield("/wait 1")
-      end
-      yield("/wait 0.1")
-    end
+    WaitReady()
+--     loading_tick = 0
+--     while loading_tick<3 do
+--       if IsAddonVisible("NowLoading") then loading_tick = 0
+--       elseif GetCharacterCondition(35) then loading_tick = 0
+--       elseif GetCharacterCondition(45) then loading_tick = 0
+--       else
+--         loading_tick = loading_tick + 0.1
+--       end
+--       yield("/wait 0.1")
+--     end
   elseif IsAddonVisible("IKDResult") then
-    results_tick = results_tick + 1
-    if results_tick>= 10 then
+    while IsAddonVisible("IKDResult") do
+      yield("/wait 10")
       yield("/pcall IKDResult true 0")
-      yield("/wait 3")
     end
-    yield("/wait 1.08")
+    break
   elseif GetCurrentOceanFishingZoneTimeLeft()<0 then
     yield("/wait 1.08")
   elseif GetInventoryFreeSlotCount()<=2 then
@@ -274,7 +300,7 @@ while IsInZone(900) do
       yield("/echo Running: "..command)
       yield(command)
     end
-  elseif movement and GetCurrentOceanFishingZoneTimeLeft()<420 then
+  elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 and is_wait_to_move ) then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.5")
     move_tick = 0
@@ -292,12 +318,23 @@ while IsInZone(900) do
     yield("/visland stop")
     movement = false
   elseif bait_and_switch and correct_bait~=current_bait then
+    if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
+      elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
+      elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
+    end
     yield("/echo Switching bait to: "..correct_bait)
-    while GetCharacterCondition(42, false) do yield("/wait 1") end
-    yield("/ahoff")
-    while GetCharacterCondition(43) do yield("/wait 1") end
-    --yield("/wait 1")
-    yield("/bait "..correct_bait)
+    if GetCharacterCondition(6) then
+      while GetCharacterCondition(42, false) do yield("/wait 1") end
+      yield("/ahoff")
+      while GetCharacterCondition(43) do yield("/wait 1") end
+    end
+    if bait_count>1 then
+      --yield("/wait 1")
+      yield("/bait "..correct_bait)
+    else
+      yield("/echo Out of "..correct_bait)
+      yield("/bait Versatile Lure")
+    end
     current_bait = correct_bait
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
     yield("/wait 0.5")
@@ -309,13 +346,6 @@ while IsInZone(900) do
       end
     end
   end
-  current_route = routes[GetCurrentOceanFishingRoute()]
-  current_zone = current_route[GetCurrentOceanFishingZone()+1]
-  normal_bait = baits[current_zone].normal_bait
-  if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = baits[current_zone].daytime end
-  if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = baits[current_zone].sunset end
-  if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = baits[current_zone].nighttime end
-  if OceanFishingIsSpectralActive() then correct_bait = spectral_bait else correct_bait = normal_bait end
   if is_debug then
     debug_tick = debug_tick + 1
     if debug_tick>=0 then
@@ -333,6 +363,18 @@ while IsInZone(900) do
   yield("/wait 1.039")
 end
 
+if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
+  loading_tick = 0
+  while loading_tick<3 do
+    if IsAddonVisible("NowLoading") then loading_tick = 0
+    elseif GetCharacterCondition(35) then loading_tick = 0
+    elseif GetCharacterCondition(45) then loading_tick = 0
+    else
+      loading_tick = loading_tick + 0.1
+    end
+    yield("/wait 0.1")
+  end
+end
 for _, command in pairs(back_in_limsa) do
   yield("/echo Running: "..command)
   yield(command)
@@ -394,6 +436,9 @@ if wait_location=="inn" then
     end
     yield("/wait 0.5")
   end
+elseif wait_location=="fc" then
+  yield("/tp estate hall")
+  WaitReady()
 end
 
 ::Desynth::
