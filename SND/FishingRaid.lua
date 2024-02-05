@@ -41,7 +41,7 @@ bags_full = {
   "/leaveduty",
   "/pcraft stop",
 }
-is_debug = true
+is_debug = false
 
 ------------------------------------------------------------------------
 
@@ -292,7 +292,7 @@ while IsInZone(900) do
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
       if command=="/leaveduty" then LeaveDuty() end
-      yield("/echo Running: "..command)
+      if is_debug then yield("/echo Running: "..command) end
       yield(command)
     end
   elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
@@ -320,7 +320,7 @@ while IsInZone(900) do
       elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
     end
     yield("/echo Switching bait to: "..correct_bait)
-    if GetCharacterCondition(6) then
+    if GetCharacterCondition(43) then
       while GetCharacterCondition(42, false) do yield("/wait 1") end
       yield("/ahoff")
       while GetCharacterCondition(43) do yield("/wait 1") end
@@ -334,11 +334,15 @@ while IsInZone(900) do
     end
     current_bait = correct_bait
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
-    yield("/wait 0.5")
+    not_fishing_tick = 0
+    while GetCharacterCondition(43, false) and not_fishing_tick<1.5 do
+      yield("/wait 0.1")
+      not_fishing_tick = not_fishing_tick + 0.1
+    end
     if GetCharacterCondition(43, false) then
-      yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
+      if is_debug then yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 ) end
       for _, command in pairs(start_fishing) do
-        yield("/echo Running: "..command)
+        if is_debug then yield("/echo Running: "..command) end
         yield(command)
       end
     end
@@ -393,6 +397,7 @@ if is_spend_scrips then
       break
     end
   end
+  yield("/pcall InclusionShop true -1")
 end
 
 ::WaitLocation::
@@ -483,8 +488,8 @@ if is_desynth then
     elseif is_clicked_desynth then
       failed_click_tick = failed_click_tick + 1
       if failed_click_tick>4 then
+        is_doing_desynth = false
         yield("/pcall SalvageItemSelector true -1")
-        yield("/wait 2")
       end
     elseif GetCharacterCondition(39, false) then
       for list=2, 16 do
