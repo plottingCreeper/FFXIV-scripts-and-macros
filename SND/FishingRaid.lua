@@ -25,6 +25,7 @@ is_discard = false  --Requires Discard Helper
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
 force_autohook_presets = true
+movement_method = "visland route" --"visland route", "visland random"
 
 is_spend_scrips = false
 scrip_category = 1
@@ -118,6 +119,47 @@ function AutoHookPresets()
   end
 end
 
+function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
+  if not radius then radius = 3 end
+  if not timeout then timeout = 60 end
+  if not type(fast)=="number" then fast = radius/2 end
+  move_x = math.random((near_x-radius)*1000, (near_x+radius)*1000)/1000
+  if near_z then
+    move_z = near_z
+  else
+    move_z = math.floor(GetPlayerRawYPos()*1000)/1000
+  end
+  move_y = math.random((near_y-radius)*1000, (near_y+radius)*1000)/1000
+  yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
+  yield("/wait 0.5")
+  move_tick = 0
+  while IsMoving() and move_tick <= timeout do
+    move_tick = move_tick + 0.1
+    if near_z == false then
+      move_z = math.floor(GetPlayerRawYPos()*1000)/1000
+      yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
+    end
+    if fast then
+      if GetDistanceToPoint(move_x, move_z, move_y)<fast then
+        break
+      end
+    end
+    yield("/wait 0.1")
+  end
+  yield("/visland stop")
+  if is_debug then
+    yield("/echo Aimed for: X:"..move_x.." Z:"..move_z.." Y:"..move_y)
+    yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
+    if move_tick < timeout then
+      reason = "arrived"
+    else
+      reason = "timeout"
+    end
+    yield("/echo Reason: "..reason)
+  end
+  return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
+end
+
 ::Start::
 if IsInZone(900) then
   goto OnBoat
@@ -201,10 +243,18 @@ if IsInZone(177) then
 end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
-  yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
-  yield("/wait 3")
-  while IsVislandRouteRunning() or IsMoving() do
-    yield("/wait 1.035")
+  if movement_method=="visland route" then
+    yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
+    yield("/wait 3")
+    while IsVislandRouteRunning() or IsMoving() do
+      yield("/wait 1.035")
+    end
+  elseif movement_method=="visland random" then
+    MoveNear(3, 40, 17, 2, 5, fast)
+    MoveNear(0, 40, 21, 2, 5, fast)
+    MoveNear(1, 40, 70, 2, 5, fast)
+    MoveNear(5, 40, 73, 2, 5, fast)
+    MoveNear(14, 40, 71, 2, 5, fast)
   end
 end
 ::AethernetToArcanist::
@@ -226,10 +276,18 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-  yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
-  yield("/wait 3")
-  while IsVislandRouteRunning() or IsMoving() do
-    yield("/wait 1.036")
+  if movement_method=="visland route" then
+    yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
+    yield("/wait 3")
+    while IsVislandRouteRunning() or IsMoving() do
+      yield("/wait 1.036")
+    end
+  elseif movement_method=="visland random" then
+    MoveNear(-339, 12, 49, 2, 5, fast)
+    MoveNear(-365, 8, 47, 2, 5, fast)
+    MoveNear(-389, 6, 49, 2, 5, fast)
+    MoveNear(-393, 5, 65, 2, 5, fast)
+    MoveNear(-408, 4, 75, 2, 5, fast)
   end
 end
 
@@ -303,8 +361,11 @@ while IsInZone(900) do
   else
     correct_bait = normal_bait
   end
-  if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
-    WaitReady()
+  if IsAddonVisible("IKDResult") then
+    yield("/wait 10")
+    yield("/pcall IKDResult true 0")
+  elseif IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
+    WaitReady(2, false, 62)
   elseif GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move then
     yield("/wait 1.011")
   elseif GetInventoryFreeSlotCount()<=2 then
@@ -398,7 +459,7 @@ if autohook_preset_loaded then
   DeletedSelectedAutoHookPreset()
   autohook_preset_loaded = false
 end
-WaitReady()
+WaitReady(3, false, 72)
 
 ::SpendScrips::
 if is_spend_scrips then
@@ -442,10 +503,18 @@ end
 if wait_location=="inn" then
   ::MoveToArcanist::
   if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
-    yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
-    yield("/wait 3")
-    while IsVislandRouteRunning() or IsMoving() do
-      yield("/wait 1.031")
+    if movement_method=="visland route" then
+      yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
+      yield("/wait 3")
+      while IsVislandRouteRunning() or IsMoving() do
+        yield("/wait 1.031")
+      end
+    elseif movement_method=="visland random" then
+      MoveNear(-392, 5, 66, 2, 5, fast)
+      MoveNear(-389, 6, 48, 2, 5, fast)
+      MoveNear(-359, 8, 49, 2, 5, fast)
+      MoveNear(-353, 8, 53, 2, 5, fast)
+      MoveNear(-335, 12, 53, 2, 5, fast)
     end
   end
   ::AethernetToAftcastle::
@@ -467,10 +536,18 @@ if wait_location=="inn" then
   end
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
-    yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
-    yield("/wait 3")
-    while IsVislandRouteRunning() or IsMoving() do
-      yield("/wait 1.032")
+    if movement_method=="visland route" then
+      yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
+      yield("/wait 3")
+      while IsVislandRouteRunning() or IsMoving() do
+        yield("/wait 1.032")
+      end
+    elseif movement_method=="visland random" then
+      MoveNear(11, 40, 74, 2, 5, fast)
+      MoveNear(1, 40, 72, 2, 5, fast)
+      MoveNear(0, 40, 43, 2, 5, fast)
+      MoveNear(2, 40, 17, 2, 5, fast)
+      MoveNear(13, 40, 13, 2, 5, fast)
     end
   end
   ::EnterInn::
