@@ -454,15 +454,22 @@ function OpenBell()
       debug("Finding summoning bell...")
       yield("/target Summoning Bell")
       target_tick = target_tick + 1
-    elseif GetDistanceToTarget()>4 then
-      yield("/lockon on")
-      yield("/automove on")
+    elseif GetDistanceToTarget() then
+      if GetDistanceToTarget()>4 then
+        yield("/lockon on")
+        yield("/automove on")
+      end
     else
       yield("/pinteract")
     end
     yield("/wait 0.511")
   end
-  if GetCharacterCondition(50) then return true else return false end
+  if GetCharacterCondition(50) then
+    while not IsAddonVisible("RetainerList") do yield("/wait 0.1") end
+    return true
+  else
+    return false
+  end
 end
 
 function WaitARFinish(ar_time)
