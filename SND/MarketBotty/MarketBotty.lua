@@ -162,6 +162,7 @@ function ClickItem(item)
   while IsAddonVisible("RetainerSell")==false do
     if IsAddonVisible("ContextMenu") then
       yield("/pcall ContextMenu true 0 0")
+      yield("/wait 0.2")
     elseif IsAddonVisible("RetainerSellList") then
       yield("/pcall RetainerSellList true 0 ".. item - 1 .." 1")
     else
