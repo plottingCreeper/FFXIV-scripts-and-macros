@@ -454,7 +454,6 @@ function OpenBell()
     elseif string.lower(GetTargetName())~="summoning bell" then
       debug("Finding summoning bell...")
       yield("/target Summoning Bell")
-      yield("/lockon on")
       target_tick = target_tick + 1
     elseif GetDistanceToTarget()>5 then
       yield("/lockon on")
@@ -463,6 +462,7 @@ function OpenBell()
       yield("/automove off")
       yield("/pinteract")
     end
+    yield("/lockon on")
     yield("/wait 0.511")
   end
   if GetCharacterCondition(50) then
