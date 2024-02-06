@@ -42,7 +42,7 @@ name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if bel
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
 is_write_to_files = true --Adds characters and retainers to characters_file and retainers_file
-is_echo_during_read = false --Echo each character and retainer name as they're read, to see how you screwed up.
+is_echo_during_read = true --Echo each character and retainer name as they're read, to see how you screwed up.
 config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 marketbotty_settings = "marketbotty_settings.lua" --loaded first
 characters_file = "my_characters.txt"
@@ -53,7 +53,7 @@ overrides_file = "item_overrides.lua"
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
 start_wait = false --For when starting script during AR operation.
 after_multi = "logout"  --"logout", "wait 10", "wait logout", number. See readme.
-is_autoretainer_while_waiting = true
+is_autoretainer_while_waiting = false
 multimode_ending_command = "/ays multi"
 is_use_ar_to_enter_house = true --Breaks if you have subs ready.
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
@@ -472,7 +472,7 @@ function WaitARFinish(ar_time)
   title_wait = 0
   if not ar_time then ar_time = 10 end
   while IsAddonVisible("_TitleMenu")==false do
-    yield("/wait 10")
+    yield("/wait 5.01")
   end
   while true do
     if IsAddonVisible("_TitleMenu") and IsAddonVisible("NowLoading")==false then
@@ -609,9 +609,9 @@ end
 if IsAddonVisible("RetainerList") then is_multimode = false end
 
 ::MultiWait::
-if start_wait then
-  WaitARFinish()
-  if is_autoretainer_while_waiting then yield("/ays multi") end
+if start_wait and is_autoretainer_while_waiting then
+    WaitARFinish()
+    yield("/ays multi")
 end
 if string.find(after_multi, "wait logout") then
 elseif string.find(after_multi, "wait") then
@@ -854,20 +854,22 @@ if string.find(after_multi, "logout") then
   yield("/wait 0.5")
   yield("/pcall SelectYesno true 0")
   while GetCharacterCondition(1) do
-    yield("/wait 1")
+    yield("/wait 1.1")
   end
 elseif wait_until then
   if is_autoretainer_while_waiting then
     yield("/ays multi")
     while GetCharacterCondition(1, false) do
-      yield("/wait 10")
+      yield("/wait 10.1")
     end
   end
   while os.time() < wait_until do
     yield("/wait 60")
   end
-  WaitARFinish()
-  if is_autoretainer_while_waiting then yield("/ays multi") end
+  if is_autoretainer_while_waiting then
+    WaitARFinish()
+    yield("/ays multi")
+  end
   goto MultiWait
 elseif type(after_multi) == "number" then
   Relog(my_characters[after_multi])
@@ -877,7 +879,7 @@ if string.find(after_multi, "wait logout") then
   if is_autoretainer_while_waiting then
     yield("/ays multi")
     while GetCharacterCondition(1, false) do
-      yield("/wait 10")
+      yield("/wait 10.2")
     end
   end
   WaitARFinish()
