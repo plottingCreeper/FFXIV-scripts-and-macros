@@ -23,7 +23,6 @@ item_overrides = { --Item names with no spaces or symbols
 }
 
 undercut = 1 --There's no reason to change this. 1 gil undercut is life.
-is_blind = false --Undercut the lowest price with no additional logic. Overrides most other options.
 is_dont_undercut_my_retainers = true --Working!
 is_price_sanity_checking = true --Ignores market results below half the trimmed mean of historical prices.
 is_using_blacklist = true --Whether or not to use the blacklist_retainers list.
@@ -42,7 +41,7 @@ name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if bel
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
 is_write_to_files = true --Adds characters and retainers to characters_file and retainers_file
-is_echo_during_read = true --Echo each character and retainer name as they're read, to see how you screwed up.
+is_echo_during_read = false --Echo each character and retainer name as they're read, to see how you screwed up.
 config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 marketbotty_settings = "marketbotty_settings.lua" --loaded first
 characters_file = "my_characters.txt"
@@ -431,14 +430,14 @@ function EnterHouse()
       yield("/target Apartment Building Entrance")
     end
     yield("/wait 0.5")
-    if IsAddonVisible("_TargetInfoMainTarget") then
-      while GetCharacterCondition(45, false) do
-        yield("/wait 0.15")
+    if string.find(string.lower(GetTargetName()), "entrance") then
+      while IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) or IsInZone(136) do
+        if not is_use_ar_to_enter_house then
+          yield("/lockon on")
+          yield("/automove on")
+        end
+        yield("/wait 1.2")
       end
-      while GetCharacterCondition(45) do
-        yield("/wait 0.16")
-      end
-      yield("/wait 2")
     else
       debug("Not entering house?")
     end
@@ -448,24 +447,22 @@ end
 function OpenBell()
   EnterHouse()
   target_tick = 1
-  while IsAddonVisible("_TargetInfoMainTarget")==false do
-    debug("Finding summoning bell...")
-    yield("/target Summoning Bell")
-    yield("/wait 0.17")
-    target_tick = target_tick + 1
-    if target_tick > 99 then break end
-  end
-  if IsAddonVisible("_TargetInfoMainTarget") then
-    yield("/lockon on")
-    yield("/automove on")
-    while GetCharacterCondition(50, false) do
+  while GetCharacterCondition(50, false) do
+    if target_tick > 99 then
+      break
+    elseif string.lower(GetTargetName())~="summoning bell" then
+      debug("Finding summoning bell...")
+      yield("/target Summoning Bell")
+      target_tick = target_tick + 1
+    elseif GetDistanceToTarget()<4 then
+      yield("/lockon on")
+      yield("/automove on")
+    else
       yield("/pinteract")
-      yield("/wait 0.5")
     end
-    yield("/waitaddon RetainerList")
-    yield("/lockon off")
-    return true
-  else return false end
+    yield("/wait 0.511")
+  end
+  if GetCharacterCondition(50) then return true else return false end
 end
 
 function WaitARFinish(ar_time)
