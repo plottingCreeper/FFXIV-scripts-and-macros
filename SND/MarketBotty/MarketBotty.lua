@@ -454,6 +454,7 @@ function OpenBell()
     elseif string.lower(GetTargetName())~="summoning bell" then
       debug("Finding summoning bell...")
       yield("/target Summoning Bell")
+      yield("/lockon on")
       target_tick = target_tick + 1
     elseif GetDistanceToTarget()>5 then
       yield("/lockon on")
