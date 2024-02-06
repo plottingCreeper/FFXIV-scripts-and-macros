@@ -100,29 +100,24 @@ end
 ::Start::
 if IsInZone(900) then
   goto OnBoat
-elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
-  if GetCharacterCondition(91) then
-    goto Enter
-  elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
-    goto Queue
-  elseif os.date("!*t").hour%2==1 and os.date("!*t").min>=45 then
-    goto WaitForBoat
-  elseif wait_location then
-    goto WaitLocation
-  else
-    goto StartAR
-  end
-elseif IsInZone(177) and wait_location=="inn" then
-  goto StartAR
-elseif fishing_character ~= "auto" then
-  goto ARWait
 elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
-  goto ReturnFromWait
+  if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+    if GetCharacterCondition(91) then
+      goto Enter
+    elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
+      goto Queue
+    elseif os.date("!*t").hour%2==1 and os.date("!*t").min>=45 then
+      goto WaitForBoat
+    end
+  else
+    goto ReturnFromWait
+  end
+elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+  goto DoneFishing
+elseif fishing_character~="auto" and fishing_character~=GetCharacterName(true) then
+  goto ARWait
 else
-  yield("/echo Zone: "..GetZoneID())
-  if IsInZone(129) then yield("/echo Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
-  yield("/echo That's not gonna work, chief.")
-  yield("/pcraft stop")
+  goto StartAR
 end
 
 ::ARWait::
@@ -144,10 +139,10 @@ if is_ar_while_waiting then
 end
 
 ::ReturnFromWait::
+::TPLimsa::
 if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
   yield("/tp Limsa")
-  yield("/wait 10")
-  WaitReady()
+  WaitReady(3, true)
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
   while GetDistanceToPoint(-84,19,0)<20 do
@@ -165,14 +160,10 @@ if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
     end
     yield("/wait 0.5")
   end
-  yield("/wait 3")
-  while GetCharacterCondition(32) or GetCharacterCondition(45) do
-      yield("/wait 1")
-  end
-  yield("/wait 3")
+  WaitReady(3, true)
 end
 ::ExitInn::
-if wait_location=="inn" and IsInZone(177) then
+if IsInZone(177) then
   while IsInZone(177) do
     if GetTargetName()~="Heavy Oaken Door" or IsAddonVisible("_TargetInfoMainTarget")==false then
       yield("/target Heavy Oaken Door")
@@ -185,10 +176,7 @@ if wait_location=="inn" and IsInZone(177) then
     end
     yield("/wait 0.5")
   end
-  while GetCharacterCondition(32) or GetCharacterCondition(45) do
-    yield("/wait 1")
-  end
-  yield("/wait 3")
+  WaitReady(3, true)
 end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
@@ -213,11 +201,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
     end
     yield("/wait 0.5")
   end
-  yield("/wait 3")
-  while GetCharacterCondition(32) or GetCharacterCondition(45) do
-      yield("/wait 1")
-  end
-  yield("/wait 3")
+  WaitReady(3, true)
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
@@ -239,19 +223,26 @@ yield("/echo Randomly waiting "..notabot.." seconds. Soooooooo human.")
 yield("/wait "..notabot)
 
 ::Queue::
-while GetCharacterCondition(91, false) do
-  if GetTargetName()~="Dryskthota" or IsAddonVisible("_TargetInfoMainTarget")==false then
-    yield("/target Dryskthota")
-  elseif GetCharacterCondition(32, false) then
-    yield("/pinteract")
-  elseif IsAddonVisible("Talk") then
-    yield("/click talk")
-  elseif IsAddonVisible("SelectString") then
-    yield("/pcall SelectString true 0")
-  elseif IsAddonVisible("SelectYesno") then
-    yield("/pcall SelectYesno true 0")
+if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+  while GetCharacterCondition(91, false) do
+    if GetTargetName()~="Dryskthota" or IsAddonVisible("_TargetInfoMainTarget")==false then
+      yield("/target Dryskthota")
+    elseif GetCharacterCondition(32, false) then
+      yield("/pinteract")
+    elseif IsAddonVisible("Talk") then
+      yield("/click talk")
+    elseif IsAddonVisible("SelectString") then
+      yield("/pcall SelectString true 0")
+    elseif IsAddonVisible("SelectYesno") then
+      yield("/pcall SelectYesno true 0")
+    end
+    yield("/wait 0.5")
   end
-  yield("/wait 0.5")
+else
+  yield("/echo Zone: "..GetZoneID())
+  if IsInZone(129) then yield("/echo Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
+  yield("/echo That's not gonna work, chief.")
+  yield("/pcraft stop")
 end
 
 ::Enter::
@@ -271,6 +262,7 @@ move_z = 6.750
 ::OnBoat::
 results_tick = 0
 debug_tick = 0
+start_fishing_attempts = 0
 while IsInZone(900) do
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
@@ -339,13 +331,21 @@ while IsInZone(900) do
       yield("/wait 0.1")
       not_fishing_tick = not_fishing_tick + 0.1
     end
-    if GetCharacterCondition(43, false) then
+    if start_fishing_attempts>6 then
+      LeaveDuty()
+      yield("/pcraft stop")
+    elseif start_fishing_attempts>3 then
+      yield("/bait Versatile Lure")
+    elseif GetCharacterCondition(43, false) then
+      start_fishing_attempts = start_fishing_attempts + 1
       if is_debug then yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 ) end
       for _, command in pairs(start_fishing) do
         if is_debug then yield("/echo Running: "..command) end
         yield(command)
       end
     end
+  else
+    start_fishing_attempts = 0
   end
   if is_debug then
     debug_tick = debug_tick + 1
@@ -366,6 +366,9 @@ end
 
 WaitReady()
 
+::DoneFishing::
+
+::SpendScrips::
 if is_spend_scrips then
   yield("/visland moveto -407 71 4")
   while IsAddonVisible("InclusionShop")==false do
@@ -392,8 +395,11 @@ if is_spend_scrips then
       scrip_shop_item_price = tonumber(price_raw)
       scrip_number_to_buy = scrips_owned//scrip_shop_item_price
       yield("/pcall InclusionShop true 14 "..item-21 .." "..scrip_number_to_buy)
-      yield("/wait 0.1")
-      if IsAddonVisible("ShopExchangeItemDialog") then yield("/pcall ShopExchangeItemDialog true 0") end
+      yield("/wait 0.5")
+      if IsAddonVisible("ShopExchangeItemDialog") then
+        yield("/pcall ShopExchangeItemDialog true 0")
+        yield("/wait 0.5")
+      end
       break
     end
   end
@@ -425,11 +431,7 @@ if wait_location=="inn" then
       end
       yield("/wait 0.5")
     end
-    yield("/wait 3")
-    while GetCharacterCondition(32) or GetCharacterCondition(45) do
-        yield("/wait 1")
-    end
-    yield("/wait 3")
+    WaitReady(3, true)
   end
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
@@ -456,9 +458,15 @@ if wait_location=="inn" then
     end
     yield("/wait 0.5")
   end
+  WaitReady(3, true)
 elseif wait_location=="fc" then
-  yield("/tp estate hall")
-  WaitReady()
+  yield("/tp Estate Hall (Free Company)")
+  WaitReady(3, true)
+  yield("/autmove on")
+  yield("/wait 1")
+  yield("/automove off")
+  yield("/ays het")
+  WaitReady(3, true)
 end
 
 WaitReady()
