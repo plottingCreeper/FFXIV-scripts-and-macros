@@ -17,13 +17,14 @@
 ]]
 
 is_ar_while_waiting = false  --AutoRetainer multimode enabled in between fishing trips.
-wait_location = false
+wait_location = false  --Can be false, "inn", or "fc"
 fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
-is_wait_to_move = true  --Wait for the barrier to drop before moving to the side of the boat.
+is_wait_to_move = false  --Wait for the barrier to drop before moving to the side of the boat.
 is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
 is_discard = false  --Requires Discard Helper
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
+force_autohook_presets = true
 
 is_spend_scrips = false
 scrip_category = 1
@@ -80,20 +81,27 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
-function WaitReady(delay, is_not_ready)
+function WaitReady(delay, is_not_ready, status)
   if is_not_ready then loading_tick = -1
     else loading_tick = 0 end
   if not delay then delay = 3 end
+  wait = 0.1
+  if type(status)=="number" then wait = wait + (status / 10000) end
   while loading_tick<delay do
     if IsAddonVisible("NowLoading") then loading_tick = 0
-    elseif GetCharacterCondition(1, false) then loading_tick = 0
-    elseif GetCharacterCondition(27) then loading_tick = 0
-    elseif GetCharacterCondition(32) then loading_tick = 0
-    elseif GetCharacterCondition(35) then loading_tick = 0
-    elseif GetCharacterCondition(45) then loading_tick = 0
-    elseif loading_tick == -1 then yield("/wait 0.01")
+    elseif IsPlayerOccupied() then loading_tick = 0
+--     elseif GetCharacterCondition(1, false) then loading_tick = 0
+--     elseif GetCharacterCondition(27) then loading_tick = 0
+--     elseif GetCharacterCondition(32) then loading_tick = 0
+--     elseif GetCharacterCondition(35) then loading_tick = 0
+--     elseif GetCharacterCondition(45) then loading_tick = 0
+    elseif loading_tick == -1 then yield("/wait "..wait)
     else loading_tick = loading_tick + 0.1 end
-    yield("/wait 0.1")
+    yield("/wait "..wait)
+    if IsAddonVisible("IKDResult") then
+      yield("/wait 10")
+      yield("/pcall IKDResult true 0")
+    end
   end
 end
 
@@ -147,7 +155,7 @@ if is_ar_while_waiting then
     elseif IsAddonVisible("RetainerList") then
       yield("/pcall RetainerList true -1")
     end
-    yield("/wait 1.009")
+    yield("/wait 1.003")
   end
 end
 
@@ -171,7 +179,7 @@ if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
       yield("/lockon on")
       yield("/automove on")
     end
-    yield("/wait 0.5")
+    yield("/wait 0.501")
   end
   WaitReady(3, true)
 end
@@ -187,7 +195,7 @@ if IsInZone(177) then
       yield("/automove on")
       yield("/pinteract")
     end
-    yield("/wait 0.5")
+    yield("/wait 0.502")
   end
   WaitReady(3, true)
 end
@@ -196,7 +204,7 @@ if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
   yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
   yield("/wait 3")
   while IsVislandRouteRunning() or IsMoving() do
-    yield("/wait 1")
+    yield("/wait 1.035")
   end
 end
 ::AethernetToArcanist::
@@ -212,7 +220,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
       yield("/lockon on")
       yield("/automove on")
     end
-    yield("/wait 0.5")
+    yield("/wait 0.503")
   end
   WaitReady(3, true)
 end
@@ -221,13 +229,13 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
   yield("/wait 3")
   while IsVislandRouteRunning() or IsMoving() do
-    yield("/wait 1")
+    yield("/wait 1.036")
   end
 end
 
 ::WaitForBoat::
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
-  yield("/wait 1.010")
+  yield("/wait 1.005")
 end
 
 ::BotPause::
@@ -249,7 +257,7 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     elseif IsAddonVisible("SelectYesno") then
       yield("/pcall SelectYesno true 0")
     end
-    yield("/wait 0.5")
+    yield("/wait 0.511")
   end
 else
   yield("/echo Zone: "..GetZoneID())
@@ -261,9 +269,9 @@ end
 ::Enter::
 while IsInZone(129) do
   if IsAddonVisible("ContentsFinderConfirm") then yield("/pcall ContentsFinderConfirm true 8") end
-  yield("/wait 1.020")
+  yield("/wait 1.007")
 end
-while GetCharacterCondition(35, false) do yield("/wait 1.021") end
+WaitReady(3, true)
 
 ::PrepareRandom::
 movement = true
@@ -273,6 +281,10 @@ if math.ceil(move_y)%2==1 then
   move_x = 7.5
 else
   move_x = -7.5
+end
+if is_debug then
+  yield("/echo move_x: "..move_x)
+  yield("/echo move_y: "..move_y)
 end
 
 ::OnBoat::
@@ -293,14 +305,8 @@ while IsInZone(900) do
   end
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     WaitReady()
-  elseif IsAddonVisible("IKDResult") then
-    while IsAddonVisible("IKDResult") do
-      yield("/wait 10")
-      yield("/pcall IKDResult true 0")
-    end
-    break
   elseif GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move then
-    yield("/wait 1.08")
+    yield("/wait 1.011")
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
       if command=="/leaveduty" then LeaveDuty() end
@@ -309,7 +315,7 @@ while IsInZone(900) do
     end
   elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
-    yield("/wait 0.5")
+    yield("/wait 0.512")
     move_tick = 0
     while IsMoving() and move_tick <= 5 do
       if GetCurrentOceanFishingZoneTimeLeft()<420 and GetCurrentOceanFishingZoneTimeLeft()>0 then
@@ -319,27 +325,26 @@ while IsInZone(900) do
         move_z = math.floor(GetPlayerRawYPos()*1000)/1000
         yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
       end
-      yield("/wait 0.1")
+      yield("/wait 0.119")
     end
     if move_x == 7.5 then yield("/visland moveto 9 "..move_z.." "..move_y)
     else yield("/visland moveto -9 "..move_z.." "..move_y) end
-    yield("/wait 0.2")
+    yield("/wait 0.200")
     yield("/visland stop")
     movement = false
   elseif bait_and_switch and correct_bait~=current_bait then
-    AutoHookPresets()
     if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
       elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
       elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
     end
     yield("/echo Switching bait to: "..correct_bait)
     if GetCharacterCondition(43) then
-      while GetCharacterCondition(42, false) do yield("/wait 1") end
+      while GetCharacterCondition(42, false) do yield("/wait 1.012") end
       yield("/ahoff")
-      while GetCharacterCondition(43) do yield("/wait 1") end
+      while GetCharacterCondition(43) do yield("/wait 1.013") end
     end
+    AutoHookPresets()
     if bait_count>1 then
-      --yield("/wait 1")
       yield("/bait "..correct_bait)
     else
       yield("/echo Out of "..correct_bait)
@@ -352,7 +357,7 @@ while IsInZone(900) do
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
     not_fishing_tick = 0
     while GetCharacterCondition(43, false) and not_fishing_tick<1.5 do
-      yield("/wait 0.1")
+      yield("/wait 0.108")
       not_fishing_tick = not_fishing_tick + 0.1
     end
     if start_fishing_attempts>6 then
@@ -385,7 +390,7 @@ while IsInZone(900) do
       yield("/echo -------------------------------------")
     end
   end
-  yield("/wait 1.039")
+  yield("/wait 1.010")
 end
 
 ::DoneFishing::
@@ -407,12 +412,12 @@ if is_spend_scrips then
     else
       yield("/pcall SelectIconString true 0")
     end
-    yield("/wait 0.5")
+    yield("/wait 0.521")
   end
   yield("/pcall InclusionShop true 12 "..scrip_category)
-  yield("/wait 0.1")
+  yield("/wait 0.522")
   yield("/pcall InclusionShop true 13 "..scrip_subcategory)
-  yield("/wait 1")
+  yield("/wait 1.021")
   scrips_raw = string.gsub(GetNodeText("InclusionShop", 21),"%D","")
   scrips_owned = tonumber(scrips_raw)
   for item=21, 36 do
@@ -422,10 +427,10 @@ if is_spend_scrips then
       scrip_shop_item_price = tonumber(price_raw)
       scrip_number_to_buy = scrips_owned//scrip_shop_item_price
       yield("/pcall InclusionShop true 14 "..item-21 .." "..scrip_number_to_buy)
-      yield("/wait 0.5")
+      yield("/wait 1.022")
       if IsAddonVisible("ShopExchangeItemDialog") then
         yield("/pcall ShopExchangeItemDialog true 0")
-        yield("/wait 0.5")
+        yield("/wait 1.023")
       end
       break
     end
@@ -440,7 +445,7 @@ if wait_location=="inn" then
     yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
-      yield("/wait 1")
+      yield("/wait 1.031")
     end
   end
   ::AethernetToAftcastle::
@@ -456,7 +461,7 @@ if wait_location=="inn" then
         yield("/lockon on")
         yield("/automove on")
       end
-      yield("/wait 0.5")
+      yield("/wait 0.531")
     end
     WaitReady(3, true)
   end
@@ -465,7 +470,7 @@ if wait_location=="inn" then
     yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
-      yield("/wait 1")
+      yield("/wait 1.032")
     end
   end
   ::EnterInn::
@@ -483,14 +488,14 @@ if wait_location=="inn" then
         yield("/pcall SelectYesno true 0")
       end
     end
-    yield("/wait 0.5")
+    yield("/wait 0.532")
   end
   WaitReady(3, true)
 elseif wait_location=="fc" then
   yield("/tp Estate Hall (Free Company)")
   WaitReady(3, true)
   yield("/autmove on")
-  yield("/wait 1")
+  yield("/wait 1.033")
   yield("/automove off")
   yield("/ays het")
   WaitReady(3, true)
@@ -548,7 +553,7 @@ if is_desynth then
         end
       end
     end
-    yield("/wait 0.5")
+    yield("/wait 0.540")
   end
   yield("/pcall SalvageItemSelector true -1")
 end
@@ -565,7 +570,7 @@ if is_ar_while_waiting then
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   yield("/ays multi")
   while GetCharacterCondition(1) do
-    yield("/wait 1")
+    yield("/wait 1.040")
   end
   goto ARWait
 else
