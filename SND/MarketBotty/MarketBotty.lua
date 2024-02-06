@@ -36,7 +36,7 @@ is_postrun_one_gil_report = true  --Requires is_verbose
 is_postrun_sanity_report = true  --Requires is_verbose
 
 is_verbose = true --Basic info in chat about what's going on.
-is_debug = false --Absolutely flood your chat with all sorts of shit you don't need to know.
+is_debug = true --Absolutely flood your chat with all sorts of shit you don't need to know.
 name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
@@ -438,6 +438,7 @@ function EnterHouse()
         end
         yield("/wait 1.2")
       end
+      while IsPlayerOccupied() do yield("/wait 0.200")
     else
       debug("Not entering house?")
     end
@@ -455,17 +456,18 @@ function OpenBell()
       yield("/target Summoning Bell")
       target_tick = target_tick + 1
     elseif GetDistanceToTarget() then
-      if GetDistanceToTarget()>4 then
-        yield("/lockon on")
-        yield("/automove on")
-      end
+      yield("/lockon on")
+      yield("/automove on")
     else
+      yield("/lockon off")
+      yield("/automove off")
       yield("/pinteract")
     end
     yield("/wait 0.511")
   end
   if GetCharacterCondition(50) then
-    while not IsAddonVisible("RetainerList") do yield("/wait 0.1") end
+    while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
+    yield("/wait 0.4")
     return true
   else
     return false
