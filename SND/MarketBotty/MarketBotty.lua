@@ -459,13 +459,13 @@ function OpenBell()
       yield("/lockon on")
       yield("/automove on")
     else
-      yield("/lockon off")
       yield("/automove off")
       yield("/pinteract")
     end
     yield("/wait 0.511")
   end
   if GetCharacterCondition(50) then
+    yield("/lockon off")
     while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
     yield("/wait 0.4")
     return true
