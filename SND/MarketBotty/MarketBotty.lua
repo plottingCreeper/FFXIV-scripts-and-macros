@@ -455,7 +455,7 @@ function OpenBell()
       debug("Finding summoning bell...")
       yield("/target Summoning Bell")
       target_tick = target_tick + 1
-    elseif GetDistanceToTarget() then
+    elseif GetDistanceToTarget()>5 then
       yield("/lockon on")
       yield("/automove on")
     else
