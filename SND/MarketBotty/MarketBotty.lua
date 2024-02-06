@@ -390,7 +390,7 @@ end
 
 function NextCharacter()
   current_character = GetCharacterName(true)
-  next_character = ""
+  next_character = nil
   debug("Current character: "..current_character)
   for character_number, character_name in pairs(my_characters) do
     if character_name == current_character then
