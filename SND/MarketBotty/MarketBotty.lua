@@ -438,7 +438,7 @@ function EnterHouse()
         end
         yield("/wait 1.2")
       end
-      while IsPlayerOccupied() do yield("/wait 0.200")
+      while IsPlayerOccupied() do yield("/wait 0.200") end
     else
       debug("Not entering house?")
     end
