@@ -37,17 +37,18 @@ is_postrun_one_gil_report = true  --Requires is_verbose
 is_postrun_sanity_report = true  --Requires is_verbose
 
 is_verbose = true --Basic info in chat about what's going on.
-is_debug = true --Absolutely flood your chat with all sorts of shit you don't need to know.
+is_debug = false --Absolutely flood your chat with all sorts of shit you don't need to know.
 name_rechecks = 10 --Latency sensitive tunable. Probably sets wrong price if below 5
 
 is_read_from_files = true --Override arrays with lists in files. Missing files are ignored.
 is_write_to_files = true --Adds characters and retainers to characters_file and retainers_file
 is_echo_during_read = false --Echo each character and retainer name as they're read, to see how you screwed up.
 config_folder = os.getenv("appdata").."\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+marketbotty_settings = "marketbotty_settings.lua" --loaded first
 characters_file = "my_characters.txt"
 retainers_file = "my_retainers.txt"
 blacklist_file = "blacklist_retainers.txt"
-overrides_file = "item_overrides.txt"
+overrides_file = "item_overrides.lua"
 
 is_multimode = true --It worked once, which means it's perfect now. Please send any complaints to /dev/null
 start_wait = false --For when starting script during AR operation.
@@ -60,12 +61,12 @@ is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
 ------------------------------------------------------------------------------------------------------
 
 function file_exists(name)
-   local f=io.open(name,"r")
-   if f~=nil then io.close(f) return true else return false end
+  local f=io.open(name,"r")
+  if f~=nil then io.close(f) return true else return false end
 end
 
 function CountRetainers()
-  yield("/waitaddon RetainerList")
+  if not IsAddonVisible("RetainerList") then SomethingBroke("RetainerList", "CountRetainers()") end
   while string.gsub(GetNodeText("RetainerList", 2, 1, 13),"%d","")=="" do
     yield("/wait 0.1")
   end
@@ -115,7 +116,7 @@ function CountRetainers()
 end
 
 function OpenRetainer(r)
-  yield("/waitaddon RetainerList")
+  if not IsAddonVisible("RetainerList") then SomethingBroke("RetainerList", "OpenRetainer("..r..")") end
   yield("/wait 0.3")
   yield("/click select_retainer"..r)
   yield("/wait 0.5")
@@ -123,10 +124,10 @@ function OpenRetainer(r)
     if IsAddonVisible("Talk") then yield("/click talk") end
     yield("/wait 0.1")
   end
-  yield("/waitaddon SelectString")
+  if not IsAddonVisible("SelectString") then SomethingBroke("SelectString", "OpenRetainer("..r..")") end
   yield("/wait 0.3")
   yield("/click select_string4")
-  yield("/waitaddon RetainerSellList")
+  if not IsAddonVisible("RetainerSellList") then SomethingBroke("RetainerSellList", "OpenRetainer("..r..")") end
 end
 
 function CloseRetainer()
@@ -158,10 +159,16 @@ end
 
 function ClickItem(item)
   CloseSales()
-  yield("/waitaddon RetainerSellList")
-  yield("/pcall RetainerSellList true 0 ".. item - 1 .." 1 <wait.0.05>")
-  yield("/pcall ContextMenu true 0 0")
-  yield("/waitaddon RetainerSell")
+  while IsAddonVisible("RetainerSell")==false do
+    if IsAddonVisible("ContextMenu") then
+      yield("/pcall ContextMenu true 0 0")
+    elseif IsAddonVisible("RetainerSellList") then
+      yield("/pcall RetainerSellList true 0 ".. item - 1 .." 1")
+    else
+      SomethingBroke("RetainerSellList", "ClickItem()")
+    end
+    yield("/wait 0.05")
+  end
 end
 
 function ReadOpenItem()
@@ -236,12 +243,10 @@ function SearchPrices()
       prices_list[i] = tonumber(trimmed_price)
     end
   end
-  if is_debug then
-    debug(open_item.." Prices")
-    for price_number, _ in pairs(prices_list) do
-      debug(prices_list[price_number])
-      prices_list_length = prices_list_length + 1
-    end
+  debug(open_item.." Prices")
+  for price_number, _ in pairs(prices_list) do
+    debug(prices_list[price_number])
+    prices_list_length = prices_list_length + 1
   end
 end
 
@@ -362,6 +367,27 @@ function CloseSales()
   end
 end
 
+function SomethingBroke(what_should_be_visible, extra_info)
+  for broken_rechecks=1, 20 do
+    if IsAddonVisible(what_should_be_visible) then
+      still_broken = false
+      break
+    else
+      yield("/wait 0.1")
+    end
+  end
+  if still_broken then
+    yield("/echo It looks like something has gone wrong.")
+    if what_should_be_visible then yield("/echo "..what_should_be_visible.." should be visible, but it isn't.") end
+    yield("/echo Attempting to fix this, please wait.")
+    if extra_info then yield("/echo "..extra_info) end
+    --yield("")
+    yield("/echo On second thought, I haven't finished this yet.")
+    yield("/echo Oops!")
+    yield("/pcraft stop")
+  end
+end
+
 function NextCharacter()
   current_character = GetCharacterName(true)
   next_character = ""
@@ -420,19 +446,25 @@ end
 
 function OpenBell()
   EnterHouse()
+  target_tick = 1
   while IsAddonVisible("_TargetInfoMainTarget")==false do
     debug("Finding summoning bell...")
     yield("/target Summoning Bell")
     yield("/wait 0.17")
+    target_tick = target_tick + 1
+    if target_tick > 99 then break end
   end
-  yield("/lockon on")
-  yield("/automove on")
-  while GetCharacterCondition(50, false) do
-    yield("/pinteract")
-    yield("/wait 0.5")
-  end
-  yield("/waitaddon RetainerList")
-  yield("/lockon off")
+  if IsAddonVisible("_TargetInfoMainTarget") then
+    yield("/lockon on")
+    yield("/automove on")
+    while GetCharacterCondition(50, false) do
+      yield("/pinteract")
+      yield("/wait 0.5")
+    end
+    yield("/waitaddon RetainerList")
+    yield("/lockon off")
+    return true
+  else return false end
 end
 
 function WaitARFinish(ar_time)
@@ -457,12 +489,16 @@ end
 function echo(input)
   if is_verbose then
     yield("/echo [MarketBotty] "..input)
+  else
+    yield("/wait 0.01")
   end
 end
 
 function debug(debug_input)
   if is_debug then
     yield("/echo [MarketBotty][DEBUG] "..debug_input)
+  else
+    yield("/wait 0.01")
   end
 end
 
@@ -483,6 +519,10 @@ end
 
 -- Tried to do this as functions, but it was too hard. Oh well.
 if is_read_from_files then
+  if file_exists(config_folder..marketbotty_settings) then
+    chunk = loadfile(config_folder..marketbotty_settings)
+    chunk()
+  end
   file_characters = config_folder..characters_file
   if file_exists(file_characters) and is_multimode then
     my_characters = {}
@@ -537,25 +577,18 @@ if is_read_from_files then
   else
     echo(file_blacklist.." not found!")
   end
---[[
   file_overrides = config_folder..overrides_file
   if file_exists(file_overrides) and is_using_overrides then
+    chunk = nil
     item_overrides = {}
-    file_overrides = io.input(file_overrides)
-    next_line = file_overrides:read("l")
-    i = 0
-    while next_line do
-      i = i + 1
-      item_overrides[i] = next_line
-      if is_echo_during_read then debug("Overrides "..i.." from file: "..next_line) end
-      next_line = file_overrides:read("l")
-    end
-    file_overrides:close()
-    echo("Overrides loaded from file: "..i)
+    chunk = loadfile(file_overrides)
+    chunk()
+    or_count = 0
+    for _, i in pairs(item_overrides) do or_count = or_count + 1 end
+    echo("Overrides loaded from file: "..or_count)
   else
     echo(file_overrides.." not found!")
   end
-]]
 end
 uc=1
 au=1
@@ -594,7 +627,7 @@ if is_write_to_files then
       break
     end
   end
-  if is_add_to_file then
+  if is_add_to_file and current_character~="null" then
     file_characters = io.open(config_folder..characters_file,"a")
     file_characters:write("\n"..current_character)
     io.close(file_characters)
@@ -806,7 +839,7 @@ if is_multimode then
   NextCharacter()
   if not next_character then goto AfterMulti end
   Relog(next_character)
-  OpenBell()
+  if OpenBell()==false then goto MultiMode end
   goto Startup
 else
   goto EndOfScript
