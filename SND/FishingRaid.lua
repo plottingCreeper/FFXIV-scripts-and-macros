@@ -97,6 +97,19 @@ function WaitReady(delay, is_not_ready)
   end
 end
 
+function AutoHookPresets()
+  if force_autohook_presets then
+    if autohook_preset_loaded then DeletedSelectedAutoHookPreset() end
+    if OceanFishingIsSpectralActive() then
+      UseAutoHookAnonymousPreset("AH3_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")
+      autohook_preset_loaded = true
+    else
+      UseAutoHookAnonymousPreset("AH3_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")
+      autohook_preset_loaded = true
+    end
+  end
+end
+
 ::Start::
 if IsInZone(900) then
   goto OnBoat
@@ -139,7 +152,7 @@ if is_ar_while_waiting then
 end
 
 ::ReturnFromWait::
-::TPLimsa::
+::TeleportToLimsa::
 if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
   yield("/tp Limsa")
   WaitReady(3, true)
@@ -254,10 +267,13 @@ while GetCharacterCondition(35, false) do yield("/wait 1.021") end
 
 ::PrepareRandom::
 movement = true
-if tostring(math.random(2))=="1" then move_x = 7.5
-else move_x = -7.5 end
 move_y = math.random(-11000,5000)/1000
 move_z = 6.750
+if math.ceil(move_y)%2==1 then
+  move_x = 7.5
+else
+  move_x = -7.5
+end
 
 ::OnBoat::
 results_tick = 0
@@ -270,7 +286,11 @@ while IsInZone(900) do
   if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = baits[current_zone].daytime end
   if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = baits[current_zone].sunset end
   if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = baits[current_zone].nighttime end
-  if OceanFishingIsSpectralActive() then correct_bait = spectral_bait else correct_bait = normal_bait end
+  if OceanFishingIsSpectralActive() then
+    correct_bait = spectral_bait
+  else
+    correct_bait = normal_bait
+  end
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     WaitReady()
   elseif IsAddonVisible("IKDResult") then
@@ -307,6 +327,7 @@ while IsInZone(900) do
     yield("/visland stop")
     movement = false
   elseif bait_and_switch and correct_bait~=current_bait then
+    AutoHookPresets()
     if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
       elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
       elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
@@ -324,7 +345,10 @@ while IsInZone(900) do
       yield("/echo Out of "..correct_bait)
       yield("/bait Versatile Lure")
     end
-    current_bait = correct_bait
+    yield("/wait 0.4")
+    if not (IsAddonVisible("_TextError") and GetNodeText("_TextError", 1)=="Unable to change bait at this time.") then
+      current_bait = correct_bait
+    end
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
     not_fishing_tick = 0
     while GetCharacterCondition(43, false) and not_fishing_tick<1.5 do
@@ -334,8 +358,8 @@ while IsInZone(900) do
     if start_fishing_attempts>6 then
       LeaveDuty()
       yield("/pcraft stop")
-    elseif start_fishing_attempts>3 then
-      yield("/bait Versatile Lure")
+    elseif start_fishing_attempts>1 then
+      current_bait = ""
     elseif GetCharacterCondition(43, false) then
       start_fishing_attempts = start_fishing_attempts + 1
       if is_debug then yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 ) end
@@ -364,9 +388,12 @@ while IsInZone(900) do
   yield("/wait 1.039")
 end
 
-WaitReady()
-
 ::DoneFishing::
+if autohook_preset_loaded then
+  DeletedSelectedAutoHookPreset()
+  autohook_preset_loaded = false
+end
+WaitReady()
 
 ::SpendScrips::
 if is_spend_scrips then
