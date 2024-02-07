@@ -127,6 +127,24 @@ function WaitReady(delay, is_not_ready, status)
   end
 end
 
+function RunDiscard(y)
+  if is_discard then
+    if is_desynth and y==1 then
+      yield("/echo You have desynth and discard turned on.")
+      yield("/echo Waiting to discard until after desynth!")
+    elseif y==1 then
+      discarded_on_1 = true
+      yield("/discardall")
+    elseif discarded_on_1 then
+      yield("/discardall")
+    else
+      yield("/discardall")
+      yield("/echo Waiting 10 seconds to give Discard Helper time to run.")
+      yield("/wait 10")
+    end
+  end
+end
+
 function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
   if not radius then radius = 3 end
   if not timeout then timeout = 60 end
@@ -263,7 +281,7 @@ if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
   elseif movement_method=="visland random" then
     MoveNear(6, 40, 19, 0.5, 5, 7)  --a
     MoveNear(-4, 40, 20, 2, 5, 6)  --b
-    MoveNear(1, 40, 77, 2, 5, 6)  --c
+    MoveNear(1, 40, 77, 2, 9, 6)  --c
     MoveNear(18.6, 40, 71, 2, 5, 5)  --d
   end
 end
@@ -535,6 +553,7 @@ while IsInZone(900) do
 end
 
 ::DoneFishing::
+RunDiscard(1)
 if autohook_preset_loaded then
   DeletedSelectedAutoHookPreset()
   autohook_preset_loaded = false
@@ -632,7 +651,7 @@ if wait_location=="inn" then
     elseif movement_method=="visland random" then
       MoveNear(5.5, 40, 74, 1, 5, 6)  --a
       MoveNear(-3, 40, 72, 1, 5, 5)  --b
-      MoveNear(0.5, 40, 11, 1, 5, 8)  --c
+      MoveNear(0.5, 40, 11, 1, 9, 8)  --c
       MoveNear(13, 40, 12, 0, 5)  --d
     end
   end
@@ -721,12 +740,7 @@ if is_desynth then
   yield("/pcall SalvageItemSelector true -1")
 end
 
-::Discard::
-if is_discard then
-  yield("/discardall")
-  yield("/echo Waiting 10 seconds to give Discard Helper time to run.")
-  yield("/wait 10")
-end
+RunDiscard(2)
 
 ::StartAR::
 if is_ar_while_waiting then
