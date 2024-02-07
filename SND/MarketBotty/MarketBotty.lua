@@ -871,7 +871,7 @@ elseif wait_until then
     end
   end
   while os.time() < wait_until do
-    yield("/wait 60")
+    yield("/wait 12")
   end
   if is_autoretainer_while_waiting then
     WaitARFinish()
