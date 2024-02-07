@@ -124,6 +124,7 @@ function WaitReady(delay, is_not_ready, status)
       yield("/wait 10")
       yield("/pcall IKDResult true 0")
     end
+    if is_discard=="spam" then yield("/discardall") end
   end
 end
 
@@ -132,7 +133,7 @@ function RunDiscard(y)
     if is_desynth and y==1 then
       yield("/echo You have desynth and discard turned on.")
       yield("/echo Waiting to discard until after desynth!")
-    elseif y==1 then
+    elseif y==1 or y==2 then
       discarded_on_1 = true
       yield("/discardall")
     elseif discarded_on_1 then
@@ -640,6 +641,7 @@ if wait_location=="inn" then
     end
     WaitReady(3, true)
   end
+  RunDiscard(2)
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
     if movement_method=="visland route" then
@@ -740,9 +742,10 @@ if is_desynth then
   yield("/pcall SalvageItemSelector true -1")
 end
 
-RunDiscard(2)
+RunDiscard()
 
 ::StartAR::
+yield("/echo You did a good job today!")
 if is_ar_while_waiting then
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   yield("/ays multi")
