@@ -472,6 +472,7 @@ while IsInZone(900) do
     yield("/visland stop")
     movement = false
   elseif bait_and_switch and correct_bait~=current_bait then
+    yield("/tweaks e baitcommand")
     if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
       elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
       elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
