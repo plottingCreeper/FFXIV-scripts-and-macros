@@ -150,7 +150,7 @@ function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
       if GetDistanceToPoint(near_x, move_z, near_y)<fast then
         break
       end
-      move_tick = move_tick + 0.1
+      move_tick = move_tick + 0.01
       yield("/wait 0.01")
     else
       move_tick = move_tick + 0.1
@@ -353,8 +353,10 @@ if type(buy_baits)=="number" then
   goto BuyBait
   end
   yield("/pcall Shop true -1")
-  MoveNear(-404, 4, 73, 1, 2)
-  MoveNear(-408, 4, 73.5, 2.2, 5)
+  if GetDistanceToPoint(-398,3,78)>5 then
+    MoveNear(-404, 4, 73, 1, 2)
+    MoveNear(-408, 4, 73.5, 2.2, 5)
+  end
 end
 
 ::WaitForBoat::
