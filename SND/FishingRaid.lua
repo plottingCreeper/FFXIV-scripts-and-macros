@@ -75,17 +75,24 @@ function AutoHookPresets()
 end
 
 baits = {
-  [1] = {id = 237, name = "Galadion Bay", normal_bait = "Plump Worm", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
-  [2] = {id = 239, name = "Southern Merlthor", normal_bait = "Krill", daytime = "Krill", sunset = "Ragworm", nighttime = "Plump Worm"},
-  [3] = {id = 243, name = "Northern Merlthor", normal_bait = "Ragworm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
-  [4] = {id = 241, name = "Rhotano Sea", normal_bait = "Plump Worm", daytime = "Plump Worm", sunset = "Ragworm", nighttime = "Krill"},
-  [5] = {id = 246, name = "The Ciedalaes", normal_bait = "Ragworm", daytime = "Krill", sunset = "Plump Worm", nighttime = "Krill"},
-  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = "Krill", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
-  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = "Plump Worm", daytime = "Krill", sunset = "Krill", nighttime = "Krill"},
-  [8] = {id = 286, name = "Sirensong Sea", normal_bait = "Plump Worm", daytime = "Krill", sunset = "Krill", nighttime = "Krill"},
-  [9] = {id = 288, name = "Kugane Coast", normal_bait = "Ragworm", daytime = "Krill", sunset = "Ragworm", nighttime = "Plump Worm"},
-  [10] = {id = 290, name = "Ruby Sea", normal_bait = "Krill", daytime = "Ragworm", sunset = "Plump Worm", nighttime = "Krill"},
-  [11] = {id = 292, name = "Lower One River", normal_bait = "Krill", daytime = "Ragworm", sunset = "Krill", nighttime = "Krill"},
+  versatile = { name = "Versatile Lure", id = 29717 },
+  ragworm = { name = "Ragworm", id = 29714 },
+  krill = { name = "Krill", id = 29715 },
+  plumpworm = { name = "Plump Worm", id = 29716 },
+}
+
+ocean_zones = {
+  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
+  [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.plumpworm},
+  [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits.ragworm, daytime = baits.plumpworm, sunset = baits.ragworm, nighttime = baits.ragworm},
+  [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits.plumpworm, daytime = baits.plumpworm, sunset = baits.ragworm, nighttime = baits.ragworm},
+  [5] = {id = 246, name = "The Ciedalaes", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
+  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
+  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
+  [8] = {id = 286, name = "Sirensong Sea", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
+  [9] = {id = 288, name = "Kugane Coast", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.plumpworm},
+  [10] = {id = 290, name = "Ruby Sea", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
+  [11] = {id = 292, name = "Lower One River", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
 }
 
 routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by SND.
@@ -109,10 +116,6 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
-Ragworm = 29714
-Krill = 29715
-PlumpWorm = 29716
-
 function WaitReady(delay, is_not_ready, status)
   if is_not_ready then loading_tick = -1
     else loading_tick = 0 end
@@ -131,7 +134,12 @@ function WaitReady(delay, is_not_ready, status)
     else loading_tick = loading_tick + 0.1 end
     yield("/wait "..wait)
     if IsAddonVisible("IKDResult") then
-      yield("/wait 10")
+      result_timer = 501
+      while result_timer>=500 do
+        result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
+        result_timer = tonumber(result_raw)
+        yield("/wait 0.266")
+      end
       yield("/pcall IKDResult true 0")
     end
     if is_discard=="spam" then yield("/discardall") end
@@ -512,10 +520,10 @@ current_bait = ""
 while IsInZone(900) or IsInZone(1163) do
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
-  normal_bait = baits[current_zone].normal_bait
-  if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = baits[current_zone].daytime end
-  if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = baits[current_zone].sunset end
-  if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = baits[current_zone].nighttime end
+  normal_bait = ocean_zones[current_zone].normal_bait
+  if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = ocean_zones[current_zone].daytime end
+  if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = ocean_zones[current_zone].sunset end
+  if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = ocean_zones[current_zone].nighttime end
   if OceanFishingIsSpectralActive() then
     correct_bait = spectral_bait
     if force_autohook_presets then
@@ -528,22 +536,33 @@ while IsInZone(900) or IsInZone(1163) do
     if force_autohook_presets then
       if autohook_preset_loaded~="normal" then
         AutoHookPresets()
-      end
-    end
-  end
+      end  -- What a fucking mess this whole area is.
+    end  --  Who wrote this shit?
+  end  -- Oh no, it was me.
+  if PlayerState.FishingBait==29717 then current_bait = "Versatile Lure"
+  elseif PlayerState.FishingBait==29714 then current_bait = "Ragworm"
+  elseif PlayerState.FishingBait==29715 then current_bait = "Krill"
+  elseif PlayerState.FishingBait==29716 then current_bait = "PlumpWorm"
+  else current_bait = "unknown" .. tostring(PlayerState.FishingBait) end
   debug("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
   debug("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
   debug("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
-  debug("Zone name: "..baits[current_zone].name, true)
-  debug("Normal bait: "..normal_bait, true)
-  debug("Spectral bait: "..spectral_bait, true)
-  debug("I think we're using: "..current_bait, true)
+  debug("Zone name: "..ocean_zones[current_zone].name, true)
+  debug("Normal bait: "..normal_bait.name, true)
+  debug("Spectral bait: "..spectral_bait.name, true)
+  debug("Should now be using: "..correct_bait.name, true)
+  debug("Current bait: "..current_bait, true)
   if IsAddonVisible("IKDResult") then
-    yield("/wait 10")
+    result_timer = 501
+    while result_timer>=500 do
+      result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
+      result_timer = tonumber(result_raw)
+      yield("/wait 0.266")
+    end
     yield("/pcall IKDResult true 0")
   elseif IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     WaitReady(2, false, 62)
-  elseif GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move then
+  elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) then
     yield("/wait 1.011")
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
@@ -587,36 +606,29 @@ while IsInZone(900) or IsInZone(1163) do
       yield("/ac Cast")
       SetAutoHookState(true)
     end
-  elseif bait_and_switch and correct_bait~=current_bait then
-    yield("/tweaks e baitcommand")
-    if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
-      elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
-      elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
-    end
-    debug("Switching bait to: "..correct_bait)
-    if GetCharacterCondition(43) then
-      stop_fishing_tick = 0
-      while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
-        stop_fishing_tick = stop_fishing_tick + 1
-        yield("/wait 1.012")
+  elseif bait_and_switch and PlayerState.FishingBait~=correct_bait.id then
+    if GetItemCount(correct_bait.id)>1 and PlayerState.FishingBait~=correct_bait.id then
+      yield("/tweaks e baitcommand")
+      debug("Switching bait to: "..correct_bait.name)
+      if GetCharacterCondition(43) then
+        stop_fishing_tick = 0
+        while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
+          stop_fishing_tick = stop_fishing_tick + 1
+          yield("/wait 1.012")
+        end
+        SetAutoHookState(false)
+        while GetCharacterCondition(43) do yield("/wait 1.013") end
       end
-      SetAutoHookState(false)
-      while GetCharacterCondition(43) do yield("/wait 1.013") end
-    end
-    if bait_count>1 then
-      yield("/bait "..correct_bait)
-      yield("/bait "..correct_bait)
-      yield("/bait "..correct_bait)
+      yield("/bait "..correct_bait.name)
+      yield("/bait "..correct_bait.name)
+      yield("/bait "..correct_bait.name)
     else
-      debug("Out of "..correct_bait)
+      debug("Out of "..correct_bait.name)
       yield("/bait Versatile Lure")
     end
     is_changed_bait = true
     yield("/wait 0.1")
-    if not ( IsAddonVisible("_TextError") and ( GetNodeText("_TextError", 1)=="Unable to change bait at this time." or GetNodeText("_TextError", 1)=="That action cannot be used immediately before or after the ship changes areas." ) ) then
-      current_bait = correct_bait
-      SetAutoHookState(true)
-    end
+    SetAutoHookState(true)
   else
     SetAutoHookState(true)
     start_fishing_attempts = 0
