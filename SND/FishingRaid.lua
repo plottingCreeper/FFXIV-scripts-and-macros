@@ -277,6 +277,7 @@ if is_ar_while_waiting then
     elseif GetCharacterCondition(50,false) then
       debug("Relogging to "..fishing_character)
       yield("/ays relog " .. fishing_character)
+      WaitReady(3, true)
     elseif IsAddonVisible("RetainerList") then
       debug("Closing retainer list.")
       yield("/pcall RetainerList true -1")
@@ -288,7 +289,7 @@ if is_ar_while_waiting then
 end
 
 ::ReturnFromWait::
-WaitReady()
+WaitReady(1)
 ::TeleportToLimsa::
 while not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) do
   if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
@@ -397,10 +398,10 @@ if type(buy_baits)=="number" then
     while not IsAddonVisible("Shop") do
       if GetTargetName()~="Merchant & Mender" then
         yield("/target Merchant & Mender")
-      elseif GetCharacterCondition(32, false) then
-        yield("/pinteract")
       elseif IsAddonVisible("SelectString") then
         yield("/pcall SelectString true 0")
+      elseif GetCharacterCondition(32, false) then
+        yield("/pinteract")
       end
       yield("/wait 0.591")
     end
@@ -575,7 +576,11 @@ while IsInZone(900) or IsInZone(1163) do
     end
     debug("Switching bait to: "..correct_bait)
     if GetCharacterCondition(43) then
-      while GetCharacterCondition(42, false) do yield("/wait 1.012") end
+      stop_fishing_tick = 0
+      while GetCharacterCondition(42, false) and stop_fishing_tick<3 do
+        stop_fishing_tick = stop_fishing_tick + 1
+        yield("/wait 1.012")
+      end
       yield("/ahoff")
       while GetCharacterCondition(43) do yield("/wait 1.013") end
     end
