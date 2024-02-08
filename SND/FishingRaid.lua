@@ -8,10 +8,11 @@
       Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
       Pandora: https://love.puni.sh/ment.json
       Visland: https://puni.sh/api/repository/veyn
-    Optional plugins:
-      AutoRetainer: https://love.puni.sh/ment.json
+    Required for major features:
       Teleporter: main repository
       Simple Tweaks: main repository
+    Optional plugins:
+      AutoRetainer: https://love.puni.sh/ment.json
       Discard Helper: https://plugins.carvel.li/
       YesAlready: https://love.puni.sh/ment.json
 ]]
@@ -19,19 +20,20 @@
 is_ar_while_waiting = false  --AutoRetainer multimode enabled in between fishing trips.
 wait_location = false  --Can be false, "inn", or "fc"
 fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
-is_wait_to_move = false  --Wait for the barrier to drop before moving to the side of the boat.
+is_wait_to_move = true  --Wait for the barrier to drop before moving to the side of the boat.
 is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
-is_discard = false  --Requires Discard Helper
+is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
 force_autohook_presets = true
 movement_method = "visland route" --"visland route", "visland random"
 buy_baits = false  --Minimum number of baits you want. Will buy 99 at a time.
+boat_route = "indigo"  --"indigo", "ruby", "random"
 
 is_spend_scrips = false
 scrip_category = 1
 scrip_subcategory = 6
-scrip_item_to_buy = "RegionalFolkloreTrader'sTokenC"
+scrip_item_to_buy = "Regional Folklore Trader's Token C"
 
 start_fishing = {
   "/wait 0.1",
@@ -51,7 +53,7 @@ is_debug = true
 function AutoHookPresets()
   if force_autohook_presets then
     if autohook_preset_loaded then
-      DeletedSelectedAutoHookPreset()
+      DeleteAllAutoHookAnonymousPresets()
       autohook_preset_loaded = false
     end
     if OceanFishingIsSpectralActive() then
@@ -130,14 +132,15 @@ end
 
 function RunDiscard(y)
   if is_discard then
-    if is_desynth and y==1 then
+    if is_desynth and y then
       yield("/echo You have desynth and discard turned on.")
       yield("/echo Waiting to discard until after desynth!")
-    elseif y==1 or y==2 then
-      discarded_on_1 = true
+    elseif y then
+      discarded_on_1 = os.time()+10
       yield("/discardall")
     elseif discarded_on_1 then
       yield("/discardall")
+      if os.time()<=discarded_on_1 then yield("/wait "..discarded_on_1-os.time()) end
     else
       yield("/discardall")
       yield("/echo Waiting 10 seconds to give Discard Helper time to run.")
@@ -190,15 +193,41 @@ function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
   return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
 end
 
+function HaveEnoughBait()
+  if type(buy_baits)~="number" then
+    return true
+  else
+    if GetItemCount(29714)<buy_baits then
+      yield("/echo Need to buy Ragworm!")
+      is_purchase_ragworm = true
+    end
+    if GetItemCount(29715)<buy_baits then
+      yield("/echo Need to buy Krill!")
+      is_purchase_krill = true
+    end
+    if GetItemCount(29716)<buy_baits then
+      yield("/echo Need to buy Plump Worm!")
+      is_purchase_plump = true
+    end
+    if is_purchase_ragworm or is_purchase_krill or is_purchase_plump then
+      return false
+    else
+      return true
+    end
+  end
+end
+
 ::Start::
-if IsInZone(900) then
+if IsInZone(900) or IsInZone(1163) then
   goto OnBoat
 elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
   if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     if GetCharacterCondition(91) then
       goto Enter
+    elseif not HaveEnoughBait() then
+      goto BuyBait
     elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
-      goto Queue
+      goto PreQueue
     elseif os.date("!*t").hour%2==1 and os.date("!*t").min>=45 then
       goto WaitForBoat
     end
@@ -232,9 +261,13 @@ if is_ar_while_waiting then
 end
 
 ::ReturnFromWait::
+WaitReady()
 ::TeleportToLimsa::
 if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
-  yield("/tp Limsa")
+  while GetCharacterCondition(27, false) do
+    yield("/tp Limsa")
+    yield("/wait 1.2")
+  end
   WaitReady(3, true)
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
@@ -324,19 +357,7 @@ end
 
 ::BuyBait::
 if type(buy_baits)=="number" then
-  if GetItemCount(29714)<buy_baits then
-    yield("/echo Need to buy Ragworm!")
-    is_purchase_ragworm = true
-  end
-  if GetItemCount(29715)<buy_baits then
-    yield("/echo Need to buy Krill!")
-    is_purchase_krill = true
-  end
-  if GetItemCount(29716)<buy_baits then
-    yield("/echo Need to buy Plump Worm!")
-    is_purchase_plump = true
-  end
-  if is_purchase_ragworm or is_purchase_krill or is_purchase_plump then
+  if not HaveEnoughBait() then
     if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
     while not IsAddonVisible("Shop") do
       if GetTargetName()~="Merchant & Mender" then
@@ -372,7 +393,7 @@ if type(buy_baits)=="number" then
   goto BuyBait
   end
   yield("/pcall Shop true -1")
-  if GetDistanceToPoint(-398,3,78)>5 then
+  if GetDistanceToPoint(-410,4,76)>6.9 then
     MoveNear(-404, 4, 73, 1, 2)
     MoveNear(-408, 4, 73.5, 2.2, 5)
   end
@@ -388,6 +409,16 @@ notabot = math.random(3,10)
 yield("/echo Randomly waiting "..notabot.." seconds. Soooooooo human.")
 yield("/wait "..notabot)
 
+::PreQueue::
+boat_route = string.lower(boat_route)
+if string.find(boat_route,"random") then
+  q = math.random(0,1)
+elseif string.find(boat_route,"ruby") or string.find(boat_route,"river") or string.find(boat_route,"kugane") then
+  q = 1
+else
+  q = 0
+end
+
 ::Queue::
 if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
   while GetCharacterCondition(91, false) do
@@ -398,7 +429,11 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     elseif IsAddonVisible("Talk") then
       yield("/click talk")
     elseif IsAddonVisible("SelectString") then
-      yield("/pcall SelectString true 0")
+      if GetSelectStringText(0)=="Register to board." then
+        yield("/pcall SelectString true 0")
+      else
+        yield("/pcall SelectString true "..q)
+      end
     elseif IsAddonVisible("SelectYesno") then
       yield("/pcall SelectYesno true 0")
     end
@@ -436,7 +471,7 @@ end
 results_tick = 0
 debug_tick = 0
 start_fishing_attempts = 0
-while IsInZone(900) do
+while IsInZone(900) or IsInZone(1163) do
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
   normal_bait = baits[current_zone].normal_bait
@@ -536,7 +571,7 @@ while IsInZone(900) do
   else
     start_fishing_attempts = 0
   end
-  if is_debug and IsInZone(900) then
+  if is_debug and ( IsInZone(900) or IsInZone(1163) ) then
     debug_tick = debug_tick + 1
     if debug_tick>=0 then
       debug_tick = -10
@@ -556,7 +591,7 @@ end
 ::DoneFishing::
 RunDiscard(1)
 if autohook_preset_loaded then
-  DeletedSelectedAutoHookPreset()
+  DeleteAllAutoHookAnonymousPresets()
   autohook_preset_loaded = false
 end
 WaitReady(3, false, 72)
