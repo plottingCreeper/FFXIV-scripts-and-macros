@@ -508,6 +508,7 @@ debug("move_y: "..move_y)
 results_tick = 0
 debug_tick = 0
 start_fishing_attempts = 0
+current_bait = ""
 while IsInZone(900) or IsInZone(1163) do
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
@@ -536,6 +537,7 @@ while IsInZone(900) or IsInZone(1163) do
   debug("Zone name: "..baits[current_zone].name, true)
   debug("Normal bait: "..normal_bait, true)
   debug("Spectral bait: "..spectral_bait, true)
+  debug("I think we're using: "..current_bait, true)
   if IsAddonVisible("IKDResult") then
     yield("/wait 10")
     yield("/pcall IKDResult true 0")
@@ -563,8 +565,7 @@ while IsInZone(900) or IsInZone(1163) do
       end
       yield("/wait 0.119")
     end
-    if move_x == 7.5 then yield("/visland moveto 9 "..move_z.." "..move_y)
-    else yield("/visland moveto -9 "..move_z.." "..move_y) end
+    yield("/visland moveto "..move_x*2 .." "..move_z.." "..move_y)
     yield("/wait 0.200")
     yield("/visland stop")
     movement = false
