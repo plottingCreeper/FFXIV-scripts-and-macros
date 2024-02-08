@@ -227,7 +227,7 @@ end
 
 function debug(debug_string, throttle)
   if is_debug then
-    if throttle and os.date("!*t").min~=0 then
+    if throttle and os.date("!*t").sec~=0 then
       yield("/wait 0.005")
     else
       yield("/echo [FishingRaid] "..debug_string)
@@ -310,6 +310,7 @@ if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
     elseif GetDistanceToTarget()<8 then
       yield("/pinteract")
     else
+      if IsMoving() then yield("/generalaction Jump") end
       yield("/lockon on")
       yield("/automove on")
     end
