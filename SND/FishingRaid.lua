@@ -569,33 +569,6 @@ while IsInZone(900) or IsInZone(1163) do
     yield("/wait 0.200")
     yield("/visland stop")
     movement = false
-  elseif bait_and_switch and correct_bait~=current_bait then
-    yield("/tweaks e baitcommand")
-    if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
-      elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
-      elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
-    end
-    debug("Switching bait to: "..correct_bait)
-    if GetCharacterCondition(43) then
-      stop_fishing_tick = 0
-      while GetCharacterCondition(42, false) and stop_fishing_tick<3 do
-        stop_fishing_tick = stop_fishing_tick + 1
-        yield("/wait 1.012")
-      end
-      yield("/ahoff")
-      while GetCharacterCondition(43) do yield("/wait 1.013") end
-    end
-    if bait_count>1 then
-      yield("/bait "..correct_bait)
-    else
-      debug("Out of "..correct_bait)
-      yield("/bait Versatile Lure")
-    end
-    is_changed_bait = true
-    --yield("/wait 0.4")
-    if not (IsAddonVisible("_TextError") and GetNodeText("_TextError", 1)=="Unable to change bait at this time.") then
-      current_bait = correct_bait
-    end
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
     not_fishing_tick = 0
     while GetCharacterCondition(43, false) and not_fishing_tick<1.5 and not is_changed_bait do
@@ -611,12 +584,41 @@ while IsInZone(900) or IsInZone(1163) do
     elseif GetCharacterCondition(43, false) then
       start_fishing_attempts = start_fishing_attempts + 1
       debug("Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
-      for _, command in pairs(start_fishing) do
-        debug("Running: "..command)
-        yield(command)
+      yield("/ac Cast")
+      SetAutoHookState(true)
+    end
+  elseif bait_and_switch and correct_bait~=current_bait then
+    yield("/tweaks e baitcommand")
+    if correct_bait=="Ragworm" then bait_count = GetItemCount(29714)
+      elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
+      elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
+    end
+    debug("Switching bait to: "..correct_bait)
+    if GetCharacterCondition(43) then
+      stop_fishing_tick = 0
+      while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
+        stop_fishing_tick = stop_fishing_tick + 1
+        yield("/wait 1.012")
       end
+      SetAutoHookState(false)
+      while GetCharacterCondition(43) do yield("/wait 1.013") end
+    end
+    if bait_count>1 then
+      yield("/bait "..correct_bait)
+      yield("/bait "..correct_bait)
+      yield("/bait "..correct_bait)
+    else
+      debug("Out of "..correct_bait)
+      yield("/bait Versatile Lure")
+    end
+    is_changed_bait = true
+    yield("/wait 0.1")
+    if not ( IsAddonVisible("_TextError") and ( GetNodeText("_TextError", 1)=="Unable to change bait at this time." or GetNodeText("_TextError", 1)=="That action cannot be used immediately before or after the ship changes areas." ) ) then
+      current_bait = correct_bait
+      SetAutoHookState(true)
     end
   else
+    SetAutoHookState(true)
     start_fishing_attempts = 0
   end
   yield("/wait 1.010")
