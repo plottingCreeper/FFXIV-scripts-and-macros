@@ -263,12 +263,13 @@ end
 ::ReturnFromWait::
 WaitReady()
 ::TeleportToLimsa::
-if not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) then
-  while GetCharacterCondition(27, false) do
+while not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) do
+  if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
     yield("/tp Limsa")
-    yield("/wait 1.2")
+  else
+    WaitReady(2)
   end
-  WaitReady(3, true)
+  yield("/wait 0.3")
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
   while GetDistanceToPoint(-84,19,0)<20 do
