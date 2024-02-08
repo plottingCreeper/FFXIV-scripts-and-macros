@@ -400,8 +400,8 @@ if type(buy_baits)=="number" then
         yield("/pinteract")
       elseif IsAddonVisible("SelectString") then
         yield("/pcall SelectString true 0")
-        yield("/wait 0.591")
       end
+      yield("/wait 0.591")
     end
     if is_purchase_ragworm then
       yield("/pcall Shop true 0 0 99")
