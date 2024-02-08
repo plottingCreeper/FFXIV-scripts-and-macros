@@ -57,10 +57,18 @@ function AutoHookPresets()
       autohook_preset_loaded = false
     end
     if OceanFishingIsSpectralActive() then
-      UseAutoHookAnonymousPreset("AH3_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")
+      if GetMaxGp()>700 then
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQXPaOhD+Kxpf3oV2ICGkyY0HtGEeJJngvhwymY5iC6zBWIwkJ6FM/ntXliVsYxxS6Km+MbufVvvtaj/JrJ1uLFkPCyl605lzuXYGEX4KSTcMnUvJY9Jw+iySPRx5JBwz5gXGrNaMaEQ2a3zj+rZ0A05EwEIwNXdGuCLh0iWv0rl0nIZzjRcQK0kHqdgoCd5whhDj5MtFLmr3iT2TTX5E5KJPcSjA3vUkZZG7WgKy9aYTThFrJ/lx8l7ureYHs/8uCEpQaDg0uXe+HJ77TRSuEsQwkjFVPgs9du01LM394vw4de8F8UIV+0csyH1AIktj8OoR4oskVcskDfQ7rdBegXox5ySSlk3KMMlDc2u3mu0PkNPmUm6M+xTDuKydYfRMuDHccso4las/0Smzp6bSabVbh/XpJOXylYpgsCIiNxhl7Tg7O0Y71HYo2c/25OwoPRnjOZkEdCr/xVQm8w4GYQwTib05cIS9qknuQ9ENqEALOgsk8lg0Dakn0QuVAUqmyQ1wSPH8H4G+4mfGN9RthihJ0WrFhwpQMXG3WFIC0E0nbQk2ruLBLC1C5xidtnvaRneO0mgYsp+kh6VW9e9aXbRSDm+iXt9yApcS0XvozNCHBKmHQxWgDKA2eiaTEC/3K9HJAdr0GZnSIBz5yDYpORZwkMIQRUyiJ4JAOn30AvRQQholrBFOcs0UeuPLHKrjFDs9zEIfZah3zmCm6rSRt98RD7YDfEtpRpUInh4+b1tjlZZlew5NadqHzhsUZ/AqOc69nyzByQteqlTsjfcN083lrTwuU5iCf20SH/hUjs3YfFKd2Io4YpljXBJR+9+JeAsFIDuy1L7SPJ1PTun6XE6l6zXCrk90eUk8KGSYDsiOSpWi9qhXYd2OqpWi9qpdVfbZCpTiCnUszUIfqIpQaUkf1LVKo9kdpv4jumZ8AS+FN7MyZZIHmUCQxIgKeTNVBYFZftg6z8qhlmaK8j/hAjQsJGgUc/tkvzhvncOmV4zN7wmeF8IY8+YhWO7vX7lXRe01vkSuQQ9L5LoIub5xd6DUFCukupPOL/K2zGN745xIzqJZSbraUUVII3KUis53OOVB1aw0NrlrT4vWHDPjHpEZiXzMVyXZWV8VPwvaQdH632G5hasmauFFrttJGwRc9r1YSLawHrUm+xbosxjSL1pdTpfGqnkpKLDdelOldsVg53vDACYxn2IvT25E9GNceFhdM6l1jF9duiB9EmJg2/wMF+qYRkWTYgcfOsrMs0uNsbC8zDyRbNmdSsJ7OIar1kYp2Ed0od7XLe1IJWUiCfBovjX2EY87PHsBhcqoRrtWjVo1atWoVaNCNf7j8GGU0YyzWjNqzag1o9aMCs24DePFEt3nHxudWjhq4aiF428Vjkfzf0f6B9+DNWjxeHh8+wU+cPL/Ih0AAA==")
+      else
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YTXPiOBD9Kypf9kKmICFkkhsLTEItJFTwbA6p1JRiC6xCWJQkh7BU/vtKliV/YBwysKf1jep+avXrVj/JbJ1uJGgPcsF7s7lzs3UGIXwlqEuIcyNYhBpOn4aiB0MPkTGlXmDMas0Ihyhd4xvX7coNGOIBJdLU3BvhDpGVi96Fc+M4DeceLmWsOB2gYoM4eMMZyhjn369zUbuv9A2l+SGeiz6DhEt71xOYhu5mJZGtD51wgtg68Y/zz3JvNb+Y/U+OQIwCw6HJvfP9+NwfQrKJEcNQRFj5LPTUtdewJPfrq9PUvRdES1XsXxFHTwEKLY3Bu4eQz+NULZMk0O+0Qns56EWMoVBYNgnDOA/Nrd1qtr9ATptLuVHmYyjHZesMwzfEjGHCMGVYbP6LTpk9NZVOq906rk/nCZcfmAeDDeK5wShrx+XlKdqhtgPxfrYnlyfpyRgu0DTAM/EnxCKed2ngxjAV0FtIjnKvapKHUHQDzMESzwMBPBrOCPYEWGMRgHia3AASDBd/cPADvlGWUrcZgjhFqxVfKkDFxE2gwEhC007aEqSu4sEsLULnFJ22e9pGd07SaDlk/6AeFFrVf2p10Uo5fAh7fctJupSIPsnODH2ZIPYgUQHKAGqjNzQlcHVYic6P0KZvwJQGwNAHtknxsZAHiRAQUgFeEZDS6YO1pAdi0iBmDWCca6bQqS9zqE5T7OQwc32UZb1zBjNVF428/RF5cjuJbynNqBLBi+PnbWeskrLszqEpTfvYeZPFGbwLBnPvJ0twuoYrlYq98W4hTi9v5XGpwhT8W5P4wMdibMbmTHViJ+KIZo5xSUTt/yTiRBYA7clS+0rzdM6c0vW5nErXa4RdH+vyCnmykCQZkD2VKkUdUK/Cuj1VK0UdVLuq7LMVKMUV6liahT5QFaGSkj6raxWH80eI/RdwT9kSEnAGRnQNbifOhwmRUMqjTcQU33BGmIuHmSqRnO7nnROuHCpGpkx/I8alqhEERhGzj/jrq9aV3P2O0sUTgotCGGNOn4bl/v6de1dUY+OLBVwqZImAFyH3D+4elJprhVS31NV13pZ5fqfOqWA0nJekqx1VhDQiR6no/IRTHlTNSmPj2/eiaM0xM+4RmqPQh2xTkp31VfGzoD0Urf8Tlju4aqIWXuS6m7RByOu/F3FBl9aj1mRfB30ayfS1VTOQRpfhlTFmoJLtzisrsSsGe18gBjCN2Ax6eXIjpJ/n3IPq4kmsY/ju4iXqIwIl2+Y3ecWOcVg0KXby00eZWXapMRaWl5mngq66M4FYD0by8rVRCvYRXqoXd0s7Em2ZCiR5ND8ah4jHI5yvpWZlVKNdq0atGrVq1KpRoRp/MfmplNGMy1ozas2oNaPWjArNmJBouQJP+cdGpxaOWjhq4fi/CseL+b8j+cvv2Rq0eDy/fPwLPjSdUjQdAAA=")
+      end
       autohook_preset_loaded = "spectral"
     else
-      UseAutoHookAnonymousPreset("AH3_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")
+      if GetMaxGp()>700 then
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YUW/iOBD+K1Ze7qW7gi7Qbd84YLfooK1K9vpQVSs3GGIRYmQ7bTnU/35jOzZJCCkVvG3e0Mzn8Xwzns8OG6+bSNbDQorebO5dbbxBjJ8j0o0i70ryhJx5fRbLHo4DEo0ZC0JrVmtGNCbbNVPr+rnyQ05EyCIwNfZGuCbRyidv0rvyvDPvBi8hlk4HqdhIBz/zhhDj/PtlLmr3mb2QbX5E5KLPcCTA3g0kZbG/XgGy+W4SThEbT/84z+WeLssl32x8Mv1fgiCNQsOhTb7z/fjkb+NorRHDWCZU+Rz01MU3sDT3y4vTFL4XJktV7d+JIA8hiR2NwVtAyFToVE/RCuMVqJdwTmLp2KQMdR6GW6vZaH2CnDGXcmN8SjHMy8Ybxi+EW8Mdp4xTud7tVBm/T7bKbmq4dJqt5nGNOk/J/KAiHKyJ+HA02u1T9ENth/R+rintkzRljBdkEtKZ/BtTqSceDMIaJhIHC+AIe1WTPISiH1KBlnQeShSweBbRQKJXKkOkx8kPcUTx4i+BfuAXxrfUXYZIp+jE4lMFqBi5OywpAei2k64EW9chJ7PdOUWn3Z6u0Z2TNBqm7D/Sw9Lo+i8jL0Yqh7dxr+84gUup6AN0ZjiFBGmAIxWgDKA2eiGTCK8OK9H5EeL0FdnSIBxPkWuSPhZwkKIIxUyiZ4JAO6foFeghTRpp1gjrXDOF3voyh+o0xU4PszBHGeqdM9ipakIxco57EsB+sKCpRKPqwvp2/MDtzFVal91BtLVpHTtwUJ3Bm+Q494RyBCeveKVScXfeT0y317fy+ExhCv6NTXwwpXJs5+aLasVOxBHLnOOSiMb/QcQ7KADZk6XxlebpffFK1+dyKl1vEG69FuYVCaCQUToheypVijqgXoV1e6pWijqodqV5mUOQLUApzHtUdyGN5/eYTp+QxeRqW5V/xQauzu8WlnLJb3nD+FJvOKJC3s5UQWCYH3fOs3KohZmi/Eu4ABGLCBol3L3aLy+aF7DlNWOLB4IXhTDWvH0Klvv71/51UXytT+s1CGKJXhchN7f+HpSaYoVUl9LFZd6WeW5vnRPJWTwvSdc4qggZxD5KxvsBqTyompbB6tv2W9Gao2bdIzIn8RTzdUnuzldF0IFyHEv8H7DcwVUTdfAi192kLQKu+14iJFs6j1qTfQ30WQLpF60+pytrNbwUFNjuvKpSu2Kw98VhAZOEz3CQJzci5jkuAqzumdQ6xm8+XZI+iTCwbXyFG3VM46JJsYNvHWXm2aXWWFheZp5IturOJOE9nMBd66IU7CO6VC/spnGkijKRBHg03s8OUY97PH8F7cnIRquWjVo2atmoZaNKNv7h8G2UEY12LRq1aNSiUYtGlWjcRclyhR7yz41OrRy1ctTK8ccqx5P9zyP9k+/RGYx6PD69/w+iobgTKR0AAA==")
+      else
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQW/iOhD+K1Yu79KuoAt02xsP2BY9aFFJXw9VtXKDIRYhRrZTyqL+9x3HsUlCSKngtrmhmc/j+WY8nx02TjuSrIOFFJ3pzLneOL0QvwakHQTOteQROXO6LJQdHHokGDLm+cas1gxoSLZrJsZ1s3R9ToTPAjDV9ka4JcHSJe/SuXacM+cOLyBWnA5SsVEc/MzpQ4yLH1eZqO1X9ka2+RGRiT7FgQB725OUhe56Ccj6h044QWyc+MdFJvdkWSb5eu2L6T8KgmIU6vdN8q0fxyd/HwbrGNEPZUSVz0JPXXwNS3K/ujxN4Tt+tFDV/hUJ8uST0NLovXuETESc6ilaob0CdSLOSSgtm4RhnIfm1qjXGl8gp82F3BifUAzzsnH64RvhxjDilHEq17udKuL3xVaZTTWXVr1RP65RFwmZn1T4vTURn45Gs3mKfqjtULyfbUrzJE0Z4jkZ+3Qq/8VUxhMPBmEMY4m9OXCEvcpJHkLR9alACzrzJfJYOA2oJ9GKSh/F4+T6OKB4/o9AP/Eb41vqNkMUp2jF4ksFKBm5EZaUAHTbSVuCreuQk9lsnaLTdk/b6NZJGg1T9pt0sNS6/qjlRUtl/z7sdC0ncCkVfYLO9CeQIPVwoAIUAdRGb2Qc4OVhJbo4Qpy+IVMahMMJsk2KjwUcpCBAIZPolSDQzglaAT0Uk0Yxa4TjXFOF3vpSh+o0xU4Os9BHGeqdMZipqkMxMo4H4sF+sKCuRKPswvp+/MDtzFVSl91BNLVpHDtwUJ3eu+Q484SyBMcrvFSp2DvvBtPt9a08LlOYnH9jEu9NqByauTlXrdiJOGCpc1wQUfs/iTiCApA9WWpfYZ7OuVO4PpNT4XqNsOtjYV4SDwoZJBOyp1KFqAPqlVu3p2qFqINqV5iXPgTpAhTCnGd1F9Jw9oDp5AUZDDpHA7ZCN6NMkcuIlOxkC/5hYAmp7N53jC+yOw+okPdTVSIY7+edE64cKkKqTP8TLkDWAoIGEbfv+KvL+iXsfcvY/IngeS6MMW8fh8X+7q17m5dj44sVHCSyQMHzkLt7dw9KzbVCqmvq8iprSz3At86x5CycFaSrHWWENGIfJe39hFQWVE5LY+P793vemqFm3AMyI+EE83VB7tZXRtCCMhwL/J+w3MGVE7XwPNfdpA0CHgCdSEi2sB61Jv0+6LII0tdWzQCMLqdLY0xBge3OOyuxKwZ73yAGMI74FHtZcgOiH+jCw+rmSaxD/O7SBemSAAPb2je4Y4c0zJsUO/j6UWaeXmqMueVF5rFky/ZUEt7BEdy+NkrOPqAL9eaua0ciLWNJgEft4+wQ9XjAsxWIUEo2GpVsVLJRyUYlG2Wy8R+Hr6WUaDQr0ahEoxKNSjTKRGMURIsleso+N1qVclTKUSnHX6scL+Y/j+Rvv2dr0Orx/PLxB1dtN3E7HQAA")
+      end
       autohook_preset_loaded = "normal"
     end
   end
@@ -133,8 +141,8 @@ end
 function RunDiscard(y)
   if is_discard then
     if is_desynth and y then
-      yield("/echo You have desynth and discard turned on.")
-      yield("/echo Waiting to discard until after desynth!")
+      debug("You have desynth and discard turned on.")
+      debug("Waiting to discard until after desynth!")
     elseif y then
       discarded_on_1 = os.time()+10
       yield("/discardall")
@@ -143,7 +151,7 @@ function RunDiscard(y)
       if os.time()<=discarded_on_1 then yield("/wait "..discarded_on_1-os.time()) end
     else
       yield("/discardall")
-      yield("/echo Waiting 10 seconds to give Discard Helper time to run.")
+      debug("Waiting 10 seconds to give Discard Helper time to run.")
       yield("/wait 10")
     end
   end
@@ -198,15 +206,15 @@ function HaveEnoughBait()
     return true
   else
     if GetItemCount(29714)<buy_baits then
-      yield("/echo Need to buy Ragworm!")
+      debug("Need to buy Ragworm!")
       is_purchase_ragworm = true
     end
     if GetItemCount(29715)<buy_baits then
-      yield("/echo Need to buy Krill!")
+      debug("Need to buy Krill!")
       is_purchase_krill = true
     end
     if GetItemCount(29716)<buy_baits then
-      yield("/echo Need to buy Plump Worm!")
+      debug("Need to buy Plump Worm!")
       is_purchase_plump = true
     end
     if is_purchase_ragworm or is_purchase_krill or is_purchase_plump then
@@ -217,11 +225,24 @@ function HaveEnoughBait()
   end
 end
 
+function debug(debug_string, throttle)
+  if is_debug then
+    if throttle and os.date("!*t").min~=0 then
+      yield("/wait 0.005")
+    else
+      yield("/echo [FishingRaid] "..debug_string)
+    end
+  end
+end
+
 ::Start::
 if IsInZone(900) or IsInZone(1163) then
+  debug("We're on the boat!")
   goto OnBoat
 elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
+  debug("Starting at or near fishing time.")
   if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+    debug("Near the ocean fishing NPC.")
     if GetCharacterCondition(91) then
       goto Enter
     elseif not HaveEnoughBait() then
@@ -232,6 +253,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
       goto WaitForBoat
     end
   else
+    debug("Not near the ocean fishing NPC.")
     goto ReturnFromWait
   end
 elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
@@ -245,16 +267,21 @@ end
 ::ARWait::
 if is_ar_while_waiting then
   while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
+    debug("Still running! AutoRetainer until 5 minutes before the boat.", true)
     yield("/wait 1.001")
   end
   yield("/ays multi")
   while GetCharacterName(true)~=fishing_character do
-    if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") then
+    if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") or GetCharacterCondition(53) then
       yield("/wait 1.002")
     elseif GetCharacterCondition(50,false) then
+      debug("Relogging to "..fishing_character)
       yield("/ays relog " .. fishing_character)
     elseif IsAddonVisible("RetainerList") then
+      debug("Closing retainer list.")
       yield("/pcall RetainerList true -1")
+    else
+      debug("Waiting for AutoRetainer to finish!")
     end
     yield("/wait 1.003")
   end
@@ -272,6 +299,7 @@ while not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) do
   yield("/wait 0.3")
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
+  debug("Limsa aetheryte plaza. Aethernet to arcanists guild.")
   while GetDistanceToPoint(-84,19,0)<20 do
     if IsAddonVisible("TelepotTown") then
       yield("/pcall TelepotTown true 11 3u")
@@ -291,6 +319,7 @@ if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
 end
 ::ExitInn::
 if IsInZone(177) then
+  debug("In inn. Leaving.")
   while IsInZone(177) do
     if GetTargetName()~="Heavy Oaken Door" then
       yield("/target Heavy Oaken Door")
@@ -307,6 +336,7 @@ if IsInZone(177) then
 end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
+  debug("Near inn. Moving to aftcastle.")
   if movement_method=="visland route" then
     yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
     yield("/wait 3")
@@ -322,6 +352,7 @@ if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
 end
 ::AethernetToArcanist::
 if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
+  debug("At aftcastle. Aethernet to arcanists guild.")
   while IsInZone(128) do
     if IsAddonVisible("TelepotTown") then
       yield("/pcall TelepotTown true 11 3u")
@@ -339,6 +370,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
+  debug("At arcanists guild. Moving to ocean fishing.")
   if movement_method=="visland route" then
     yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
     yield("/wait 3")
@@ -359,6 +391,7 @@ end
 ::BuyBait::
 if type(buy_baits)=="number" then
   if not HaveEnoughBait() then
+    debug("Buying more bait.")
     if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
     while not IsAddonVisible("Shop") do
       if GetTargetName()~="Merchant & Mender" then
@@ -402,12 +435,13 @@ end
 
 ::WaitForBoat::
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
+  debug("Still running! Waiting for the boat.", true)
   yield("/wait 1.005")
 end
 
 ::BotPause::
 notabot = math.random(3,10)
-yield("/echo Randomly waiting "..notabot.." seconds. Soooooooo human.")
+debug("Randomly waiting "..notabot.." seconds. Soooooooo human.")
 yield("/wait "..notabot)
 
 ::PreQueue::
@@ -422,6 +456,7 @@ end
 
 ::Queue::
 if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+  debug("Queueing up!")
   while GetCharacterCondition(91, false) do
     if GetTargetName()~="Dryskthota" then
       yield("/target Dryskthota")
@@ -441,18 +476,19 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     yield("/wait 0.511")
   end
 else
-  yield("/echo Zone: "..GetZoneID())
-  if IsInZone(129) then yield("/echo Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
-  yield("/echo That's not gonna work, chief.")
+  debug("Zone: "..GetZoneID())
+  if IsInZone(129) then debug("Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
+  debug("That's not gonna work, chief.")
   yield("/pcraft stop")
 end
 
 ::Enter::
 while IsInZone(129) do
+  debug("Waiting for queue to pop.", true)
   if IsAddonVisible("ContentsFinderConfirm") then yield("/pcall ContentsFinderConfirm true 8") end
   yield("/wait 1.007")
 end
-WaitReady(3, true)
+WaitReady(3)
 
 ::PrepareRandom::
 movement = true
@@ -463,10 +499,8 @@ if math.ceil(move_y)%2==1 then
 else
   move_x = -7.5
 end
-if is_debug then
-  yield("/echo move_x: "..move_x)
-  yield("/echo move_y: "..move_y)
-end
+debug("move_x: "..move_x)
+debug("move_y: "..move_y)
 
 ::OnBoat::
 results_tick = 0
@@ -494,6 +528,12 @@ while IsInZone(900) or IsInZone(1163) do
       end
     end
   end
+  debug("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
+  debug("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
+  debug("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
+  debug("Zone name: "..baits[current_zone].name, true)
+  debug("Normal bait: "..normal_bait, true)
+  debug("Spectral bait: "..spectral_bait, true)
   if IsAddonVisible("IKDResult") then
     yield("/wait 10")
     yield("/pcall IKDResult true 0")
@@ -504,7 +544,7 @@ while IsInZone(900) or IsInZone(1163) do
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
       if command=="/leaveduty" then LeaveDuty() end
-      if is_debug then yield("/echo Running: "..command) end
+      debug("Running: "..command)
       yield(command)
     end
   elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
@@ -532,7 +572,7 @@ while IsInZone(900) or IsInZone(1163) do
       elseif correct_bait=="Krill" then bait_count = GetItemCount(29715)
       elseif correct_bait=="Plump Worm" then bait_count = GetItemCount(29716)
     end
-    yield("/echo Switching bait to: "..correct_bait)
+    debug("Switching bait to: "..correct_bait)
     if GetCharacterCondition(43) then
       while GetCharacterCondition(42, false) do yield("/wait 1.012") end
       yield("/ahoff")
@@ -541,7 +581,7 @@ while IsInZone(900) or IsInZone(1163) do
     if bait_count>1 then
       yield("/bait "..correct_bait)
     else
-      yield("/echo Out of "..correct_bait)
+      debug("Out of "..correct_bait)
       yield("/bait Versatile Lure")
     end
     is_changed_bait = true
@@ -563,28 +603,14 @@ while IsInZone(900) or IsInZone(1163) do
       current_bait = ""
     elseif GetCharacterCondition(43, false) then
       start_fishing_attempts = start_fishing_attempts + 1
-      if is_debug then yield("/echo Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 ) end
+      debug("Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
       for _, command in pairs(start_fishing) do
-        if is_debug then yield("/echo Running: "..command) end
+        debug("Running: "..command)
         yield(command)
       end
     end
   else
     start_fishing_attempts = 0
-  end
-  if is_debug and ( IsInZone(900) or IsInZone(1163) ) then
-    debug_tick = debug_tick + 1
-    if debug_tick>=0 then
-      debug_tick = -10
-      yield("/echo -------------------------------------")
-      yield("/echo FishingRoute: "..tostring(GetCurrentOceanFishingRoute()))
-      yield("/echo FishingZone:  "..tostring(GetCurrentOceanFishingZone()))
-      yield("/echo FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()))
-      yield("/echo Zone name: "..baits[current_zone].name)
-      yield("/echo Normal bait: "..normal_bait)
-      yield("/echo Spectral bait: "..spectral_bait)
-      yield("/echo -------------------------------------")
-    end
   end
   yield("/wait 1.010")
 end
@@ -599,6 +625,7 @@ WaitReady(3, false, 72)
 
 ::SpendScrips::
 if is_spend_scrips then
+  debug("Spending scrips on "..scrip_item_to_buy)
   yield("/visland moveto -407 71 4")
   while IsAddonVisible("InclusionShop")==false do
     if GetTargetName()~="Scrip Exchange" then
@@ -637,8 +664,10 @@ end
 
 ::WaitLocation::
 if wait_location=="inn" then
+  debug("Returning to inn.")
   ::MoveToArcanist::
   if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
+    debug("Near ocean fishing. Moving to arcanists guild.")
     if movement_method=="visland route" then
       yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
       yield("/wait 3")
@@ -662,6 +691,7 @@ if wait_location=="inn" then
   end
   ::AethernetToAftcastle::
   if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
+    debug("At arcanists guild. Aethernet to aftcastle.")
     while IsInZone(129) do
       if IsAddonVisible("TelepotTown") then
         yield("/pcall TelepotTown true 11 1u")
@@ -680,6 +710,7 @@ if wait_location=="inn" then
   RunDiscard(2)
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
+    debug("Near aftcastle. Moving to inn.")
     if movement_method=="visland route" then
       yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
       yield("/wait 3")
@@ -695,6 +726,7 @@ if wait_location=="inn" then
   end
   ::EnterInn::
   while IsInZone(128) do
+    debug("Near inn. Entering.")
     if GetDistanceToPoint(13,40,13)<4 then
       if GetTargetName()~="Mytesyn" then
         yield("/target Mytesyn")
@@ -712,19 +744,29 @@ if wait_location=="inn" then
   end
   WaitReady(3, true)
 elseif wait_location=="fc" then
-  yield("/tp Estate Hall (Free Company)")
-  WaitReady(3, true)
-  yield("/autmove on")
+  debug("Returning to FC house.")
+  while not ( IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) ) do
+    if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
+      yield("/tp Estate Hall (Free Company)")
+    else
+      WaitReady()
+    end
+    yield("/wait 0.31")
+  end
+  debug("Arrived at FC house. Entering.")
+  yield("/automove on")
   yield("/wait 1.033")
   yield("/automove off")
   yield("/ays het")
   WaitReady(3, true)
+  debug("Inside FC house (hopefully)")
 end
 
 WaitReady()
 
 ::Desynth::
 if is_desynth then
+  debug("Running desynthesis.")
   is_doing_desynth = true
   failed_click_tick = 0
   open_desynth_attempts = 0
@@ -735,7 +777,7 @@ if is_desynth then
       if open_desynth_attempts>5 then
         is_doing_desynth = false
         is_desynth = false
-        yield("/echo Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
+        debug("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
     elseif IsAddonVisible("SalvageDialog") then
       yield("/pcall SalvageDialog true 0 false")
@@ -759,11 +801,9 @@ if is_desynth then
         item_level = string.gsub(item_level_raw,"%D","")
         item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
         if item_level=="1" and item_type=="Culinarian" then
-          if is_debug then
-            yield("/echo item_name: "..item_name)
-            yield("/echo item_level: "..item_level)
-            yield("/echo item_type: "..item_type)
-          end
+          debug("item_name: "..item_name)
+          debug("item_level: "..item_level)
+          debug("item_type: "..item_type)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
           is_clicked_desynth = true
           break
@@ -781,8 +821,9 @@ end
 RunDiscard()
 
 ::StartAR::
-yield("/echo You did a good job today!")
+debug("You did a good job today!")
 if is_ar_while_waiting then
+  debug("Enabling AutoRetainer while waiting.")
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   yield("/ays multi")
   while GetCharacterCondition(1) do
@@ -790,6 +831,7 @@ if is_ar_while_waiting then
   end
   goto ARWait
 else
+  debug("Waiting for the next boat.")
   goto WaitForBoat
 end
 
