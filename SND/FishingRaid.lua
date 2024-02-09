@@ -47,55 +47,6 @@ bags_full = {
   "/pcraft stop",
 }
 is_debug = true
---[[
-
-  Automatic ocean fishing script. Options for AutoRetainer and returning to inn room between trips.
-
-    Script runs using:
-      SomethingNeedDoing (Expanded Edition): https://puni.sh/api/repository/croizat
-    Required plugins:
-      Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
-      Pandora: https://love.puni.sh/ment.json
-      Visland: https://puni.sh/api/repository/veyn
-    Required for major features:
-      Teleporter: main repository
-      Simple Tweaks: main repository
-    Optional plugins:
-      AutoRetainer: https://love.puni.sh/ment.json
-      Discard Helper: https://plugins.carvel.li/
-      YesAlready: https://love.puni.sh/ment.json
-]]
-
-is_ar_while_waiting = true  --AutoRetainer multimode enabled in between fishing trips.
-wait_location = "inn"  --Can be false, "inn", or "fc"
-fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
-is_wait_to_move = false  --Wait for the barrier to drop before moving to the side of the boat.
-is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
-is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
-is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
-bait_and_switch = true  --Uses /bait command from SimpleTweaks
-force_autohook_presets = true
-movement_method = "visland route" --"visland route", "visland random"
-buy_baits = 150  --Minimum number of baits you want. Will buy 99 at a time.
-boat_route = "random"  --"indigo", "ruby", "random"
-
-is_spend_scrips = true
-scrip_category = 1
-scrip_subcategory = 5
-scrip_item_to_buy = "Regional Folklore Trader's Token B"
-
-start_fishing = {
-  "/wait 0.1",
-  "/ac cast",
-  "/ahon",
-}
-
-bags_full = {
-  "/echo Bags full!",
-  "/leaveduty",
-  "/pcraft stop",
-}
-is_debug = true
 
 ------------------------------------------------------------------------
 
@@ -185,15 +136,15 @@ function WaitReady(delay, is_not_ready, status)
     elseif loading_tick == -1 then yield("/wait "..wait)
     else loading_tick = loading_tick + 0.1 end
     yield("/wait "..wait)
-    if IsAddonVisible("IKDResult") then
-      result_timer = 501
-      while result_timer>=500 do
-        result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
-        result_timer = tonumber(result_raw)
-        yield("/wait 0.266")
-      end
-      yield("/pcall IKDResult true 0")
-    end
+--     if IsAddonVisible("IKDResult") then
+--       result_timer = 501
+--       while result_timer>=500 do
+--         result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
+--         result_timer = tonumber(result_raw)
+--         yield("/wait 0.266")
+--       end
+--       yield("/pcall IKDResult true 0")
+--     end
     if is_discard=="spam" then yield("/discardall") end
   end
 end
@@ -460,8 +411,8 @@ if type(buy_baits)=="number" then
     while not IsAddonVisible("Shop") do
       if GetTargetName()~="Merchant & Mender" then
         yield("/target Merchant & Mender")
-      elseif IsAddonVisible("SelectString") then
-        yield("/pcall SelectString true 0")
+      elseif IsAddonVisible("SelectIconString") then
+        yield("/pcall SelectIconString true 0")
       elseif GetCharacterCondition(32, false) then
         yield("/pinteract")
       end
