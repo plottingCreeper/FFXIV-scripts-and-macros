@@ -418,14 +418,19 @@ if string.find(string.lower(do_repair),"npc") and NeedsRepair(tonumber(repair_th
     yield("/wait 0.592")
   end
   while IsAddonVisible("Repair") and string.gsub(GetNodeText("Repair",2),"%D","")~="0" do
-    if IsAddonVisible("SelectYesno") then
-      yield("/pcall SelectYesno true 0")
+    if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
+      if IsAddonVisible("SelectYesno") then
+        yield("/pcall SelectYesno true 0")
+      else
+        yield("/pcall Repair true 0")
+      end
     else
-      yield("/pcall Repair true 0")
+      yield("/pcall Repair true -1")
     end
     yield("/wait 0.305")
   end
 end
+
 ::BuyBait::
 if type(buy_baits)=="number" then
   if not HaveEnoughBait() then
@@ -542,7 +547,9 @@ debug("move_y: "..move_y)
 
 ::OnBoat::
 start_fishing_attempts = 0
-current_bait = baits_list.versatile
+for _, bait in pairs(baits_list) do
+  if PlayerState.FishingBait==bait.id then current_bait = bait end
+end
 while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
   ::AlwaysDo::
   AutoHookPresets()
@@ -567,7 +574,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   debug("Normal bait: "..normal_bait.name, true)
   debug("Spectral bait: "..spectral_bait.name, true)
   debug("Should now be using: "..correct_bait.name, true)
-  debug("Current bait: "..current_bait.name, true)
+  debug("Script thinks we're using: "..current_bait.name, true)
   ocean_fishing_time = GetCurrentOceanFishingZoneTimeLeft()
 
   ::Ifs::
@@ -575,6 +582,10 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
     WaitReady(2, false, 62)
+
+  ::ShouldntNeed::
+  elseif IsAddonVisible("IKDResult") then
+    break
 
   ::DoNothing::
   elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) then
@@ -625,6 +636,8 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     elseif GetCharacterCondition(43, false) then
       start_fishing_attempts = start_fishing_attempts + 1
       debug("Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
+      debug("Should now be using: "..correct_bait.name)
+      debug("Script thinks we're using: "..current_bait.name)
       yield("/ac Cast")
       SetAutoHookState(true)
     end
