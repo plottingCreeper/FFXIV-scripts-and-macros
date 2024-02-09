@@ -52,10 +52,10 @@ is_debug = true
 
 function AutoHookPresets()
   if force_autohook_presets then
-    if autohook_preset_loaded then
-      DeleteAllAutoHookAnonymousPresets()
-      autohook_preset_loaded = false
-    end
+--     if autohook_preset_loaded then
+--       DeleteAllAutoHookAnonymousPresets()
+--       autohook_preset_loaded = false
+--     end
     if OceanFishingIsSpectralActive() then
       if GetMaxGp()>700 then
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQXPaOhD+Kxpf3oV2ICGkyY0HtGEeJJngvhwymY5iC6zBWIwkJ6FM/ntXliVsYxxS6Km+MbufVvvtaj/JrJ1uLFkPCyl605lzuXYGEX4KSTcMnUvJY9Jw+iySPRx5JBwz5gXGrNaMaEQ2a3zj+rZ0A05EwEIwNXdGuCLh0iWv0rl0nIZzjRcQK0kHqdgoCd5whhDj5MtFLmr3iT2TTX5E5KJPcSjA3vUkZZG7WgKy9aYTThFrJ/lx8l7ureYHs/8uCEpQaDg0uXe+HJ77TRSuEsQwkjFVPgs9du01LM394vw4de8F8UIV+0csyH1AIktj8OoR4oskVcskDfQ7rdBegXox5ySSlk3KMMlDc2u3mu0PkNPmUm6M+xTDuKydYfRMuDHccso4las/0Smzp6bSabVbh/XpJOXylYpgsCIiNxhl7Tg7O0Y71HYo2c/25OwoPRnjOZkEdCr/xVQm8w4GYQwTib05cIS9qknuQ9ENqEALOgsk8lg0Dakn0QuVAUqmyQ1wSPH8H4G+4mfGN9RthihJ0WrFhwpQMXG3WFIC0E0nbQk2ruLBLC1C5xidtnvaRneO0mgYsp+kh6VW9e9aXbRSDm+iXt9yApcS0XvozNCHBKmHQxWgDKA2eiaTEC/3K9HJAdr0GZnSIBz5yDYpORZwkMIQRUyiJ4JAOn30AvRQQholrBFOcs0UeuPLHKrjFDs9zEIfZah3zmCm6rSRt98RD7YDfEtpRpUInh4+b1tjlZZlew5NadqHzhsUZ/AqOc69nyzByQteqlTsjfcN083lrTwuU5iCf20SH/hUjs3YfFKd2Io4YpljXBJR+9+JeAsFIDuy1L7SPJ1PTun6XE6l6zXCrk90eUk8KGSYDsiOSpWi9qhXYd2OqpWi9qpdVfbZCpTiCnUszUIfqIpQaUkf1LVKo9kdpv4jumZ8AS+FN7MyZZIHmUCQxIgKeTNVBYFZftg6z8qhlmaK8j/hAjQsJGgUc/tkvzhvncOmV4zN7wmeF8IY8+YhWO7vX7lXRe01vkSuQQ9L5LoIub5xd6DUFCukupPOL/K2zGN745xIzqJZSbraUUVII3KUis53OOVB1aw0NrlrT4vWHDPjHpEZiXzMVyXZWV8VPwvaQdH632G5hasmauFFrttJGwRc9r1YSLawHrUm+xbosxjSL1pdTpfGqnkpKLDdelOldsVg53vDACYxn2IvT25E9GNceFhdM6l1jF9duiB9EmJg2/wMF+qYRkWTYgcfOsrMs0uNsbC8zDyRbNmdSsJ7OIar1kYp2Ed0od7XLe1IJWUiCfBovjX2EY87PHsBhcqoRrtWjVo1atWoVaNCNf7j8GGU0YyzWjNqzag1o9aMCs24DePFEt3nHxudWjhq4aiF428Vjkfzf0f6B9+DNWjxeHh8+wU+cPL/Ih0AAA==")
@@ -74,7 +74,7 @@ function AutoHookPresets()
   end
 end
 
-baits = {
+baits_list = {
   versatile = { name = "Versatile Lure", id = 29717 },
   ragworm = { name = "Ragworm", id = 29714 },
   krill = { name = "Krill", id = 29715 },
@@ -82,17 +82,17 @@ baits = {
 }
 
 ocean_zones = {
-  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
-  [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.plumpworm},
-  [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits.ragworm, daytime = baits.plumpworm, sunset = baits.ragworm, nighttime = baits.ragworm},
-  [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits.plumpworm, daytime = baits.plumpworm, sunset = baits.ragworm, nighttime = baits.ragworm},
-  [5] = {id = 246, name = "The Ciedalaes", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
-  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
-  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
-  [8] = {id = 286, name = "Sirensong Sea", normal_bait = baits.plumpworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
-  [9] = {id = 288, name = "Kugane Coast", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.plumpworm},
-  [10] = {id = 290, name = "Ruby Sea", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.plumpworm, nighttime = baits.ragworm},
-  [11] = {id = 292, name = "Lower One River", normal_bait = baits.ragworm, daytime = baits.ragworm, sunset = baits.ragworm, nighttime = baits.ragworm},
+  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
+  [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listplumpworm},
+  [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits_listragworm, daytime = baits_listplumpworm, sunset = baits_listragworm, nighttime = baits_listragworm},
+  [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits_listplumpworm, daytime = baits_listplumpworm, sunset = baits_listragworm, nighttime = baits_listragworm},
+  [5] = {id = 246, name = "The Ciedalaes", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
+  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
+  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
+  [8] = {id = 286, name = "Sirensong Sea", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
+  [9] = {id = 288, name = "Kugane Coast", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listplumpworm},
+  [10] = {id = 290, name = "Ruby Sea", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
+  [11] = {id = 292, name = "Lower One River", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
 }
 
 routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by SND.
@@ -244,7 +244,9 @@ function debug(debug_string, throttle)
 end
 
 ::Start::
-if IsInZone(900) or IsInZone(1163) then
+if IsAddonVisible("IKDResult") then
+  goto FishingResults
+elseif IsInZone(900) or IsInZone(1163) then
   debug("We're on the boat!")
   goto OnBoat
 elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
@@ -513,11 +515,10 @@ debug("move_x: "..move_x)
 debug("move_y: "..move_y)
 
 ::OnBoat::
-results_tick = 0
-debug_tick = 0
 start_fishing_attempts = 0
 current_bait = ""
-while IsInZone(900) or IsInZone(1163) do
+while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
+  AutoHookPresets()
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
   normal_bait = ocean_zones[current_zone].normal_bait
@@ -526,24 +527,17 @@ while IsInZone(900) or IsInZone(1163) do
   if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = ocean_zones[current_zone].nighttime end
   if OceanFishingIsSpectralActive() then
     correct_bait = spectral_bait
-    if force_autohook_presets then
-      if autohook_preset_loaded~="spectral" then
-        AutoHookPresets()
-      end
-    end
   else
     correct_bait = normal_bait
-    if force_autohook_presets then
-      if autohook_preset_loaded~="normal" then
-        AutoHookPresets()
-      end  -- What a fucking mess this whole area is.
-    end  --  Who wrote this shit?
-  end  -- Oh no, it was me.
-  if PlayerState.FishingBait==29717 then current_bait = "Versatile Lure"
-  elseif PlayerState.FishingBait==29714 then current_bait = "Ragworm"
-  elseif PlayerState.FishingBait==29715 then current_bait = "Krill"
-  elseif PlayerState.FishingBait==29716 then current_bait = "PlumpWorm"
-  else current_bait = "unknown" .. tostring(PlayerState.FishingBait) end
+  end
+  for _, bait in pairs(baits_list) do --I hope this works!
+    if PlayerState.FishingBait==bait.id then current_bait = bait.name end
+  end
+--   if PlayerState.FishingBait==29717 then current_bait = "Versatile Lure"
+--   elseif PlayerState.FishingBait==29714 then current_bait = "Ragworm"
+--   elseif PlayerState.FishingBait==29715 then current_bait = "Krill"
+--   elseif PlayerState.FishingBait==29716 then current_bait = "PlumpWorm"
+--   else current_bait = "unknown" .. tostring(PlayerState.FishingBait) end
   debug("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
   debug("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
   debug("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
@@ -552,15 +546,8 @@ while IsInZone(900) or IsInZone(1163) do
   debug("Spectral bait: "..spectral_bait.name, true)
   debug("Should now be using: "..correct_bait.name, true)
   debug("Current bait: "..current_bait, true)
-  if IsAddonVisible("IKDResult") then
-    result_timer = 501
-    while result_timer>=500 do
-      result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
-      result_timer = tonumber(result_raw)
-      yield("/wait 0.266")
-    end
-    yield("/pcall IKDResult true 0")
-  elseif IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
+  if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
+    is_changed_zone = true
     WaitReady(2, false, 62)
   elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) then
     yield("/wait 1.011")
@@ -590,11 +577,12 @@ while IsInZone(900) or IsInZone(1163) do
     movement = false
   elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
     not_fishing_tick = 0
-    while GetCharacterCondition(43, false) and not_fishing_tick<1.5 and not is_changed_bait do
+    while GetCharacterCondition(43, false) and not_fishing_tick<1.5 and not is_changed_bait and not is_changed_zone do
       yield("/wait 0.108")
       not_fishing_tick = not_fishing_tick + 0.1
     end
     is_changed_bait = false
+    is_changed_zone = false
     if start_fishing_attempts>6 then
       LeaveDuty()
       yield("/pcraft stop")
@@ -635,6 +623,17 @@ while IsInZone(900) or IsInZone(1163) do
   end
   yield("/wait 1.010")
 end
+::FishingResults::
+if IsAddonVisible("IKDResult") then
+  result_timer = 501
+  while IsAddonVisible("IKDResult") and result_timer>=500 do
+    result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
+    result_timer = tonumber(result_raw)
+    if not type(result_timer)=="number" then result_timer = 501 end
+    yield("/wait 0.266")
+  end
+  yield("/pcall IKDResult true 0")
+else
 
 ::DoneFishing::
 RunDiscard(1)
