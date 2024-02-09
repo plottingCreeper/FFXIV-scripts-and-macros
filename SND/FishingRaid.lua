@@ -129,19 +129,22 @@ baits_list = {
   krill = { name = "Krill", id = 29715 },
   plumpworm = { name = "Plump Worm", id = 29716 },
 }
+correct_bait = baits_list.versatile
+normal_bait = baits_list.versatile
+spectral_bait = baits_list.versatile
 
 ocean_zones = {
-  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
-  [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listplumpworm},
-  [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits_listragworm, daytime = baits_listplumpworm, sunset = baits_listragworm, nighttime = baits_listragworm},
-  [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits_listplumpworm, daytime = baits_listplumpworm, sunset = baits_listragworm, nighttime = baits_listragworm},
-  [5] = {id = 246, name = "The Ciedalaes", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
-  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
-  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
-  [8] = {id = 286, name = "Sirensong Sea", normal_bait = baits_listplumpworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
-  [9] = {id = 288, name = "Kugane Coast", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listplumpworm},
-  [10] = {id = 290, name = "Ruby Sea", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listplumpworm, nighttime = baits_listragworm},
-  [11] = {id = 292, name = "Lower One River", normal_bait = baits_listragworm, daytime = baits_listragworm, sunset = baits_listragworm, nighttime = baits_listragworm},
+  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.plumpworm, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
+  [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits_list.krill, daytime = baits_list.krill, sunset = baits_list.ragworm, nighttime = baits_list.plumpworm},
+  [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits_list.ragworm, daytime = baits_list.plumpworm, sunset = baits_list.ragworm, nighttime = baits_list.krill},
+  [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits_list.plumpworm, daytime = baits_list.plumpworm, sunset = baits_list.ragworm, nighttime = baits_list.krill},
+  [5] = {id = 246, name = "The Ciedalaes", normal_bait = baits_list.ragworm, daytime = baits_list.krill, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
+  [6] = {id = 248, name = "Bloodbrine Sea", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
+  [7] = {id = 250, name = "Rothlyt Sound", normal_bait = baits_list.plumpworm, daytime = baits_list.krill, sunset = baits_list.krill, nighttime = baits_list.krill},
+  [8] = {id = 286, name = "Sirensong Sea", normal_bait = baits_list.plumpworm, daytime = baits_list.krill, sunset = baits_list.krill, nighttime = baits_list.krill},
+  [9] = {id = 288, name = "Kugane Coast", normal_bait = baits_list.ragworm, daytime = baits_list.krill, sunset = baits_list.ragworm, nighttime = baits_list.plumpworm},
+  [10] = {id = 290, name = "Ruby Sea", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
+  [11] = {id = 292, name = "Lower One River", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.krill, nighttime = baits_list.krill},
 }
 
 routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by SND.
@@ -575,9 +578,9 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = ocean_zones[current_zone].daytime end
   if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = ocean_zones[current_zone].sunset end
   if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = ocean_zones[current_zone].nighttime end
-  if OceanFishingIsSpectralActive() then
+  if OceanFishingIsSpectralActive() and spectral_bait then
     correct_bait = spectral_bait
-  else
+  elseif normal_bait then
     correct_bait = normal_bait
   end
   for _, bait in pairs(baits_list) do --I hope this works!
