@@ -47,6 +47,55 @@ bags_full = {
   "/pcraft stop",
 }
 is_debug = true
+--[[
+
+  Automatic ocean fishing script. Options for AutoRetainer and returning to inn room between trips.
+
+    Script runs using:
+      SomethingNeedDoing (Expanded Edition): https://puni.sh/api/repository/croizat
+    Required plugins:
+      Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
+      Pandora: https://love.puni.sh/ment.json
+      Visland: https://puni.sh/api/repository/veyn
+    Required for major features:
+      Teleporter: main repository
+      Simple Tweaks: main repository
+    Optional plugins:
+      AutoRetainer: https://love.puni.sh/ment.json
+      Discard Helper: https://plugins.carvel.li/
+      YesAlready: https://love.puni.sh/ment.json
+]]
+
+is_ar_while_waiting = true  --AutoRetainer multimode enabled in between fishing trips.
+wait_location = "inn"  --Can be false, "inn", or "fc"
+fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
+is_wait_to_move = false  --Wait for the barrier to drop before moving to the side of the boat.
+is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
+is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
+is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
+bait_and_switch = true  --Uses /bait command from SimpleTweaks
+force_autohook_presets = true
+movement_method = "visland route" --"visland route", "visland random"
+buy_baits = 150  --Minimum number of baits you want. Will buy 99 at a time.
+boat_route = "random"  --"indigo", "ruby", "random"
+
+is_spend_scrips = true
+scrip_category = 1
+scrip_subcategory = 5
+scrip_item_to_buy = "Regional Folklore Trader's Token B"
+
+start_fishing = {
+  "/wait 0.1",
+  "/ac cast",
+  "/ahon",
+}
+
+bags_full = {
+  "/echo Bags full!",
+  "/leaveduty",
+  "/pcraft stop",
+}
+is_debug = true
 
 ------------------------------------------------------------------------
 
@@ -280,7 +329,7 @@ if is_ar_while_waiting then
     debug("Still running! AutoRetainer until 5 minutes before the boat.", true)
     yield("/wait 1.001")
   end
-  yield("/ays multi")
+  yield("/ays multi d")
   while GetCharacterName(true)~=fishing_character do
     if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") or GetCharacterCondition(53) then
       yield("/wait 1.002")
@@ -518,6 +567,7 @@ debug("move_y: "..move_y)
 start_fishing_attempts = 0
 current_bait = ""
 while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
+  ::AlwaysDo::
   AutoHookPresets()
   current_route = routes[GetCurrentOceanFishingRoute()]
   current_zone = current_route[GetCurrentOceanFishingZone()+1]
@@ -546,17 +596,27 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   debug("Spectral bait: "..spectral_bait.name, true)
   debug("Should now be using: "..correct_bait.name, true)
   debug("Current bait: "..current_bait, true)
+  ocean_fishing_time = GetCurrentOceanFishingZoneTimeLeft()
+
+  ::Ifs::
+  ::Loading::
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
     WaitReady(2, false, 62)
+
+  ::DoNothing::
   elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) then
     yield("/wait 1.011")
+
+  ::BagCheck::
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
       if command=="/leaveduty" then LeaveDuty() end
       debug("Running: "..command)
       yield(command)
     end
+
+  ::Movement::
   elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.512")
@@ -575,7 +635,9 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     yield("/wait 0.200")
     yield("/visland stop")
     movement = false
-  elseif GetCurrentOceanFishingZoneTimeLeft()>30 and GetCharacterCondition(43, false) then
+
+  ::StartFishing::
+  elseif --[[ GetCurrentOceanFishingZoneTimeLeft()>30 and ]] GetCharacterCondition(43, false) then
     not_fishing_tick = 0
     while GetCharacterCondition(43, false) and not_fishing_tick<1.5 and not is_changed_bait and not is_changed_zone do
       yield("/wait 0.108")
@@ -594,6 +656,8 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
       yield("/ac Cast")
       SetAutoHookState(true)
     end
+
+  ::BaitSwitch::
   elseif bait_and_switch and PlayerState.FishingBait~=correct_bait.id then
     if GetItemCount(correct_bait.id)>1 and PlayerState.FishingBait~=correct_bait.id then
       yield("/tweaks e baitcommand")
@@ -633,14 +697,11 @@ if IsAddonVisible("IKDResult") then
     yield("/wait 0.266")
   end
   yield("/pcall IKDResult true 0")
-else
+end
 
 ::DoneFishing::
 RunDiscard(1)
-if autohook_preset_loaded then
-  DeleteAllAutoHookAnonymousPresets()
-  autohook_preset_loaded = false
-end
+DeleteAllAutoHookAnonymousPresets()
 WaitReady(3, false, 72)
 
 ::SpendScrips::
@@ -845,7 +906,7 @@ debug("You did a good job today!")
 if is_ar_while_waiting then
   debug("Enabling AutoRetainer while waiting.")
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
-  yield("/ays multi")
+  yield("/ays multi e")
   while GetCharacterCondition(1) do
     yield("/wait 1.040")
   end
