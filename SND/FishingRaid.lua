@@ -119,6 +119,12 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
+if do_repair then
+  repair_threshold = string.gsub(do_repair,"%D","")
+else
+  do_repair = ""
+end
+
 function WaitReady(delay, is_not_ready, status)
   if is_not_ready then loading_tick = -1
     else loading_tick = 0 end
@@ -136,15 +142,7 @@ function WaitReady(delay, is_not_ready, status)
     elseif loading_tick == -1 then yield("/wait "..wait)
     else loading_tick = loading_tick + 0.1 end
     yield("/wait "..wait)
---     if IsAddonVisible("IKDResult") then
---       result_timer = 501
---       while result_timer>=500 do
---         result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
---         result_timer = tonumber(result_raw)
---         yield("/wait 0.266")
---       end
---       yield("/pcall IKDResult true 0")
---     end
+    if IsAddonVisible("IKDResult") then break end
     if is_discard=="spam" then yield("/discardall") end
   end
 end
@@ -271,6 +269,8 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
   end
 elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
   goto DoneFishing
+elseif IsInZone(129) or IsInZone(128) then
+  goto WaitLocation
 elseif fishing_character~="auto" and fishing_character~=GetCharacterName(true) then
   goto ARWait
 else
@@ -403,6 +403,29 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   end
 end
 
+::Repair::
+if not repair_threshold then repair_threshold = 50 end
+if string.find(string.lower(do_repair),"npc") and NeedsRepair(tonumber(repair_threshold)) then
+  if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
+  while not IsAddonVisible("Repair") do
+    if GetTargetName()~="Merchant & Mender" then
+      yield("/target Merchant & Mender")
+    elseif IsAddonVisible("SelectIconString") then
+      yield("/pcall SelectIconString true 1")
+    elseif GetCharacterCondition(32, false) then
+      yield("/pinteract")
+    end
+    yield("/wait 0.592")
+  end
+  while IsAddonVisible("Repair") and string.gsub(GetNodeText("Repair",2),"%D","")~="0" do
+    if IsAddonVisible("SelectYesno") then
+      yield("/pcall SelectYesno true 0")
+    else
+      yield("/pcall Repair true 0")
+    end
+    yield("/wait 0.305")
+  end
+end
 ::BuyBait::
 if type(buy_baits)=="number" then
   if not HaveEnoughBait() then
@@ -439,7 +462,7 @@ if type(buy_baits)=="number" then
       if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
       yield("/wait 0.5")
     end
-  goto BuyBait
+    goto BuyBait
   end
   yield("/pcall Shop true -1")
   if GetDistanceToPoint(-410,4,76)>6.9 then
@@ -519,7 +542,7 @@ debug("move_y: "..move_y)
 
 ::OnBoat::
 start_fishing_attempts = 0
-current_bait = ""
+current_bait = baits_list.versatile
 while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
   ::AlwaysDo::
   AutoHookPresets()
@@ -534,14 +557,9 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   elseif normal_bait then
     correct_bait = normal_bait
   end
-  for _, bait in pairs(baits_list) do --I hope this works!
-    if PlayerState.FishingBait==bait.id then current_bait = bait.name end
-  end
---   if PlayerState.FishingBait==29717 then current_bait = "Versatile Lure"
---   elseif PlayerState.FishingBait==29714 then current_bait = "Ragworm"
---   elseif PlayerState.FishingBait==29715 then current_bait = "Krill"
---   elseif PlayerState.FishingBait==29716 then current_bait = "PlumpWorm"
---   else current_bait = "unknown" .. tostring(PlayerState.FishingBait) end
+--   for _, bait in pairs(baits_list) do
+--     if PlayerState.FishingBait==bait.id then current_bait = bait end
+--   end
   debug("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
   debug("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
   debug("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
@@ -549,7 +567,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   debug("Normal bait: "..normal_bait.name, true)
   debug("Spectral bait: "..spectral_bait.name, true)
   debug("Should now be using: "..correct_bait.name, true)
-  debug("Current bait: "..current_bait, true)
+  debug("Current bait: "..current_bait.name, true)
   ocean_fishing_time = GetCurrentOceanFishingZoneTimeLeft()
 
   ::Ifs::
@@ -612,8 +630,8 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     end
 
   ::BaitSwitch::
-  elseif bait_and_switch and PlayerState.FishingBait~=correct_bait.id then
-    if GetItemCount(correct_bait.id)>1 and PlayerState.FishingBait~=correct_bait.id then
+  elseif bait_and_switch and ( ( current_bait.id~=correct_bait.id and GetItemCount(correct_bait.id)>1 ) or ( current_bait.id==baits_list.versatile and GetItemCount(correct_bait.id)<1 ) ) then
+    if GetItemCount(correct_bait.id)>1 and current_bait.id~=correct_bait.id then
       yield("/tweaks e baitcommand")
       debug("Switching bait to: "..correct_bait.name)
       if GetCharacterCondition(43) then
@@ -625,15 +643,19 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
         SetAutoHookState(false)
         while GetCharacterCondition(43) do yield("/wait 1.013") end
       end
+--       while current_bait.id~=correct_bait.id do
+--         yield("/bait "..correct_bait.name)
+--         yield("/wait 0.1014")
+--       end
       yield("/bait "..correct_bait.name)
-      yield("/bait "..correct_bait.name)
+      yield("/wait 1")
       yield("/bait "..correct_bait.name)
     else
       debug("Out of "..correct_bait.name)
       yield("/bait Versatile Lure")
     end
+    current_bait = correct_bait
     is_changed_bait = true
-    yield("/wait 0.1")
     SetAutoHookState(true)
   else
     SetAutoHookState(true)
@@ -641,6 +663,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   end
   yield("/wait 1.010")
 end
+
 ::FishingResults::
 if IsAddonVisible("IKDResult") then
   result_timer = 501
@@ -700,6 +723,7 @@ end
 ::WaitLocation::
 if wait_location=="inn" then
   debug("Returning to inn.")
+  RunDiscard(2)
   ::MoveToArcanist::
   if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
     debug("Near ocean fishing. Moving to arcanists guild.")
@@ -742,7 +766,7 @@ if wait_location=="inn" then
     end
     WaitReady(3, true)
   end
-  RunDiscard(2)
+  RunDiscard(3)
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
     debug("Near aftcastle. Moving to inn.")
@@ -778,23 +802,45 @@ if wait_location=="inn" then
     yield("/wait 0.532")
   end
   WaitReady(3, true)
-elseif wait_location=="fc" then
-  debug("Returning to FC house.")
+elseif string.find(string.lower(wait_location),"fc")
+or string.find(string.lower(wait_location),"private")
+or string.find(string.lower(wait_location),"apartment")
+or string.find(string.lower(wait_location),"shared")
+then
+  if string.find(string.lower(wait_location),"fc") then
+    debug_string = "FC house"
+    tp_location = "Estate Hall (Free Company)"
+  elseif string.find(string.lower(wait_location),"private") then
+    debug_string = "private house"
+    tp_location = "Estate Hall (Private)"
+  elseif string.find(string.lower(wait_location),"apartment") then
+    debug_string = "apartment"
+    tp_location = "Apartment"
+  elseif string.find(string.lower(wait_location),"shared") then
+    debug_string = "shared estate"
+    if string.find(string.lower(wait_location), "Shared Estate (Plot ") then
+      tp_location = wait_location
+    else
+      tp_location = "Shared Estate "
+    end
+  end
+  debug("Returning to "..debug_string..".")
   while not ( IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) ) do
     if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
-      yield("/tp Estate Hall (Free Company)")
+      yield("/tp "..tp_location)
     else
       WaitReady()
     end
     yield("/wait 0.31")
+    RunDiscard(2)
   end
-  debug("Arrived at FC house. Entering.")
+  debug("Arrived at "..debug_string..". Entering.")
   yield("/automove on")
   yield("/wait 1.033")
   yield("/automove off")
   yield("/ays het")
   WaitReady(3, true)
-  debug("Inside FC house (hopefully)")
+  debug("Inside "..debug_string.." (hopefully)")
 end
 
 WaitReady()
