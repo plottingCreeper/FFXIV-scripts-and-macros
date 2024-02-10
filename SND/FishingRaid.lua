@@ -314,7 +314,12 @@ while GetCharacterName(true)~=fishing_character do
 end
 
 ::ReturnFromWait::
-WaitReady(1)
+if GetCharacterCondition(45) then
+  WaitReady(1)
+  goto Start
+elseif IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
+  WaitReady(1)
+end
 ::TeleportToLimsa::
 while not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) do
   if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
@@ -492,10 +497,13 @@ if DoBuyBaits() then
     yield("/wait 0.5")
   end
   goto BuyBait
-yield("/pcall Shop true -1")
+elseif IsAddonVisible("Shop") then
+  yield("/pcall Shop true -1")
+  goto BuyBait
 end
 
 ::BackToOcean::
+WaitReady(0.3)
 if GetDistanceToPoint(-410,4,76)>6.9 then
   verbose("At Merchant & Mender. Moving to Ocean fishing.")
   if movement_method=="visland" then
@@ -621,11 +629,19 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   elseif IsAddonVisible("IKDResult") then
     break
 
+  elseif wasabi_mode and is_changed_zone then
+    if math.floor(GetPlayerRawXPos())~=7 then
+      need_to_move_to_rail = true
+      wasabi_move = true
+    end
+
   ::Movement::
   elseif need_to_move_to_rail then
     while is_wait_to_move and ( GetCurrentOceanFishingZoneTimeLeft()>420 or GetCurrentOceanFishingZoneTimeLeft()<0 ) do
       yield("/wait 0.244")
     end
+    if GetPlayerRawXPos()>0 then move_x = 7.5 else move_x = -7.5 end
+    if wasabi_move then move_y = math.floor(GetPlayerRawZPos()*1000)/1000 end
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.512")
     move_tick = 0
