@@ -46,7 +46,9 @@ bags_full = {
   "/leaveduty",
   "/pcraft stop",
 }
-is_debug = true
+
+is_verbose = true
+is_debug = false
 
 ------------------------------------------------------------------------
 
@@ -85,7 +87,7 @@ normal_bait = baits_list.versatile
 spectral_bait = baits_list.versatile
 
 ocean_zones = {
-  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.plumpworm, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
+  [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
   [2] = {id = 239, name = "Southern Merlthor", normal_bait = baits_list.krill, daytime = baits_list.krill, sunset = baits_list.ragworm, nighttime = baits_list.plumpworm},
   [3] = {id = 243, name = "Northern Merlthor", normal_bait = baits_list.ragworm, daytime = baits_list.plumpworm, sunset = baits_list.ragworm, nighttime = baits_list.krill},
   [4] = {id = 241, name = "Rhotano Sea", normal_bait = baits_list.plumpworm, daytime = baits_list.plumpworm, sunset = baits_list.ragworm, nighttime = baits_list.krill},
@@ -119,12 +121,6 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
-if do_repair then
-  repair_threshold = string.gsub(do_repair,"%D","")
-else
-  do_repair = ""
-end
-
 function WaitReady(delay, is_not_ready, status)
   if is_not_ready then loading_tick = -1
     else loading_tick = 0 end
@@ -150,8 +146,8 @@ end
 function RunDiscard(y)
   if is_discard then
     if is_desynth and y then
-      debug("You have desynth and discard turned on.")
-      debug("Waiting to discard until after desynth!")
+      verbose("You have desynth and discard turned on.")
+      verbose("Waiting to discard until after desynth!")
     elseif y then
       discarded_on_1 = os.time()+10
       yield("/discardall")
@@ -160,7 +156,7 @@ function RunDiscard(y)
       if os.time()<=discarded_on_1 then yield("/wait "..discarded_on_1-os.time()) end
     else
       yield("/discardall")
-      debug("Waiting 10 seconds to give Discard Helper time to run.")
+      verbose("Waiting 10 seconds to give Discard Helper time to run.")
       yield("/wait 10")
     end
   end
@@ -215,15 +211,15 @@ function HaveEnoughBait()
     return true
   else
     if GetItemCount(29714)<buy_baits then
-      debug("Need to buy Ragworm!")
+      verbose("Need to buy Ragworm!")
       is_purchase_ragworm = true
     end
     if GetItemCount(29715)<buy_baits then
-      debug("Need to buy Krill!")
+      verbose("Need to buy Krill!")
       is_purchase_krill = true
     end
     if GetItemCount(29716)<buy_baits then
-      debug("Need to buy Plump Worm!")
+      verbose("Need to buy Plump Worm!")
       is_purchase_plump = true
     end
     if is_purchase_ragworm or is_purchase_krill or is_purchase_plump then
@@ -234,12 +230,12 @@ function HaveEnoughBait()
   end
 end
 
-function debug(debug_string, throttle)
-  if is_debug then
-    if throttle and os.date("!*t").sec~=0 then
+function verbose(verbose_string, throttle)
+  if is_verbose then
+    if throttle and ( os.date("!*t").sec~=0 or is_debug ) then
       yield("/wait 0.005")
     else
-      yield("/echo [FishingRaid] "..debug_string)
+      yield("/echo [FishingRaid] "..verbose_string)
     end
   end
 end
@@ -248,12 +244,12 @@ end
 if IsAddonVisible("IKDResult") then
   goto FishingResults
 elseif IsInZone(900) or IsInZone(1163) then
-  debug("We're on the boat!")
+  verbose("We're on the boat!")
   goto OnBoat
 elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
-  debug("Starting at or near fishing time.")
+  verbose("Starting at or near fishing time.")
   if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
-    debug("Near the ocean fishing NPC.")
+    verbose("Near the ocean fishing NPC.")
     if GetCharacterCondition(91) then
       goto Enter
     elseif not HaveEnoughBait() then
@@ -264,41 +260,48 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
       goto WaitForBoat
     end
   else
-    debug("Not near the ocean fishing NPC.")
+    verbose("Not near the ocean fishing NPC.")
     goto ReturnFromWait
   end
 elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
-  goto DoneFishing
+  if GetCharacterCondition(91) then
+    goto Enter
+  else
+    goto DoneFishing
+  end
 elseif IsInZone(129) or IsInZone(128) then
   goto WaitLocation
 elseif fishing_character~="auto" and fishing_character~=GetCharacterName(true) then
-  goto ARWait
+  goto MainWait
 else
   goto StartAR
 end
 
-::ARWait::
-if is_ar_while_waiting then
-  while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
-    debug("Still running! AutoRetainer until 5 minutes before the boat.", true)
-    yield("/wait 1.001")
+::MainWait::
+while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
+  if is_ar_while_waiting then
+    verbose("Still running! AutoRetainer until 5 minutes before the boat.", true)
+  else
+    verbose("Still running! Waiting until 5 minutes before the boat.", true)
   end
-  yield("/ays multi d")
-  while GetCharacterName(true)~=fishing_character do
-    if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") or GetCharacterCondition(53) then
-      yield("/wait 1.002")
-    elseif GetCharacterCondition(50,false) then
-      debug("Relogging to "..fishing_character)
-      yield("/ays relog " .. fishing_character)
-      WaitReady(3, true)
-    elseif IsAddonVisible("RetainerList") then
-      debug("Closing retainer list.")
-      yield("/pcall RetainerList true -1")
-    else
-      debug("Waiting for AutoRetainer to finish!")
-    end
-    yield("/wait 1.003")
+  yield("/wait 1.001")
+end
+
+yield("/ays multi d")
+while GetCharacterName(true)~=fishing_character do
+  if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") or GetCharacterCondition(53) then
+    yield("/wait 1.002")
+  elseif GetCharacterCondition(50,false) then
+    verbose("Relogging to "..fishing_character)
+    yield("/ays relog " .. fishing_character)
+    WaitReady(3, true)
+  elseif IsAddonVisible("RetainerList") then
+    verbose("Closing retainer list.")
+    yield("/pcall RetainerList true -1")
+  else
+    verbose("Waiting for AutoRetainer to finish!")
   end
+  yield("/wait 1.003")
 end
 
 ::ReturnFromWait::
@@ -313,7 +316,7 @@ while not ( IsInZone(177) or IsInZone(128) or IsInZone(129) ) do
   yield("/wait 0.3")
 end
 if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
-  debug("Limsa aetheryte plaza. Aethernet to arcanists guild.")
+  verbose("Limsa aetheryte plaza. Aethernet to arcanists guild.")
   while GetDistanceToPoint(-84,19,0)<20 do
     if IsAddonVisible("TelepotTown") then
       yield("/pcall TelepotTown true 11 3u")
@@ -334,7 +337,7 @@ if IsInZone(129) and GetDistanceToPoint(-84,19,0)<20 then
 end
 ::ExitInn::
 if IsInZone(177) then
-  debug("In inn. Leaving.")
+  verbose("In inn. Leaving.")
   while IsInZone(177) do
     if GetTargetName()~="Heavy Oaken Door" then
       yield("/target Heavy Oaken Door")
@@ -351,7 +354,7 @@ if IsInZone(177) then
 end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
-  debug("Near inn. Moving to aftcastle.")
+  verbose("Near inn. Moving to aftcastle.")
   if movement_method=="visland route" then
     yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
     yield("/wait 3")
@@ -367,7 +370,7 @@ if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
 end
 ::AethernetToArcanist::
 if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
-  debug("At aftcastle. Aethernet to arcanists guild.")
+  verbose("At aftcastle. Aethernet to arcanists guild.")
   while IsInZone(128) do
     if IsAddonVisible("TelepotTown") then
       yield("/pcall TelepotTown true 11 3u")
@@ -385,7 +388,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-  debug("At arcanists guild. Moving to ocean fishing.")
+  verbose("At arcanists guild. Moving to ocean fishing.")
   if movement_method=="visland route" then
     yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
     yield("/wait 3")
@@ -404,37 +407,54 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
 end
 
 ::Repair::
-if not repair_threshold then repair_threshold = 50 end
-if string.find(string.lower(do_repair),"npc") and NeedsRepair(tonumber(repair_threshold)) then
-  if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
-  while not IsAddonVisible("Repair") do
-    if GetTargetName()~="Merchant & Mender" then
-      yield("/target Merchant & Mender")
-    elseif IsAddonVisible("SelectIconString") then
-      yield("/pcall SelectIconString true 1")
-    elseif GetCharacterCondition(32, false) then
-      yield("/pinteract")
-    end
-    yield("/wait 0.592")
-  end
-  while IsAddonVisible("Repair") and string.gsub(GetNodeText("Repair",2),"%D","")~="0" do
-    if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
-      if IsAddonVisible("SelectYesno") then
-        yield("/pcall SelectYesno true 0")
-      else
-        yield("/pcall Repair true 0")
+if type(do_repair)=="string" then
+  repair_threshold = tonumber(string.gsub(do_repair,"%D",""))
+  if not repair_threshold then repair_threshold = 99 end
+  if string.find(string.lower(do_repair),"npc") and NeedsRepair(tonumber(repair_threshold)) then
+    if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
+    while not IsAddonVisible("Repair") do
+      if GetTargetName()~="Merchant & Mender" then
+        yield("/target Merchant & Mender")
+      elseif IsAddonVisible("SelectIconString") then
+        yield("/pcall SelectIconString true 1")
+      elseif GetCharacterCondition(32, false) then
+        yield("/pinteract")
       end
-    else
-      yield("/pcall Repair true -1")
+      yield("/wait 0.592")
     end
-    yield("/wait 0.305")
+    while IsAddonVisible("Repair") and string.gsub(GetNodeText("Repair",2),"%D","")~="0" do
+      if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
+        if IsAddonVisible("SelectYesno") then
+          yield("/pcall SelectYesno true 0")
+        else
+          yield("/pcall Repair true 0")
+        end
+      else
+        yield("/pcall Repair true -1")
+      end
+      yield("/wait 0.305")
+    end
+  elseif string.find(string.lower(do_repair),"self") and NeedsRepair(tonumber(repair_threshold)) then
+    while not IsAddonVisible("Repair") do
+      yield("/generalaction repair")
+      yield("/wait 0.5")
+    end
+    yield("/pcall Repair true 0")
+    yield("/wait 0.1")
+    if IsAddonVisible("SelectYesno") then
+      yield("/pcall SelectYesno true 0")
+      yield("/wait 0.1")
+    end
+    while GetCharacterCondition(39) do yield("/wait 1") end
+    yield("/wait 1")
+    yield("/pcall Repair true -1")
   end
 end
 
 ::BuyBait::
 if type(buy_baits)=="number" then
   if not HaveEnoughBait() then
-    debug("Buying more bait.")
+    verbose("Buying more bait.")
     if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
     while not IsAddonVisible("Shop") do
       if GetTargetName()~="Merchant & Mender" then
@@ -478,13 +498,13 @@ end
 
 ::WaitForBoat::
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
-  debug("Still running! Waiting for the boat.", true)
+  verbose("Still running! Waiting for the boat.", true)
   yield("/wait 1.005")
 end
 
 ::BotPause::
 notabot = math.random(3,10)
-debug("Randomly waiting "..notabot.." seconds. Soooooooo human.")
+verbose("Randomly waiting "..notabot.." seconds. Soooooooo human.")
 yield("/wait "..notabot)
 
 ::PreQueue::
@@ -499,7 +519,7 @@ end
 
 ::Queue::
 if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
-  debug("Queueing up!")
+  verbose("Queueing up!")
   while GetCharacterCondition(91, false) do
     if GetTargetName()~="Dryskthota" then
       yield("/target Dryskthota")
@@ -519,15 +539,15 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     yield("/wait 0.511")
   end
 else
-  debug("Zone: "..GetZoneID())
-  if IsInZone(129) then debug("Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
-  debug("That's not gonna work, chief.")
+  verbose("Zone: "..GetZoneID())
+  if IsInZone(129) then verbose("Distance from Dryskthota: "..GetDistanceToPoint(-410,4,76)) end
+  verbose("That's not gonna work, chief.")
   yield("/pcraft stop")
 end
 
 ::Enter::
 while IsInZone(129) do
-  debug("Waiting for queue to pop.", true)
+  verbose("Waiting for queue to pop.", true)
   if IsAddonVisible("ContentsFinderConfirm") then yield("/pcall ContentsFinderConfirm true 8") end
   yield("/wait 1.007")
 end
@@ -542,14 +562,11 @@ if math.ceil(move_y)%2==1 then
 else
   move_x = -7.5
 end
-debug("move_x: "..move_x)
-debug("move_y: "..move_y)
+verbose("move_x: "..move_x)
+verbose("move_y: "..move_y)
 
 ::OnBoat::
 start_fishing_attempts = 0
-for _, bait in pairs(baits_list) do
-  if PlayerState.FishingBait==bait.id then current_bait = bait end
-end
 while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
   ::AlwaysDo::
   AutoHookPresets()
@@ -564,43 +581,43 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   elseif normal_bait then
     correct_bait = normal_bait
   end
---   for _, bait in pairs(baits_list) do
---     if PlayerState.FishingBait==bait.id then current_bait = bait end
---   end
-  debug("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
-  debug("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
-  debug("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
-  debug("Zone name: "..ocean_zones[current_zone].name, true)
-  debug("Normal bait: "..normal_bait.name, true)
-  debug("Spectral bait: "..spectral_bait.name, true)
-  debug("Should now be using: "..correct_bait.name, true)
-  debug("Script thinks we're using: "..current_bait.name, true)
+  for _, bait in pairs(baits_list) do
+    if GetCurrentBait()==bait.id then current_bait = bait end
+  end
+  verbose("FishingRoute: "..tostring(GetCurrentOceanFishingRoute()), true)
+  verbose("FishingZone:  "..tostring(GetCurrentOceanFishingZone()), true)
+  verbose("FishingTime:  "..tostring(GetCurrentOceanFishingTimeOfDay()), true)
+  verbose("Zone name: "..ocean_zones[current_zone].name, true)
+  verbose("Normal bait: "..normal_bait.name, true)
+  verbose("Spectral bait: "..spectral_bait.name, true)
+  verbose("Should now be using: "..correct_bait.name, true)
+  verbose("Script thinks we're using: "..current_bait.name, true)
+  verbose("time: "..GetCurrentOceanFishingZoneTimeLeft(), true)
   ocean_fishing_time = GetCurrentOceanFishingZoneTimeLeft()
 
   ::Ifs::
   ::Loading::
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
-    WaitReady(2, false, 62)
 
   ::ShouldntNeed::
   elseif IsAddonVisible("IKDResult") then
     break
 
   ::DoNothing::
-  elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) then
-    yield("/wait 1.011")
+  elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) or GetCurrentOceanFishingZoneTimeLeft()>420 then
+    yield("/wait 0.05")
 
   ::BagCheck::
   elseif GetInventoryFreeSlotCount()<=2 then
     for _, command in pairs(bags_full) do
       if command=="/leaveduty" then LeaveDuty() end
-      debug("Running: "..command)
+      verbose("Running: "..command)
       yield(command)
     end
 
   ::Movement::
-  elseif movement and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move ) then
+  elseif movement --[[and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move )]] then
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.512")
     move_tick = 0
@@ -619,6 +636,50 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     yield("/visland stop")
     movement = false
 
+  ::BaitSwitch::
+  elseif bait_and_switch and ( ( current_bait.id~=correct_bait.id and GetItemCount(correct_bait.id)>1 ) or ( current_bait.id==baits_list.versatile and GetItemCount(correct_bait.id)<1 ) ) then
+    if GetItemCount(correct_bait.id)>1 and current_bait.id~=correct_bait.id then
+      yield("/tweaks e baitcommand")
+      verbose("Switching bait to: "..correct_bait.name)
+--       if GetCharacterCondition(43) then
+--         stop_fishing_tick = 0
+--         while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
+--           stop_fishing_tick = stop_fishing_tick + 1
+--           yield("/wait 1.012")
+--         end
+--         SetAutoHookState(false)
+--         while GetCharacterCondition(43) do yield("/wait 1.013") end
+--       end
+--       for i=1, 10 do
+--         yield("/bait "..correct_bait.name)
+--         yield("/wait 0.075")
+--       end
+      bait_switch_failsafe = 0
+      while current_bait.id~=correct_bait.id do
+        yield("/bait "..correct_bait.name)
+        yield("/wait 0.1014")
+        if bait_switch_failsafe > 3 then
+          for i=1,20 do
+            verbose("Bait switch didn't work! Please report this.")
+          end
+          break
+        elseif is_fishing_animation_noticed then
+          if GetCharacterCondition(42, false) then
+            is_fishing_animation_noticed = false
+            bait_switch_failsafe = bait_switch_failsafe + 1
+          end
+        elseif GetCharacterCondition(42) then
+          is_fishing_animation_noticed = true
+        end
+      end
+    else
+      verbose("Out of "..correct_bait.name)
+      yield("/bait Versatile Lure")
+    end
+    current_bait = correct_bait
+    is_changed_bait = true
+    SetAutoHookState(true)
+
   ::StartFishing::
   elseif --[[ GetCurrentOceanFishingZoneTimeLeft()>30 and ]] GetCharacterCondition(43, false) then
     not_fishing_tick = 0
@@ -635,41 +696,13 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
       current_bait = ""
     elseif GetCharacterCondition(43, false) then
       start_fishing_attempts = start_fishing_attempts + 1
-      debug("Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
-      debug("Should now be using: "..correct_bait.name)
-      debug("Script thinks we're using: "..current_bait.name)
+      verbose("Starting fishing from: X: ".. math.floor(GetPlayerRawXPos()*1000)/1000 .." Y or Z, depending on which plugin you ask: ".. math.floor(GetPlayerRawZPos()*1000)/1000 )
+      verbose("Should now be using: "..correct_bait.name)
+      verbose("Script thinks we're using: "..current_bait.name)
       yield("/ac Cast")
       SetAutoHookState(true)
     end
 
-  ::BaitSwitch::
-  elseif bait_and_switch and ( ( current_bait.id~=correct_bait.id and GetItemCount(correct_bait.id)>1 ) or ( current_bait.id==baits_list.versatile and GetItemCount(correct_bait.id)<1 ) ) then
-    if GetItemCount(correct_bait.id)>1 and current_bait.id~=correct_bait.id then
-      yield("/tweaks e baitcommand")
-      debug("Switching bait to: "..correct_bait.name)
-      if GetCharacterCondition(43) then
-        stop_fishing_tick = 0
-        while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
-          stop_fishing_tick = stop_fishing_tick + 1
-          yield("/wait 1.012")
-        end
-        SetAutoHookState(false)
-        while GetCharacterCondition(43) do yield("/wait 1.013") end
-      end
---       while current_bait.id~=correct_bait.id do
---         yield("/bait "..correct_bait.name)
---         yield("/wait 0.1014")
---       end
-      yield("/bait "..correct_bait.name)
-      yield("/wait 1")
-      yield("/bait "..correct_bait.name)
-    else
-      debug("Out of "..correct_bait.name)
-      yield("/bait Versatile Lure")
-    end
-    current_bait = correct_bait
-    is_changed_bait = true
-    SetAutoHookState(true)
   else
     SetAutoHookState(true)
     start_fishing_attempts = 0
@@ -683,7 +716,7 @@ if IsAddonVisible("IKDResult") then
   while IsAddonVisible("IKDResult") and result_timer>=500 do
     result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
     result_timer = tonumber(result_raw)
-    if not type(result_timer)=="number" then result_timer = 501 end
+    if type(result_timer)~="number" then result_timer = 501 end
     yield("/wait 0.266")
   end
   yield("/pcall IKDResult true 0")
@@ -696,7 +729,7 @@ WaitReady(3, false, 72)
 
 ::SpendScrips::
 if is_spend_scrips then
-  debug("Spending scrips on "..scrip_item_to_buy)
+  verbose("Spending scrips on "..scrip_item_to_buy)
   yield("/visland moveto -407 71 4")
   while IsAddonVisible("InclusionShop")==false do
     if GetTargetName()~="Scrip Exchange" then
@@ -735,11 +768,11 @@ end
 
 ::WaitLocation::
 if wait_location=="inn" then
-  debug("Returning to inn.")
+  verbose("Returning to inn.")
   RunDiscard(2)
   ::MoveToArcanist::
   if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
-    debug("Near ocean fishing. Moving to arcanists guild.")
+    verbose("Near ocean fishing. Moving to arcanists guild.")
     if movement_method=="visland route" then
       yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
       yield("/wait 3")
@@ -763,7 +796,7 @@ if wait_location=="inn" then
   end
   ::AethernetToAftcastle::
   if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-    debug("At arcanists guild. Aethernet to aftcastle.")
+    verbose("At arcanists guild. Aethernet to aftcastle.")
     while IsInZone(129) do
       if IsAddonVisible("TelepotTown") then
         yield("/pcall TelepotTown true 11 1u")
@@ -782,7 +815,7 @@ if wait_location=="inn" then
   RunDiscard(3)
   ::MoveToInn::
   if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
-    debug("Near aftcastle. Moving to inn.")
+    verbose("Near aftcastle. Moving to inn.")
     if movement_method=="visland route" then
       yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
       yield("/wait 3")
@@ -798,7 +831,7 @@ if wait_location=="inn" then
   end
   ::EnterInn::
   while IsInZone(128) do
-    debug("Near inn. Entering.")
+    verbose("Near inn. Entering.")
     if GetDistanceToPoint(13,40,13)<4 then
       if GetTargetName()~="Mytesyn" then
         yield("/target Mytesyn")
@@ -821,23 +854,23 @@ or string.find(string.lower(wait_location),"apartment")
 or string.find(string.lower(wait_location),"shared")
 then
   if string.find(string.lower(wait_location),"fc") then
-    debug_string = "FC house"
+    verbose_string = "FC house"
     tp_location = "Estate Hall (Free Company)"
   elseif string.find(string.lower(wait_location),"private") then
-    debug_string = "private house"
+    verbose_string = "private house"
     tp_location = "Estate Hall (Private)"
   elseif string.find(string.lower(wait_location),"apartment") then
-    debug_string = "apartment"
+    verbose_string = "apartment"
     tp_location = "Apartment"
   elseif string.find(string.lower(wait_location),"shared") then
-    debug_string = "shared estate"
+    verbose_string = "shared estate"
     if string.find(string.lower(wait_location), "Shared Estate (Plot ") then
       tp_location = wait_location
     else
       tp_location = "Shared Estate "
     end
   end
-  debug("Returning to "..debug_string..".")
+  verbose("Returning to "..verbose_string..".")
   while not ( IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) ) do
     if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
       yield("/tp "..tp_location)
@@ -847,20 +880,20 @@ then
     yield("/wait 0.31")
     RunDiscard(2)
   end
-  debug("Arrived at "..debug_string..". Entering.")
+  verbose("Arrived at "..verbose_string..". Entering.")
   yield("/automove on")
   yield("/wait 1.033")
   yield("/automove off")
   yield("/ays het")
   WaitReady(3, true)
-  debug("Inside "..debug_string.." (hopefully)")
+  verbose("Inside "..verbose_string.." (hopefully)")
 end
 
 WaitReady()
 
 ::Desynth::
 if is_desynth then
-  debug("Running desynthesis.")
+  verbose("Running desynthesis.")
   is_doing_desynth = true
   failed_click_tick = 0
   open_desynth_attempts = 0
@@ -871,7 +904,7 @@ if is_desynth then
       if open_desynth_attempts>5 then
         is_doing_desynth = false
         is_desynth = false
-        debug("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
+        verbose("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
     elseif IsAddonVisible("SalvageDialog") then
       yield("/pcall SalvageDialog true 0 false")
@@ -895,9 +928,9 @@ if is_desynth then
         item_level = string.gsub(item_level_raw,"%D","")
         item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
         if item_level=="1" and item_type=="Culinarian" then
-          debug("item_name: "..item_name)
-          debug("item_level: "..item_level)
-          debug("item_type: "..item_type)
+          verbose("item_name: "..item_name)
+          verbose("item_level: "..item_level)
+          verbose("item_type: "..item_type)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
           is_clicked_desynth = true
           break
@@ -915,18 +948,36 @@ end
 RunDiscard()
 
 ::StartAR::
-debug("You did a good job today!")
+verbose("You did a good job today!")
+if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
 if is_ar_while_waiting then
-  debug("Enabling AutoRetainer while waiting.")
-  if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
-  yield("/ays multi e")
-  while GetCharacterCondition(1) do
-    yield("/wait 1.040")
+  verbose("Enabling AutoRetainer while waiting.")
+  target_tick = 1
+  while GetCharacterCondition(50, false) do
+    if target_tick > 99 then
+      break
+    elseif string.lower(GetTargetName())~="summoning bell" then
+      verbose("Finding summoning bell...")
+      yield("/target Summoning Bell")
+      target_tick = target_tick + 1
+    elseif GetDistanceToTarget()>5 then
+      yield("/lockon on")
+      yield("/automove on")
+    else
+      yield("/automove off")
+      yield("/pinteract")
+    end
+    yield("/lockon on")
+    yield("/wait 0.511")
   end
-  goto ARWait
+  if GetCharacterCondition(50) then
+    yield("/lockon off")
+    yield("/ays e")
+    while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
+    yield("/wait 0.4")
+  end
+  yield("/ays multi e")
 else
-  debug("Waiting for the next boat.")
-  goto WaitForBoat
+  verbose("Waiting for the next boat.")
 end
-
-goto Start
+goto MainWait
