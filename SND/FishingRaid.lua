@@ -69,14 +69,16 @@ function AutoHookPresets()
 end
 
 baits_list = {
+  unset = { name = "unset", id = 0},
   versatile = { name = "Versatile Lure", id = 29717 },
   ragworm = { name = "Ragworm", id = 29714 },
   krill = { name = "Krill", id = 29715 },
   plumpworm = { name = "Plump Worm", id = 29716 },
 }
-correct_bait = baits_list.versatile
-normal_bait = baits_list.versatile
-spectral_bait = baits_list.versatile
+correct_bait = baits_list.unset
+normal_bait = baits_list.unset
+spectral_bait = baits_list.unset
+current_bait = baits_list.unset
 
 ocean_zones = {
   [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
@@ -260,6 +262,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
   if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     verbose("Near the ocean fishing NPC.")
     if GetCharacterCondition(91) then
+      verbose("Already in queue.")
       goto Enter
     elseif DoBuyBaits() then
       goto BuyBait
@@ -630,7 +633,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     break
 
   elseif wasabi_mode and is_changed_zone then
-    if math.floor(GetPlayerRawXPos())~=7 then
+    if math.floor(GetPlayerRawXPos())~=7 and math.floor(GetPlayerRawXPos())~=-7 then
       need_to_move_to_rail = true
       wasabi_move = true
     end
@@ -714,9 +717,17 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     end
     is_changed_bait = false
     is_changed_zone = false
-    if start_fishing_attempts>6 then
+    if start_fishing_attempts>9 then
+      yield("/echo [FishingRaid] Something has gone horribly wrong!")
       LeaveDuty()
+      WaitReady(1,true)
+      yield("/ays multi e")
       yield("/pcraft stop")
+    elseif start_fishing_attempts>6 then
+      if math.floor(GetPlayerRawXPos())~=7 and math.floor(GetPlayerRawXPos())~=-7 then
+        need_to_move_to_rail = true
+        wasabi_move = true
+      end
     elseif start_fishing_attempts>1 then
       current_bait = ""
     elseif GetCharacterCondition(43, false) then
