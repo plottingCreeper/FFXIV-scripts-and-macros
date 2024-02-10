@@ -904,7 +904,9 @@ if is_desynth then
   is_doing_desynth = true
   failed_click_tick = 0
   open_desynth_attempts = 0
+  yield("/wait 0.1")
   while is_doing_desynth do
+    verbose("Desynth is running...", true)
     if not IsAddonVisible("SalvageItemSelector") then
       yield("/generalaction desynthesis")
       open_desynth_attempts = open_desynth_attempts + 1
