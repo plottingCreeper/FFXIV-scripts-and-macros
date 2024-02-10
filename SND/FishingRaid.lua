@@ -735,6 +735,7 @@ end
 RunDiscard(1)
 DeleteAllAutoHookAnonymousPresets()
 WaitReady(3, false, 72)
+yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
 
 ::SpendScrips::
 if type(spend_scrips_when_above)=="number" then
