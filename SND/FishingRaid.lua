@@ -121,7 +121,7 @@ routes = { --Lua indexes from 1, so make sure to add 1 to the zone returned by S
   [18] = {[1] = 8, [2] = 9, [3] = 10},
 }
 
-function WaitReady(delay, is_not_ready, status)
+function WaitReady(delay, is_not_ready, status, target_zone)
   if is_not_ready then loading_tick = -1
     else loading_tick = 0 end
   if not delay then delay = 3 end
@@ -135,7 +135,11 @@ function WaitReady(delay, is_not_ready, status)
 --     elseif GetCharacterCondition(32) then loading_tick = 0
 --     elseif GetCharacterCondition(35) then loading_tick = 0
 --     elseif GetCharacterCondition(45) then loading_tick = 0
-    elseif loading_tick == -1 then yield("/wait "..wait)
+    elseif loading_tick == -1 then
+      if type(target_zone)=="number" then
+        if IsInZone(target_zone) then loading_tick = 0 end
+      end
+      yield("/wait "..wait)
     else loading_tick = loading_tick + 0.1 end
     yield("/wait "..wait)
     if IsAddonVisible("IKDResult") then break end
@@ -655,10 +659,10 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
 --         yield("/wait 0.075")
 --       end
       bait_switch_failsafe = 0
-      while current_bait.id~=correct_bait.id do
+      while GetCurrentBait()~=correct_bait.id do
         yield("/bait "..correct_bait.name)
         yield("/wait 0.1014")
-        if bait_switch_failsafe > 3 then
+        if bait_switch_failsafe > 13 then
           for i=1,20 do
             verbose("Bait switch didn't work! Please report this.")
           end
@@ -767,126 +771,129 @@ if is_spend_scrips then
 end
 
 ::WaitLocation::
-if wait_location=="inn" then
-  verbose("Returning to inn.")
-  RunDiscard(2)
-  ::MoveToArcanist::
-  if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
-    verbose("Near ocean fishing. Moving to arcanists guild.")
-    if movement_method=="visland route" then
-      yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
-      yield("/wait 3")
-      while IsVislandRouteRunning() or IsMoving() do
-        yield("/wait 1.031")
-      end
-    elseif movement_method=="visland random" then
-      MoveNear(-388, 5, 61, 1, 5, 5.5)  --1
-      MoveNear(-386.5, 6, 41.8, 1, 5, 8)  --2
-      MoveNear(-362.4, 8, 48.5, 1, 5, 3)  --3
-      MoveNear(-354, 8, 50, 0.5, 3, 3)  --4
-      if move_x==7.5 then
-        MoveNear(-352.5, 8, 53.5, 0.5, 3, 2)  --5l
-        MoveNear(-344, 12, 52.4, 0.5, 3, 2)  --6l
-      else
-        MoveNear(-350, 8, 49, 0.5, 3, 2.5)  --5r
-        MoveNear(-336, 12, 48.6, 0.5, 3, 3)  --6r
-      end
-      MoveNear(-333.5, 12, 55.5, 2, 5, 5)  --arcanist
-    end
-  end
-  ::AethernetToAftcastle::
-  if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-    verbose("At arcanists guild. Aethernet to aftcastle.")
-    while IsInZone(129) do
-      if IsAddonVisible("TelepotTown") then
-        yield("/pcall TelepotTown true 11 1u")
-      elseif GetTargetName()~="Aethernet shard" then
-        yield("/target Aethernet shard")
-      elseif GetDistanceToTarget()<4 then
-        yield("/pinteract")
-      else
-        yield("/lockon on")
-        yield("/automove on")
-      end
-      yield("/wait 0.531")
-    end
-    WaitReady(3, true)
-  end
-  RunDiscard(3)
-  ::MoveToInn::
-  if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
-    verbose("Near aftcastle. Moving to inn.")
-    if movement_method=="visland route" then
-      yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
-      yield("/wait 3")
-      while IsVislandRouteRunning() or IsMoving() do
-        yield("/wait 1.032")
-      end
-    elseif movement_method=="visland random" then
-      MoveNear(5.5, 40, 74, 1, 5, 6)  --a
-      MoveNear(-3, 40, 72, 1, 5, 5)  --b
-      MoveNear(0.5, 40, 11, 1, 9, 8)  --c
-      MoveNear(13, 40, 12, 0, 5)  --d
-    end
-  end
-  ::EnterInn::
-  while IsInZone(128) do
-    verbose("Near inn. Entering.")
-    if GetDistanceToPoint(13,40,13)<4 then
-      if GetTargetName()~="Mytesyn" then
-        yield("/target Mytesyn")
-      elseif GetCharacterCondition(32, false) then
-        yield("/pinteract")
-      elseif IsAddonVisible("Talk") then
-        yield("/click talk")
-      elseif IsAddonVisible("SelectString") then
-        yield("/pcall SelectString true 0")
-      elseif IsAddonVisible("SelectYesno") then
-        yield("/pcall SelectYesno true 0")
-      end
-    end
-    yield("/wait 0.532")
-  end
-  WaitReady(3, true)
-elseif string.find(string.lower(wait_location),"fc")
-or string.find(string.lower(wait_location),"private")
-or string.find(string.lower(wait_location),"apartment")
-or string.find(string.lower(wait_location),"shared")
-then
-  if string.find(string.lower(wait_location),"fc") then
-    verbose_string = "FC house"
-    tp_location = "Estate Hall (Free Company)"
-  elseif string.find(string.lower(wait_location),"private") then
-    verbose_string = "private house"
-    tp_location = "Estate Hall (Private)"
-  elseif string.find(string.lower(wait_location),"apartment") then
-    verbose_string = "apartment"
-    tp_location = "Apartment"
-  elseif string.find(string.lower(wait_location),"shared") then
-    verbose_string = "shared estate"
-    if string.find(string.lower(wait_location), "Shared Estate (Plot ") then
-      tp_location = wait_location
-    else
-      tp_location = "Shared Estate "
-    end
-  end
-  verbose("Returning to "..verbose_string..".")
-  while not ( IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) ) do
-    if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
-      yield("/tp "..tp_location)
-    else
-      WaitReady()
-    end
-    yield("/wait 0.31")
+if type(wait_location)=="string" then
+  if string.find(string.lower(wait_location),"inn") then
+    verbose("Returning to inn.")
     RunDiscard(2)
+    ::MoveToArcanist::
+    if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
+      verbose("Near ocean fishing. Moving to arcanists guild.")
+      if movement_method=="visland route" then
+        yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
+        yield("/wait 3")
+        while IsVislandRouteRunning() or IsMoving() do
+          yield("/wait 1.031")
+        end
+      elseif movement_method=="visland random" then
+        MoveNear(-388, 5, 61, 1, 5, 5.5)  --1
+        MoveNear(-386.5, 6, 41.8, 1, 5, 8)  --2
+        MoveNear(-362.4, 8, 48.5, 1, 5, 3)  --3
+        MoveNear(-354, 8, 50, 0.5, 3, 3)  --4
+        if move_x==7.5 then
+          MoveNear(-352.5, 8, 53.5, 0.5, 3, 2)  --5l
+          MoveNear(-344, 12, 52.4, 0.5, 3, 2)  --6l
+        else
+          MoveNear(-350, 8, 49, 0.5, 3, 2.5)  --5r
+          MoveNear(-336, 12, 48.6, 0.5, 3, 3)  --6r
+        end
+        MoveNear(-333.5, 12, 55.5, 2, 5, 5)  --arcanist
+      end
+    end
+    ::AethernetToAftcastle::
+    if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
+      verbose("At arcanists guild. Aethernet to aftcastle.")
+      while IsInZone(129) do
+        if IsAddonVisible("TelepotTown") then
+          yield("/pcall TelepotTown true 11 1u")
+        elseif GetTargetName()~="Aethernet shard" then
+          yield("/target Aethernet shard")
+        elseif GetDistanceToTarget()<4 then
+          yield("/pinteract")
+        else
+          yield("/lockon on")
+          yield("/automove on")
+        end
+        yield("/wait 0.531")
+      end
+      WaitReady(3, true)
+    end
+    RunDiscard(3)
+    ::MoveToInn::
+    if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
+      verbose("Near aftcastle. Moving to inn.")
+      if movement_method=="visland route" then
+        yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
+        yield("/wait 3")
+        while IsVislandRouteRunning() or IsMoving() do
+          yield("/wait 1.032")
+        end
+      elseif movement_method=="visland random" then
+        MoveNear(5.5, 40, 74, 1, 5, 6)  --a
+        MoveNear(-3, 40, 72, 1, 5, 5)  --b
+        MoveNear(0.5, 40, 11, 1, 9, 8)  --c
+        MoveNear(13, 40, 12, 0, 5)  --d
+      end
+    end
+    ::EnterInn::
+    while IsInZone(128) do
+      verbose("Near inn. Entering.")
+      if GetDistanceToPoint(13,40,13)<4 then
+        if GetTargetName()~="Mytesyn" then
+          yield("/target Mytesyn")
+        elseif GetCharacterCondition(32, false) then
+          yield("/pinteract")
+        elseif IsAddonVisible("Talk") then
+          yield("/click talk")
+        elseif IsAddonVisible("SelectString") then
+          yield("/pcall SelectString true 0")
+        elseif IsAddonVisible("SelectYesno") then
+          yield("/pcall SelectYesno true 0")
+        end
+      end
+      yield("/wait 0.532")
+    end
+    WaitReady(3, true, 32, 177)
+  elseif string.find(string.lower(wait_location),"fc")
+  or string.find(string.lower(wait_location),"private")
+  or string.find(string.lower(wait_location),"personal")
+  or string.find(string.lower(wait_location),"apartment")
+  or string.find(string.lower(wait_location),"shared")
+  then
+    if string.find(string.lower(wait_location),"fc") then
+      verbose_string = "FC house"
+      tp_location = "Estate Hall (Free Company)"
+    elseif string.find(string.lower(wait_location),"private") or string.find(string.lower(wait_location),"personal") then
+      verbose_string = "private house"
+      tp_location = "Estate Hall (Private)"
+    elseif string.find(string.lower(wait_location),"apartment") then
+      verbose_string = "apartment"
+      tp_location = "Apartment"
+    elseif string.find(string.lower(wait_location),"shared") then
+      verbose_string = "shared estate"
+      if string.find(string.lower(wait_location), "Shared Estate (Plot ") then
+        tp_location = wait_location
+      else
+        tp_location = "Shared Estate "
+      end
+    end
+    verbose("Returning to "..verbose_string..".")
+    while not ( IsInZone(339) or IsInZone(340) or IsInZone(341) or IsInZone(641) or IsInZone(979) ) do
+      if GetCharacterCondition(27, false) and not IsPlayerOccupied() then
+        yield("/tp "..tp_location)
+      else
+        WaitReady()
+      end
+      yield("/wait 0.31")
+      RunDiscard(2)
+    end
+    verbose("Arrived at "..verbose_string..". Entering.")
+    yield("/automove on")
+    yield("/wait 1.033")
+    yield("/automove off")
+    yield("/ays het")
+    WaitReady(3, true)
+    verbose("Inside "..verbose_string.." (hopefully)")
   end
-  verbose("Arrived at "..verbose_string..". Entering.")
-  yield("/automove on")
-  yield("/wait 1.033")
-  yield("/automove off")
-  yield("/ays het")
-  WaitReady(3, true)
-  verbose("Inside "..verbose_string.." (hopefully)")
 end
 
 WaitReady()
