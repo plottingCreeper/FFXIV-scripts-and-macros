@@ -272,7 +272,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
     verbose("Not near the ocean fishing NPC.")
     goto ReturnFromWait
   end
-elseif IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
+elseif IsInZone(129) and GetDistanceToPoint(-411,4,72)<20 then
   if GetCharacterCondition(91) then
     goto Enter
   else
@@ -740,15 +740,24 @@ WaitReady(3, false, 72)
 if type(spend_scrips_when_above)=="number" then
   if GetItemCount(25200)>spend_scrips_when_above then
     verbose("Spending scrips on "..scrip_item_to_buy)
-    yield("/visland moveto -407 71 4")
+    while IsInZone(129) and GetDistanceToPoint(-407,3.1,67.5)>6.9 do
+      if IsMoving() then while IsMoving() do yield("/wait 0.1") end
+      elseif GetDistanceToPoint(-410,4,76)<6.9 then  --ocean
+        yield("/visland moveto -407 4 71")
+      elseif GetDistanceToPoint(-408.5,3.1,56)<6.9 or GetDistanceToPoint(-396,4.3,69)<6.9 or GetDistanceToPoint(-398,3.1,75.5)<6.9 then
+        yield("/visland moveto -404 4 71")  --boardwalk
+      end
+      yield("/wait 0.1")
+    end
+    yield("/visland stop")
     while IsAddonReady("InclusionShop")==false do
       if GetTargetName()~="Scrip Exchange" then
         yield("/target Scrip Exchange")
-      elseif IsAddonVisible("SelectIconString")==false then
-        yield("/pinteract")
+      elseif IsAddonVisible("SelectIconString") then
+        yield("/pcall SelectIconString true 0")
         yield("/visland stop")
       else
-        yield("/pcall SelectIconString true 0")
+        yield("/pinteract")
       end
       yield("/wait 0.521")
     end
