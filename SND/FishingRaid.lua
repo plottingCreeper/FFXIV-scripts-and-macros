@@ -239,7 +239,7 @@ end
 
 function verbose(verbose_string, throttle)
   if is_verbose then
-    if ( throttle and os.date("!*t").sec==0 ) or is_debug then
+    if throttle==false or ( throttle and os.date("!*t").sec==0 ) or is_debug then
       yield("/echo [FishingRaid] "..verbose_string)
     else
       yield("/wait 0.005")
@@ -536,7 +536,7 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
       yield("/pinteract")
     elseif IsAddonVisible("Talk") then
       yield("/click talk")
-    elseif IsAddonVisible("SelectString") then
+    elseif IsAddonReady("SelectString") then
       if GetSelectStringText(0)=="Register to board." then
         yield("/pcall SelectString true 0")
       else
