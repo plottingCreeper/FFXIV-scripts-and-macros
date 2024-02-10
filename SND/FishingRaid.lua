@@ -232,7 +232,7 @@ end
 
 function verbose(verbose_string, throttle)
   if is_verbose then
-    if throttle and ( os.date("!*t").sec~=0 or is_debug ) then
+    if throttle and os.date("!*t").sec~=0 and not is_debug then
       yield("/wait 0.005")
     else
       yield("/echo [FishingRaid] "..verbose_string)
