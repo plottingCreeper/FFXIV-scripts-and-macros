@@ -26,20 +26,16 @@ is_discard = false  --Requires Discard Helper. Can set to "spam" to run during c
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
 force_autohook_presets = true
-movement_method = "visland route" --"visland route", "visland random"
+movement_method = "visland route" --"visland" (navmesh coming soon)
 buy_baits = false  --Minimum number of baits you want. Will buy 99 at a time.
+do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
 boat_route = "indigo"  --"indigo", "ruby", "random"
+is_recast_on_spectral = true
 
-is_spend_scrips = false
+spend_scrips_when_above = false
 scrip_category = 1
 scrip_subcategory = 6
 scrip_item_to_buy = "Regional Folklore Trader's Token C"
-
-start_fishing = {
-  "/wait 0.1",
-  "/ac cast",
-  "/ahon",
-}
 
 bags_full = {
   "/echo Bags full!",
@@ -56,16 +52,16 @@ function AutoHookPresets()
   if force_autohook_presets then
     if OceanFishingIsSpectralActive() then
       if GetMaxGp()>700 then
-        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQXPaOhD+Kxpf3oV2ICGkyY0HtGEeJJngvhwymY5iC6zBWIwkJ6FM/ntXliVsYxxS6Km+MbufVvvtaj/JrJ1uLFkPCyl605lzuXYGEX4KSTcMnUvJY9Jw+iySPRx5JBwz5gXGrNaMaEQ2a3zj+rZ0A05EwEIwNXdGuCLh0iWv0rl0nIZzjRcQK0kHqdgoCd5whhDj5MtFLmr3iT2TTX5E5KJPcSjA3vUkZZG7WgKy9aYTThFrJ/lx8l7ureYHs/8uCEpQaDg0uXe+HJ77TRSuEsQwkjFVPgs9du01LM394vw4de8F8UIV+0csyH1AIktj8OoR4oskVcskDfQ7rdBegXox5ySSlk3KMMlDc2u3mu0PkNPmUm6M+xTDuKydYfRMuDHccso4las/0Smzp6bSabVbh/XpJOXylYpgsCIiNxhl7Tg7O0Y71HYo2c/25OwoPRnjOZkEdCr/xVQm8w4GYQwTib05cIS9qknuQ9ENqEALOgsk8lg0Dakn0QuVAUqmyQ1wSPH8H4G+4mfGN9RthihJ0WrFhwpQMXG3WFIC0E0nbQk2ruLBLC1C5xidtnvaRneO0mgYsp+kh6VW9e9aXbRSDm+iXt9yApcS0XvozNCHBKmHQxWgDKA2eiaTEC/3K9HJAdr0GZnSIBz5yDYpORZwkMIQRUyiJ4JAOn30AvRQQholrBFOcs0UeuPLHKrjFDs9zEIfZah3zmCm6rSRt98RD7YDfEtpRpUInh4+b1tjlZZlew5NadqHzhsUZ/AqOc69nyzByQteqlTsjfcN083lrTwuU5iCf20SH/hUjs3YfFKd2Io4YpljXBJR+9+JeAsFIDuy1L7SPJ1PTun6XE6l6zXCrk90eUk8KGSYDsiOSpWi9qhXYd2OqpWi9qpdVfbZCpTiCnUszUIfqIpQaUkf1LVKo9kdpv4jumZ8AS+FN7MyZZIHmUCQxIgKeTNVBYFZftg6z8qhlmaK8j/hAjQsJGgUc/tkvzhvncOmV4zN7wmeF8IY8+YhWO7vX7lXRe01vkSuQQ9L5LoIub5xd6DUFCukupPOL/K2zGN745xIzqJZSbraUUVII3KUis53OOVB1aw0NrlrT4vWHDPjHpEZiXzMVyXZWV8VPwvaQdH632G5hasmauFFrttJGwRc9r1YSLawHrUm+xbosxjSL1pdTpfGqnkpKLDdelOldsVg53vDACYxn2IvT25E9GNceFhdM6l1jF9duiB9EmJg2/wMF+qYRkWTYgcfOsrMs0uNsbC8zDyRbNmdSsJ7OIar1kYp2Ed0od7XLe1IJWUiCfBovjX2EY87PHsBhcqoRrtWjVo1atWoVaNCNf7j8GGU0YyzWjNqzag1o9aMCs24DePFEt3nHxudWjhq4aiF428Vjkfzf0f6B9+DNWjxeHh8+wU+cPL/Ih0AAA==")
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YTXPiOBD9Kypf9sJMQQJkkhsLzIRaSFLBszmkUlOKEViFkChJTsJQ+e8rWZb8gTHJwp7WN6q71XqvpX5qs/V6kWR9KKTozxfe1dYbUvhMUI8Q70ryCDW8AaOyD2mAyISxILRmvWaMKUrXzKzrx9oPORIhI8rU3JvhGpG1j96kd+V5De8GrlSuGA7QuUGcvOGNVI6zb5e5rL1n9oJSfEjkss8hEcreCyRm1N+sVWTr3QBOIrZe/OPsEPZW85PofwoE4igwGlns3W/HY7+lZBNHjKiMsPa50FPX3oQl2C8vTlP3fhitdLF/RQI9hIg6GsO3AKGZiKE6Jkmif3MUxitAP+IcUenYJAxjHIZbu9Vsf4KcMZdyY4SgQObuUhmDTx6GTevQto47iraDy2cYqu7eeiP6grg13HHMOJab/+Ji2T0Nl26rfSSXs4TLdyzC4QaJg7XvdE5xe/R2IN7PHUrnJFdoApdoGuK5/BPi+CJpg7CGqYTBUnFUe1WT/AhFP8QCrPAilCBgdE5wIMErliGIm98PIcFw+YcA3+EL4yl1hxDEEJ20faoAFQJxByVGKjQ9SVeC1JWsv0dzvd0QcrLxsYZ3SDw63VMcvwPiTr97ktNXnfcb9aE0L9NPo5BG7Ue3tD9wnJRLPwQP6rhGMwUQB5DoBGUBeqMXNCVwvdvQZSU6O0JfvwJbGgDpDLiTi++Kul2EAMokeEZAyf8MvCp6ICYNYtYAxlgzhU59mZt2mmInN1yY+63qnTPYVjtv5O33KFDbqfiWFpIqZTw/vgl3ei0py25z2tK0j21CVZzhm+QwNwOmN2X6Ctcai3u2f0CcTiDa4zMdU/BvLfLhDMuJ7Zsv+ih2Mo5Z5h6XZDT+AxnvVAXQHpTGV4rT++KVrs9hKl1vItz6WK3X6tXmqjFNh+ypVGnUB+pVWLenaqVRH6pdFfpsBUrjCnUsRWFuZUWqpKSQMvrrUb+4mC7uIZ49gRvGV2qIeLfLEzr5IJtNIRljIW/nuiqqox93Jn3t0EszlfkbcaGUjCAwjrj7+Li8aF2oTa8ZWz4guCykseZ0pC33D67962JfWV8s2koVS0S7GHJz6++J0r2sI/XLdHGZt2U+G1LnVHJGFyVwjaOKkInIUSo6D3DKB1WzMrHxi3tetOaYWfcYLRCdQb4pQed8Vfxc0B6Kzn+A5U5cNVEXXuS6C9pGqCe/HwnJVs6j12QnggGLFPyi1ed4ba2Glw5VbHfGrcSuGeydOmzANOJzGOTJjZGZ00UA9WOTWCfwTc9uA0SgYtv8qp7VCaZFk2anPtm0mWeXWmNheZl5Ktm6N5eI92GkHtz0Tcvbx3ilR++WcSSSMpVI8Wi+Nz4iHvdw8aoUKqMa+pOrVo1aNWrVqFVjn2r8xdXnUUYzOrVm1JNGPWnUk0bFpHFHotUaPOSHjW4tHLVw1MLxfxWOJ/t/R/I336MzGPF4fHr/B4+oiaDsHQAA")
       else
-        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YTXPiOBD9Kypf9kKmICFkkhsLTEItJFTwbA6p1JRiC6xCWJQkh7BU/vtKliV/YBwysKf1jep+avXrVj/JbJ1uJGgPcsF7s7lzs3UGIXwlqEuIcyNYhBpOn4aiB0MPkTGlXmDMas0Ihyhd4xvX7coNGOIBJdLU3BvhDpGVi96Fc+M4DeceLmWsOB2gYoM4eMMZyhjn369zUbuv9A2l+SGeiz6DhEt71xOYhu5mJZGtD51wgtg68Y/zz3JvNb+Y/U+OQIwCw6HJvfP9+NwfQrKJEcNQRFj5LPTUtdewJPfrq9PUvRdES1XsXxFHTwEKLY3Bu4eQz+NULZMk0O+0Qns56EWMoVBYNgnDOA/Nrd1qtr9ATptLuVHmYyjHZesMwzfEjGHCMGVYbP6LTpk9NZVOq906rk/nCZcfmAeDDeK5wShrx+XlKdqhtgPxfrYnlyfpyRgu0DTAM/EnxCKed2ngxjAV0FtIjnKvapKHUHQDzMESzwMBPBrOCPYEWGMRgHia3AASDBd/cPADvlGWUrcZgjhFqxVfKkDFxE2gwEhC007aEqSu4sEsLULnFJ22e9pGd07SaDlk/6AeFFrVf2p10Uo5fAh7fctJupSIPsnODH2ZIPYgUQHKAGqjNzQlcHVYic6P0KZvwJQGwNAHtknxsZAHiRAQUgFeEZDS6YO1pAdi0iBmDWCca6bQqS9zqE5T7OQwc32UZb1zBjNVF428/RF5cjuJbynNqBLBi+PnbWeskrLszqEpTfvYeZPFGbwLBnPvJ0twuoYrlYq98W4hTi9v5XGpwhT8W5P4wMdibMbmTHViJ+KIZo5xSUTt/yTiRBYA7clS+0rzdM6c0vW5nErXa4RdH+vyCnmykCQZkD2VKkUdUK/Cuj1VK0UdVLuq7LMVKMUV6liahT5QFaGSkj6raxWH80eI/RdwT9kSEnAGRnQNbifOhwmRUMqjTcQU33BGmIuHmSqRnO7nnROuHCpGpkx/I8alqhEERhGzj/jrq9aV3P2O0sUTgotCGGNOn4bl/v6de1dUY+OLBVwqZImAFyH3D+4elJprhVS31NV13pZ5fqfOqWA0nJekqx1VhDQiR6no/IRTHlTNSmPj2/eiaM0xM+4RmqPQh2xTkp31VfGzoD0Urf8Tlju4aqIWXuS6m7RByOu/F3FBl9aj1mRfB30ayfS1VTOQRpfhlTFmoJLtzisrsSsGe18gBjCN2Ax6eXIjpJ/n3IPq4kmsY/ju4iXqIwIl2+Y3ecWOcVg0KXby00eZWXapMRaWl5mngq66M4FYD0by8rVRCvYRXqoXd0s7Em2ZCiR5ND8ah4jHI5yvpWZlVKNdq0atGrVq1KpRoRp/MfmplNGMy1ozas2oNaPWjArNmJBouQJP+cdGpxaOWjhq4fi/CseL+b8j+cvv2Rq0eDy/fPwLPjSdUjQdAAA=")
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YXW/iOhD9K1Ze7gtdQQt02zcusC260KKSvX2oqpUbDLEwMbKdUhb1v68dx84HIbQL+7R5QzPj8Tljz/GErdMJBe1CLnh3Nneut04/gC8EdQhxrgULUc3p0UB0YeAhMqLU841ZrRniACVrpsZ1s3J9hrhPiTTV92a4RWTlojfhXDtOzbmDS5krggNUbhAlrzkDmeP861Uma+eFvqIEH+KZ7DNIuLR3PIFp4G5WMrLxrgHHEVsn+nF+CHuj/kn03zkCURQYDAz29tfjsd8HZBNFDAIRYuWzoaeuvQ6LsV9dnqbuXT9cqmL/CDl69FFgafTfPISmPIJqmcSJfucotJeDbsgYCoRlEzOMcGhuzUa9+Qly2lzIjRKCPJG5S0UMPnkYJq1F2zjuKJoWLptiKLt76wyCV8SMYcwwZVhs/sTFMntqLu1G80gu5zGXb5j7/Q3iB2vfap3i9qjtQLSfPZTWSa7QCC7QxMcz8S/E0UVSBm4MEwG9heQo9yon+RGKro85WOK5L4BHgxnBngBrLHwQNb/rQ4Lh4h8OvsFXyhLqFiGIIFpp+1QBSgRiDAVGMjQ5SVuCxBWvf0AztV0fMrJxsYJ3SDxa7VMcvwViT799ktOXnfcTdaHQL9N3rZBa7Qf3QbdnOUmXegge5XENphIg9iBRCYoC1EavaELgarehi0p0foS+fgGmNAAGU2BPLror8nYRAgIqwAsCUv6nYC3pgYg0iFgDGGFNFTrxpW7aaYod33Cu77esd8ZgWu2ilrU/IE9uJ+MbSkjKlPHi+Cbc6bW4LLvNaUrTPLYJZXH6b4LBzAyY3JTJGq4UFvts30CcTCDK41IVk/NvDfL+FIuR6ZszdRQ7GYc0dY8LMmr/gYxjWQG0B6X2FeJ0zpzC9RlMhet1hF0fqfVKvtpMNqbukD2VKoz6QL1y6/ZUrTDqQ7UrQ5+uQGFcro6FKPStLEkVl/RJPbY4mD9APH0Gd5QtIQFnYEjX4GbsvJsUMaVstMmYxNecIebifqZKJNv7aWfsVw6VI1Wm/xHjUtYIAsOQ2S+Rq8vGpdz9ltLFI4KLXBpjTubbYn/v1r3NN5nxRQouJbJAwfMhd/funijV2CpSPVOXV1lb6hsicU4Eo8G8AK52lBHSERlKeecBTtmgclY6Nnp+L/LWDDPjHqI5CqaQbQrQWV8ZPxu0h6L1H2C5E1dO1Ibnue6CNhHy/e+GXNCl9ag16fGgR0MJX1s1A2l0GV4ZYypUst2ZvWK7YrB3BDEBk5DNoJclN0R6aOceVC9PbB3BNzXI9RCBkm39i3xjRzjImxQ7+f2mzCy91Bhzy4vME0FXnZlArAtD+fomD1zWPsRLNYc3tCPWlolAkkf9vfYR8XiA87XUrJRqqO+vSjUq1ahUo1KNfarxH5PfSinNaFWaUU0a1aRRTRolk8aYhMsVeMwOG+1KOCrhqITjbxWOZ/N/R/yf35M1aPF4en7/BRDOl5f5HQAA")
       end
       autohook_preset_loaded = "spectral"
     else
       if GetMaxGp()>700 then
-        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YUW/iOBD+K1Ze7qW7gi7Qbd84YLfooK1K9vpQVSs3GGIRYmQ7bTnU/35jOzZJCCkVvG3e0Mzn8Xwzns8OG6+bSNbDQorebO5dbbxBjJ8j0o0i70ryhJx5fRbLHo4DEo0ZC0JrVmtGNCbbNVPr+rnyQ05EyCIwNfZGuCbRyidv0rvyvDPvBi8hlk4HqdhIBz/zhhDj/PtlLmr3mb2QbX5E5KLPcCTA3g0kZbG/XgGy+W4SThEbT/84z+WeLssl32x8Mv1fgiCNQsOhTb7z/fjkb+NorRHDWCZU+Rz01MU3sDT3y4vTFL4XJktV7d+JIA8hiR2NwVtAyFToVE/RCuMVqJdwTmLp2KQMdR6GW6vZaH2CnDGXcmN8SjHMy8Ybxi+EW8Mdp4xTud7tVBm/T7bKbmq4dJqt5nGNOk/J/KAiHKyJ+HA02u1T9ENth/R+rintkzRljBdkEtKZ/BtTqSceDMIaJhIHC+AIe1WTPISiH1KBlnQeShSweBbRQKJXKkOkx8kPcUTx4i+BfuAXxrfUXYZIp+jE4lMFqBi5OywpAei2k64EW9chJ7PdOUWn3Z6u0Z2TNBqm7D/Sw9Lo+i8jL0Yqh7dxr+84gUup6AN0ZjiFBGmAIxWgDKA2eiGTCK8OK9H5EeL0FdnSIBxPkWuSPhZwkKIIxUyiZ4JAO6foFeghTRpp1gjrXDOF3voyh+o0xU4PszBHGeqdM9ipakIxco57EsB+sKCpRKPqwvp2/MDtzFVal91BtLVpHTtwUJ3Bm+Q494RyBCeveKVScXfeT0y317fy+ExhCv6NTXwwpXJs5+aLasVOxBHLnOOSiMb/QcQ7KADZk6XxlebpffFK1+dyKl1vEG69FuYVCaCQUToheypVijqgXoV1e6pWijqodqV5mUOQLUApzHtUdyGN5/eYTp+QxeRqW5V/xQauzu8WlnLJb3nD+FJvOKJC3s5UQWCYH3fOs3KohZmi/Eu4ABGLCBol3L3aLy+aF7DlNWOLB4IXhTDWvH0Klvv71/51UXytT+s1CGKJXhchN7f+HpSaYoVUl9LFZd6WeW5vnRPJWTwvSdc4qggZxD5KxvsBqTyompbB6tv2W9Gao2bdIzIn8RTzdUnuzldF0IFyHEv8H7DcwVUTdfAi192kLQKu+14iJFs6j1qTfQ30WQLpF60+pytrNbwUFNjuvKpSu2Kw98VhAZOEz3CQJzci5jkuAqzumdQ6xm8+XZI+iTCwbXyFG3VM46JJsYNvHWXm2aXWWFheZp5IturOJOE9nMBd66IU7CO6VC/spnGkijKRBHg03s8OUY97PH8F7cnIRquWjVo2atmoZaNKNv7h8G2UEY12LRq1aNSiUYtGlWjcRclyhR7yz41OrRy1ctTK8ccqx5P9zyP9k+/RGYx6PD69/w+iobgTKR0AAA==")
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YS3PiOBD+Kypf9pKZggyPSW4sMBNqIUkFz+aQSm0pRmAVwqIkOQlD5b+vHpb8wBiycFvfqO6vpe9rqVtttl4vFrQPueD9+cK73nrDCL4Q1CPEuxYsRhfegEaiD6MAkQmlQWjNKmaMI5TGzKzr59oPGeIhJdLU2LvCDSJrH70L79rzLrxbuJJraTpArQ304hfeSK5x+f0qt2rvhb6ilB/iudXnkHBp7wUC08jfrCWy+WEIJ4itp39c5rgnYTnyzcYn6f/iCGgUGI0s+c7308nfRWSjEaNIxFj5HPTcyTewhPtV9zyJ74fxSmX7n5ijxxBFTsbwPUBoxjXVKiXdTvsYLcbLQT9mDEXCiUkEahpGWqvZaH1CmzGXSqOEoEAcvEufPAu7rGPbPO0kWo4um2Eoq3vrjaJXxKzhnmHKsNjs3quziDGbGjGdZutEMZeJmB+Yh8MN4geT3243znB91HZA7+dOpX2WOzSBSzQN8Vz8CbG+ScrArWEqYLCUGuVe1SKPkeiHmIMVXoQCBDSaExwI8IZFCHTx+yEkGC7/4OAHfKUsle4YAk3RtbZPJaCiQdxDgZGEpifpUpC6kvgHNFfbDSEjGx8reo1Dmemc4/gdEXf6nbOcviy936gPhXmafpkOabr96C7qD5wm6VIPwaM8rtFMEsQBJGqBMoDa6BVNCVwfV9GXjf+eoq/ApgbAaAbcyem7Im8XISCiArwgINv/DLxJeUCLBlo1gJprJtGpL3PTzpPs5IZzc79lvnMGW2pNmYyc4wEFcj8Z0GwfeKm+nV6FO8WW5GW3Om1uWqdWoczO8F0wmJsC06syfYNrxcW92z8hTkcQ5fGpwhT8W8t8OMNiYgvnizqLnRXHNHORS1Y0/gMr3ssMoD0sja+Up/fFK43PcSqNNwgXr9v1Wr7bTFamKZE9mSpFHZGvQtyerJWijspdFftsBkpx3pN6InG0eIB49gwsJpfcKgEVG7hEf1hYIia/5S1lK73hGHNxN1cZkeX8tPONohwqMJOVvxHjso0RBMYxc58eV91mV255Q+nyEcFlYRlrTufZcv/gxr8p1pT16Y4tW2JJxy5Cbu/8PShVxwqpnqXuVd6W+WZInVPBaLQooWscVYIMYp8k4z0gKg+qlmWw+r39VrTmpFn3GC1QNINsU8Ld+aoEOlBOY4n/gModXLVQBy9q3SVtEfLB78dc0JXzqJjsPDCgsaRftPoMr63V6FJQqXZn2ErsSsHemcMCpjGbwyAvbozMlM4DqF6axDqB72pyGyACpdrGV/mmTnBUNCl18otNmVk21BoL4WXmqaDr3lwg1oexfG3TBy1vH+OVGrybxpF0lKlAUkfj4+KY7vEAF2+y92TahvriqttG3TbqtlG3jb1t4y8mv44yTaNdN4161qhnjXrWqJo17km8WoPH/LjRqTtH3TnqzvG/7RzP9j+P5G++J2cw3ePp+eNfQgSXCu4dAAA=")
       else
-        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQW/iOhD+K1Yu79KuoAt02xsP2BY9aFFJXw9VtXKDIRYhRrZTyqL+9x3HsUlCSKngtrmhmc/j+WY8nx02TjuSrIOFFJ3pzLneOL0QvwakHQTOteQROXO6LJQdHHokGDLm+cas1gxoSLZrJsZ1s3R9ToTPAjDV9ka4JcHSJe/SuXacM+cOLyBWnA5SsVEc/MzpQ4yLH1eZqO1X9ka2+RGRiT7FgQB725OUhe56Ccj6h044QWyc+MdFJvdkWSb5eu2L6T8KgmIU6vdN8q0fxyd/HwbrGNEPZUSVz0JPXXwNS3K/ujxN4Tt+tFDV/hUJ8uST0NLovXuETESc6ilaob0CdSLOSSgtm4RhnIfm1qjXGl8gp82F3BifUAzzsnH64RvhxjDilHEq17udKuL3xVaZTTWXVr1RP65RFwmZn1T4vTURn45Gs3mKfqjtULyfbUrzJE0Z4jkZ+3Qq/8VUxhMPBmEMY4m9OXCEvcpJHkLR9alACzrzJfJYOA2oJ9GKSh/F4+T6OKB4/o9AP/Eb41vqNkMUp2jF4ksFKBm5EZaUAHTbSVuCreuQk9lsnaLTdk/b6NZJGg1T9pt0sNS6/qjlRUtl/z7sdC0ncCkVfYLO9CeQIPVwoAIUAdRGb2Qc4OVhJbo4Qpy+IVMahMMJsk2KjwUcpCBAIZPolSDQzglaAT0Uk0Yxa4TjXFOF3vpSh+o0xU4Os9BHGeqdMZipqkMxMo4H4sF+sKCuRKPswvp+/MDtzFVSl91BNLVpHDtwUJ3eu+Q484SyBMcrvFSp2DvvBtPt9a08LlOYnH9jEu9NqByauTlXrdiJOGCpc1wQUfs/iTiCApA9WWpfYZ7OuVO4PpNT4XqNsOtjYV4SDwoZJBOyp1KFqAPqlVu3p2qFqINqV5iXPgTpAhTCnGd1F9Jw9oDp5AUZDDpHA7ZCN6NMkcuIlOxkC/5hYAmp7N53jC+yOw+okPdTVSIY7+edE64cKkKqTP8TLkDWAoIGEbfv+KvL+iXsfcvY/IngeS6MMW8fh8X+7q17m5dj44sVHCSyQMHzkLt7dw9KzbVCqmvq8iprSz3At86x5CycFaSrHWWENGIfJe39hFQWVE5LY+P793vemqFm3AMyI+EE83VB7tZXRtCCMhwL/J+w3MGVE7XwPNfdpA0CHgCdSEi2sB61Jv0+6LII0tdWzQCMLqdLY0xBge3OOyuxKwZ73yAGMI74FHtZcgOiH+jCw+rmSaxD/O7SBemSAAPb2je4Y4c0zJsUO/j6UWaeXmqMueVF5rFky/ZUEt7BEdy+NkrOPqAL9eaua0ciLWNJgEft4+wQ9XjAsxWIUEo2GpVsVLJRyUYlG2Wy8R+Hr6WUaDQr0ahEoxKNSjTKRGMURIsleso+N1qVclTKUSnHX6scL+Y/j+Rvv2dr0Orx/PLxB1dtN3E7HQAA")
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YUW/iOBD+K1Ze7qVdQRfotm8csC06aFHJXh+qauUGQyxMjBynlEP97zeOYyeBEKjgbfOGZsbj7xt7Pk/YOO1I8g4OZdiZzpzbjdML8BsjbcacWykicuF0eSA7OPAIG3Lu+cas1gxoQNI1E+O6W7q+IKHPGZhqezPcE7Z0yYd0bh3nwnnAC8gVw0EqN4qTXzh9yHH14yaXtf3G30mKj4S57FPMQrC3PUl54K6XEFn/1ICTiI0T/7jKYU+W5cDXa1+E/yskKI5C/b4B3/pxOvjHgK3jiH4gI6p8NvTcxddhCfab6/MUvuNHC1Xt31FInn0SWBq9D4+QSRhDPcdRaG+IOpEQJJCWTcIwxqG5Neq1xhfIaXMhN84Y8eTBy/TFwzBpLdr6aUfRsHDFhGJo743TD96JMIaRoFxQud69WGchozfVZFr1xolkrhIyP2no99YkPFj8ZvMc10dth+L97Kk0z3KHhnhOxj6dyr8xjW+SMoTGMJbYmwNH2Kuc5DEUXZ+GaEFnvkQeD6aMehKtqPRR3P2ujxnF879C9BO/c5FStwhRDNFq25cKUKIQIywpgdD0JG0JUley/olM1XY9LNjapQreIfVots5x/BaIPf3WWU4fWu8/0sFSv02/tERque8/Bp2u5QQu9RI8w3H1JwCQepipBEUBaqN3MmZ4eVxHX50gsN+QKQ3CwQTZk4vvCtwuxlDAJXojCPR/glZAD8WkUcwa4RhrptCpL3PTzlPs5IaH+n5DvXMG02p1KEbO8UQ82A8W1JWSlD2630/vwp1mS+qy252mNo1TuxCq0/uQAufGwPSqjFd4qbDYh/sO03QGUR6Xq5gt/8Yg702oHJrGuVRnsZNxwDMXuSCj9h/IOIIKkD0ota8Qp3PpFK7PYSpcryPs+liul/BuC+hM3SJ7KlUYdUS9ttbtqVph1FG1K0OfrUBhnPOinkgazJ4wnbwiE4Mu0YCv0N0oV+UyJiU72Yp/mrCEVX7vBy4W+Z0HNJSPU1UjaPCXnc8W5VAZMnX6l4gQhI0RNIiE/Rq5ua5fw973nM+fCZ5vpTHmdMQt9nfv3fvtLjO+WMNBJAs0fDvk4dHdE6U6W0Wqh+r6Jm/LfEakzrEUPJgVwNWOMkI6Yh8l7T1AKh9UTkvHxi/w921rjppxD8iMBBMs1gXYra+MoA3KcSzwH2C5E1dO1IZvc90FbSJgBOhEoeQL61FrshNCl0cAX1s1AzC6gi6NMRMKbHfGr8SuGOydQkzAOBJT7OXJDYie20MPq7cnsQ7xh5rluoRhYFv7Bq/skAbbJsUOvuGUWWSXGuPW8iLzWPJleyqJ6OAI3t/0icvbB3ShRvG6diTSMpYEeNQ+L45Rjyc8W4EIZWRDfYNVslHJRiUblWzslY1/BHwvZUSjWYlGNWtUs0Y1a5TNGiMWLZboOT9utCrlqJSjUo4/VjlezX8eyR9/L9ag1ePl9fN/02kSawEeAAA=")
       end
       autohook_preset_loaded = "normal"
     end
@@ -238,7 +234,7 @@ function DoRepair()
         return "npc"
       end
     else
-      verbose("Don't need repair.")
+      return false
     end
   end
 end
@@ -265,7 +261,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
     verbose("Near the ocean fishing NPC.")
     if GetCharacterCondition(91) then
       goto Enter
-    elseif not DoBuyBaits() then
+    elseif DoBuyBaits() then
       goto BuyBait
     elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
       goto PreQueue
@@ -591,10 +587,15 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   if GetCurrentOceanFishingTimeOfDay()==1 then spectral_bait = ocean_zones[current_zone].daytime end
   if GetCurrentOceanFishingTimeOfDay()==2 then spectral_bait = ocean_zones[current_zone].sunset end
   if GetCurrentOceanFishingTimeOfDay()==3 then spectral_bait = ocean_zones[current_zone].nighttime end
-  if OceanFishingIsSpectralActive() and spectral_bait then
-    correct_bait = spectral_bait
-  elseif normal_bait then
-    correct_bait = normal_bait
+  if OceanFishingIsSpectralActive() then
+    if spectral_bait then correct_bait = spectral_bait end
+    if is_recast_on_spectral and not is_already_recast then
+      is_already_recast = true
+      yield("/ac hook")
+    end
+  else
+    if normal_bait then correct_bait = normal_bait end
+    is_already_recast = false
   end
   for _, bait in pairs(baits_list) do
     if GetCurrentBait()==bait.id then current_bait = bait end
@@ -736,42 +737,44 @@ DeleteAllAutoHookAnonymousPresets()
 WaitReady(3, false, 72)
 
 ::SpendScrips::
-if is_spend_scrips then
-  verbose("Spending scrips on "..scrip_item_to_buy)
-  yield("/visland moveto -407 71 4")
-  while IsAddonVisible("InclusionShop")==false do
-    if GetTargetName()~="Scrip Exchange" then
-      yield("/target Scrip Exchange")
-    elseif IsAddonVisible("SelectIconString")==false then
-      yield("/pinteract")
-      yield("/visland stop")
-    else
-      yield("/pcall SelectIconString true 0")
-    end
-    yield("/wait 0.521")
-  end
-  yield("/pcall InclusionShop true 12 "..scrip_category)
-  yield("/wait 0.522")
-  yield("/pcall InclusionShop true 13 "..scrip_subcategory)
-  yield("/wait 1.021")
-  scrips_raw = string.gsub(GetNodeText("InclusionShop", 21),"%D","")
-  scrips_owned = tonumber(scrips_raw)
-  for item=21, 36 do
-    scrip_shop_item_name = string.sub(string.gsub(GetNodeText("InclusionShop", 5, item, 12),"%G",""),5,-3)
-    if scrip_shop_item_name==string.gsub(scrip_item_to_buy,"%G","") then
-      price_raw = string.gsub(GetNodeText("InclusionShop", 5, item, 5, 1),"%D","")
-      scrip_shop_item_price = tonumber(price_raw)
-      scrip_number_to_buy = scrips_owned//scrip_shop_item_price
-      yield("/pcall InclusionShop true 14 "..item-21 .." "..scrip_number_to_buy)
-      yield("/wait 1.022")
-      if IsAddonVisible("ShopExchangeItemDialog") then
-        yield("/pcall ShopExchangeItemDialog true 0")
-        yield("/wait 1.023")
+if type(spend_scrips_when_above)=="number" then
+  if GetItemCount(25200)>spend_scrips_when_above then
+    verbose("Spending scrips on "..scrip_item_to_buy)
+    yield("/visland moveto -407 71 4")
+    while IsAddonReady("InclusionShop")==false do
+      if GetTargetName()~="Scrip Exchange" then
+        yield("/target Scrip Exchange")
+      elseif IsAddonVisible("SelectIconString")==false then
+        yield("/pinteract")
+        yield("/visland stop")
+      else
+        yield("/pcall SelectIconString true 0")
       end
-      break
+      yield("/wait 0.521")
     end
+    yield("/pcall InclusionShop true 12 "..scrip_category)
+    yield("/wait 0.522")
+    yield("/pcall InclusionShop true 13 "..scrip_subcategory)
+    yield("/wait 1.021")
+    scrips_raw = string.gsub(GetNodeText("InclusionShop", 21),"%D","")
+    scrips_owned = tonumber(scrips_raw)
+    for item=21, 36 do
+      scrip_shop_item_name = string.sub(string.gsub(GetNodeText("InclusionShop", 5, item, 12),"%G",""),5,-3)
+      if scrip_shop_item_name==string.gsub(scrip_item_to_buy,"%G","") then
+        price_raw = string.gsub(GetNodeText("InclusionShop", 5, item, 5, 1),"%D","")
+        scrip_shop_item_price = tonumber(price_raw)
+        scrip_number_to_buy = scrips_owned//scrip_shop_item_price
+        yield("/pcall InclusionShop true 14 "..item-21 .." "..scrip_number_to_buy)
+        yield("/wait 1.022")
+        if IsAddonVisible("ShopExchangeItemDialog") then
+          yield("/pcall ShopExchangeItemDialog true 0")
+          yield("/wait 1.023")
+        end
+        break
+      end
+    end
+    yield("/pcall InclusionShop true -1")
   end
-  yield("/pcall InclusionShop true -1")
 end
 
 ::WaitLocation::
@@ -902,7 +905,7 @@ if is_desynth then
         verbose("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
     elseif not IsAddonReady("SalvageItemSelector") then
-      yield("/wait 0.05")
+      yield("/wait 0.541")
     elseif IsAddonVisible("SalvageDialog") then
       yield("/pcall SalvageDialog true 0 false")
       is_clicked_desynth = false
@@ -918,6 +921,13 @@ if is_desynth then
         yield("/pcall SalvageItemSelector true -1")
       end
     elseif GetCharacterCondition(39, false) then
+      for i=1,20 do
+        if string.gsub(GetNodeText("SalvageItemSelector", 3, 2, 8),"%W","")~="" then
+          break
+        else
+          yield("/wait 0.09")
+        end
+      end
       for list=2, 16 do
         item_name_raw = string.gsub(GetNodeText("SalvageItemSelector", 3, list, 8),"%W","")
         item_name = string.sub(item_name_raw, 3,-3)
