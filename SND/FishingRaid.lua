@@ -782,6 +782,7 @@ if type(spend_scrips_when_above)=="number" then
       if GetTargetName()~="Scrip Exchange" then
         yield("/target Scrip Exchange")
       elseif IsAddonVisible("SelectIconString") then
+        yield("/lockon on")
         yield("/pcall SelectIconString true 0")
         yield("/visland stop")
       else
@@ -789,6 +790,7 @@ if type(spend_scrips_when_above)=="number" then
       end
       yield("/wait 0.521")
     end
+    yield("/lockon off")
     yield("/pcall InclusionShop true 12 "..scrip_category)
     yield("/wait 0.522")
     yield("/pcall InclusionShop true 13 "..scrip_subcategory)
