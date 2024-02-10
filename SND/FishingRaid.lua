@@ -218,9 +218,9 @@ function DoBuyBaits()
       is_purchase_plump = true
     end
     if is_purchase_ragworm or is_purchase_krill or is_purchase_plump then
-      return false
-    else
       return true
+    else
+      return false
     end
   end
 end
@@ -232,14 +232,20 @@ function DoRepair()
     repair_threshold = tonumber(string.gsub(do_repair,"%D",""))
     if not repair_threshold then repair_threshold = 99 end
     if NeedsRepair(tonumber(repair_threshold)) then
-     return true
+      if string.find(string.lower(do_repair),"self") then
+        return "self"
+      else
+        return "npc"
+      end
+    else
+      verbose("Don't need repair.")
     end
   end
 end
 
 function verbose(verbose_string, throttle)
   if is_verbose then
-    if throttle==false or ( throttle and os.date("!*t").sec==0 ) or is_debug then
+    if not throttle or ( throttle and os.date("!*t").sec==0 ) or is_debug then
       yield("/echo [FishingRaid] "..verbose_string)
     else
       yield("/wait 0.005")
@@ -390,7 +396,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-  if DoRepair() or DoBuyBaits() then
+  if DoRepair()=="npc" or DoBuyBaits() then
     verbose("At arcanists guild. Moving to Merchant & Mender.")
     if movement_method=="visland" then
       yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXMWRWyFmu5hS6QQ7pRcNPSg0hUIqilYCstJfjdKy8hUPoEjU7zj35+Rh+jA9za2oGBebO2wbdpRmeN21nfAILKfu+iD6kF83qA+9j65GMAc4BnMBeME8yJIAzBCkxRYNWrEsELGC6xZqwQossyBre4yg6qETzajd/nPIoJgmX8dLULCUwWi5BcY9ep8ml71/t/9aY581jtNn4db/I8Oe3dfrTuZB+GLBBc1zG5Y1Ry9VTOB8ckHvauTVPdB1fWp1Nir25icxnDZno7GZtPvnbL7CMd+oOMUljKkg9gBNb5cCVGMBpzwUquzhOMZpjpfkcyGD6A0XrgUgosqCJnui9aY1GoEQsbsdDxI8n8rQg923WRWDEp6ASG9GDEuDBSYUappP8fzFv3A6BUZs+lBQAA")
@@ -402,7 +408,7 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   else
     verbose("At arcanists guild. Moving to ocean fishing.")
     if movement_method=="visland" then
-      yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
+      yield("/visland exectemponce H4sIAAAAAAAACuWSy2oDMQxFfyVoPTX22J6xvAt9QBbpi0L6oAszcRpDxy4Zp6WE/Hsdz4R0kS9ItNKVxLV80AZuTWtBw3jVGO+6OIphFBpr/GjhuqXzH1DAzPx+BedjB/ptA/ehc9EFD3oDz6AvOFekRiYLeAHNGFGilCgKeAUtFEEmsNomFbydXIGmBTyauVsnL0aSmIZv21ofc2fio12ZJs5cXN4N0/9rw65ppW4ZfvadtEtyW5jPzh7G84KsgOs2xP3Dk2jbIR3niUE8rG0Xh3xnPDMuHhx36iasLoOfD/+mffHJtXaa5ui2OEKlkkRgyUXGoghNIaueSk0oq7hSx7GUJ41FYcKCss5YJMEUXPVYkDDGKTtLLFgSKcsBCs080gExUZV4hjgErYmiFfZAeL4SxP5MakFqhVKeOpb37R9ZYl91nAUAAA==")
       yield("/wait 3")
       while IsVislandRouteRunning() or IsMoving() do
         yield("/wait 1.036")
@@ -497,7 +503,7 @@ end
 if GetDistanceToPoint(-410,4,76)>6.9 then
   verbose("At Merchant & Mender. Moving to Ocean fishing.")
   if movement_method=="visland" then
-    yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
+    yield("/visland exectemponce H4sIAAAAAAAACuVQXUvDQBD8K2Wfz3CJqWnurVSFPtSPIsQqPhztSg+825LbKhLy393UK0XxH/g2MzsMs9PBjfUIBpa4s64dMY1ojTaAgsZ+7sgFjmCeO7ij6NhRANPBI5izUp9nuihLBSswZaYVPIGpRMt1PemFUcD5JZi8qBUs7cbtJacYfAt6R4+BwQiZB8bWrrlxvL0d/L+01E7qxC19HC/SQ9Je7VvEk/1QLldw5YnxGMXoE5weHInc7zFywkNwYx2fEgd2Te2Mwib9rL/FB+dxIT7dq78WGWcXdVGNf04iYJJX/2CSl/4LNp/3pk0CAAA=")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
       yield("/wait 1.036")
@@ -682,10 +688,12 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
 
   ::StartFishing::
   elseif --[[ GetCurrentOceanFishingZoneTimeLeft()>30 and ]] GetCharacterCondition(43, false) then
-    not_fishing_tick = 0
-    while GetCharacterCondition(43, false) and not_fishing_tick<1.5 and not is_changed_bait and not is_changed_zone do
-      yield("/wait 0.108")
-      not_fishing_tick = not_fishing_tick + 0.1
+    if not is_changed_bait and not is_changed_zone then
+      not_fishing_tick = 0
+      while GetCharacterCondition(43, false) and not_fishing_tick<1.5 do
+        yield("/wait 0.108")
+        not_fishing_tick = not_fishing_tick + 0.1
+      end
     end
     is_changed_bait = false
     is_changed_zone = false
@@ -893,6 +901,8 @@ if is_desynth then
         is_desynth = false
         verbose("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
+    elseif not IsAddonReady("SalvageItemSelector") then
+      yield("/wait 0.05")
     elseif IsAddonVisible("SalvageDialog") then
       yield("/pcall SalvageDialog true 0 false")
       is_clicked_desynth = false
