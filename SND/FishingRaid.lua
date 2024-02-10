@@ -54,10 +54,6 @@ is_debug = false
 
 function AutoHookPresets()
   if force_autohook_presets then
---     if autohook_preset_loaded then
---       DeleteAllAutoHookAnonymousPresets()
---       autohook_preset_loaded = false
---     end
     if OceanFishingIsSpectralActive() then
       if GetMaxGp()>700 then
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YQXPaOhD+Kxpf3oV2ICGkyY0HtGEeJJngvhwymY5iC6zBWIwkJ6FM/ntXliVsYxxS6Km+MbufVvvtaj/JrJ1uLFkPCyl605lzuXYGEX4KSTcMnUvJY9Jw+iySPRx5JBwz5gXGrNaMaEQ2a3zj+rZ0A05EwEIwNXdGuCLh0iWv0rl0nIZzjRcQK0kHqdgoCd5whhDj5MtFLmr3iT2TTX5E5KJPcSjA3vUkZZG7WgKy9aYTThFrJ/lx8l7ureYHs/8uCEpQaDg0uXe+HJ77TRSuEsQwkjFVPgs9du01LM394vw4de8F8UIV+0csyH1AIktj8OoR4oskVcskDfQ7rdBegXox5ySSlk3KMMlDc2u3mu0PkNPmUm6M+xTDuKydYfRMuDHccso4las/0Smzp6bSabVbh/XpJOXylYpgsCIiNxhl7Tg7O0Y71HYo2c/25OwoPRnjOZkEdCr/xVQm8w4GYQwTib05cIS9qknuQ9ENqEALOgsk8lg0Dakn0QuVAUqmyQ1wSPH8H4G+4mfGN9RthihJ0WrFhwpQMXG3WFIC0E0nbQk2ruLBLC1C5xidtnvaRneO0mgYsp+kh6VW9e9aXbRSDm+iXt9yApcS0XvozNCHBKmHQxWgDKA2eiaTEC/3K9HJAdr0GZnSIBz5yDYpORZwkMIQRUyiJ4JAOn30AvRQQholrBFOcs0UeuPLHKrjFDs9zEIfZah3zmCm6rSRt98RD7YDfEtpRpUInh4+b1tjlZZlew5NadqHzhsUZ/AqOc69nyzByQteqlTsjfcN083lrTwuU5iCf20SH/hUjs3YfFKd2Io4YpljXBJR+9+JeAsFIDuy1L7SPJ1PTun6XE6l6zXCrk90eUk8KGSYDsiOSpWi9qhXYd2OqpWi9qpdVfbZCpTiCnUszUIfqIpQaUkf1LVKo9kdpv4jumZ8AS+FN7MyZZIHmUCQxIgKeTNVBYFZftg6z8qhlmaK8j/hAjQsJGgUc/tkvzhvncOmV4zN7wmeF8IY8+YhWO7vX7lXRe01vkSuQQ9L5LoIub5xd6DUFCukupPOL/K2zGN745xIzqJZSbraUUVII3KUis53OOVB1aw0NrlrT4vWHDPjHpEZiXzMVyXZWV8VPwvaQdH632G5hasmauFFrttJGwRc9r1YSLawHrUm+xbosxjSL1pdTpfGqnkpKLDdelOldsVg53vDACYxn2IvT25E9GNceFhdM6l1jF9duiB9EmJg2/wMF+qYRkWTYgcfOsrMs0uNsbC8zDyRbNmdSsJ7OIar1kYp2Ed0od7XLe1IJWUiCfBovjX2EY87PHsBhcqoRrtWjVo1atWoVaNCNf7j8GGU0YyzWjNqzag1o9aMCs24DePFEt3nHxudWjhq4aiF428Vjkfzf0f6B9+DNWjxeHh8+wU+cPL/Ih0AAA==")
@@ -130,11 +126,6 @@ function WaitReady(delay, is_not_ready, status, target_zone)
   while loading_tick<delay do
     if IsAddonVisible("NowLoading") then loading_tick = 0
     elseif IsPlayerOccupied() then loading_tick = 0
---     elseif GetCharacterCondition(1, false) then loading_tick = 0
---     elseif GetCharacterCondition(27) then loading_tick = 0
---     elseif GetCharacterCondition(32) then loading_tick = 0
---     elseif GetCharacterCondition(35) then loading_tick = 0
---     elseif GetCharacterCondition(45) then loading_tick = 0
     elseif loading_tick == -1 then
       if type(target_zone)=="number" then
         if IsInZone(target_zone) then loading_tick = 0 end
@@ -210,9 +201,9 @@ function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
   return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
 end
 
-function HaveEnoughBait()
+function DoBuyBaits()
   if type(buy_baits)~="number" then
-    return true
+    return false
   else
     if GetItemCount(29714)<buy_baits then
       verbose("Need to buy Ragworm!")
@@ -234,12 +225,24 @@ function HaveEnoughBait()
   end
 end
 
+function DoRepair()
+  if type(do_repair)~="string" then
+    return false
+  else
+    repair_threshold = tonumber(string.gsub(do_repair,"%D",""))
+    if not repair_threshold then repair_threshold = 99 end
+    if NeedsRepair(tonumber(repair_threshold)) then
+     return true
+    end
+  end
+end
+
 function verbose(verbose_string, throttle)
   if is_verbose then
-    if throttle and os.date("!*t").sec~=0 and not is_debug then
-      yield("/wait 0.005")
-    else
+    if ( throttle and os.date("!*t").sec==0 ) or is_debug then
       yield("/echo [FishingRaid] "..verbose_string)
+    else
+      yield("/wait 0.005")
     end
   end
 end
@@ -256,7 +259,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
     verbose("Near the ocean fishing NPC.")
     if GetCharacterCondition(91) then
       goto Enter
-    elseif not HaveEnoughBait() then
+    elseif not DoBuyBaits() then
       goto BuyBait
     elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
       goto PreQueue
@@ -359,17 +362,12 @@ end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
   verbose("Near inn. Moving to aftcastle.")
-  if movement_method=="visland route" then
+  if movement_method=="visland" then
     yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
       yield("/wait 1.035")
     end
-  elseif movement_method=="visland random" then
-    MoveNear(6, 40, 19, 0.5, 5, 7)  --a
-    MoveNear(-4, 40, 20, 2, 5, 6)  --b
-    MoveNear(1, 40, 77, 2, 9, 6)  --c
-    MoveNear(18.6, 40, 71, 2, 5, 5)  --d
   end
 end
 ::AethernetToArcanist::
@@ -392,29 +390,30 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-  verbose("At arcanists guild. Moving to ocean fishing.")
-  if movement_method=="visland route" then
-    yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
-    yield("/wait 3")
-    while IsVislandRouteRunning() or IsMoving() do
-      yield("/wait 1.036")
+  if DoRepair() or DoBuyBaits() then
+    verbose("At arcanists guild. Moving to Merchant & Mender.")
+    if movement_method=="visland" then
+      yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXMWRWyFmu5hS6QQ7pRcNPSg0hUIqilYCstJfjdKy8hUPoEjU7zj35+Rh+jA9za2oGBebO2wbdpRmeN21nfAILKfu+iD6kF83qA+9j65GMAc4BnMBeME8yJIAzBCkxRYNWrEsELGC6xZqwQossyBre4yg6qETzajd/nPIoJgmX8dLULCUwWi5BcY9ep8ml71/t/9aY581jtNn4db/I8Oe3dfrTuZB+GLBBc1zG5Y1Ry9VTOB8ckHvauTVPdB1fWp1Nir25icxnDZno7GZtPvnbL7CMd+oOMUljKkg9gBNb5cCVGMBpzwUquzhOMZpjpfkcyGD6A0XrgUgosqCJnui9aY1GoEQsbsdDxI8n8rQg923WRWDEp6ASG9GDEuDBSYUappP8fzFv3A6BUZs+lBQAA")
+      yield("/wait 3")
+      while IsVislandRouteRunning() or IsMoving() do
+        yield("/wait 1.036")
+      end
     end
-  elseif movement_method=="visland random" then
-    MoveNear(-343.9, 12, 51.54, 1, 5, 3)  --1
-    MoveNear(-356.5, 8, 52, 1, 5, 4)  --2
-    MoveNear(-374.36, 8, 44, 2, 5, 7)  --3
-    MoveNear(-395, 6, 48, 2.5, 5, 7.5)  --4
-    MoveNear(-393, 5, 71, 3, 5, 7)  --5
-    MoveNear(-408, 4, 73.5, 2.2, 5)  --ocean
-    yield("/visland stop")
+  else
+    verbose("At arcanists guild. Moving to ocean fishing.")
+    if movement_method=="visland" then
+      yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
+      yield("/wait 3")
+      while IsVislandRouteRunning() or IsMoving() do
+        yield("/wait 1.036")
+      end
+    end
   end
 end
 
 ::Repair::
-if type(do_repair)=="string" then
-  repair_threshold = tonumber(string.gsub(do_repair,"%D",""))
-  if not repair_threshold then repair_threshold = 99 end
-  if string.find(string.lower(do_repair),"npc") and NeedsRepair(tonumber(repair_threshold)) then
+if DoRepair() then
+  if string.find(string.lower(do_repair),"npc") then
     if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
     while not IsAddonVisible("Repair") do
       if GetTargetName()~="Merchant & Mender" then
@@ -438,7 +437,7 @@ if type(do_repair)=="string" then
       end
       yield("/wait 0.305")
     end
-  elseif string.find(string.lower(do_repair),"self") and NeedsRepair(tonumber(repair_threshold)) then
+  elseif string.find(string.lower(do_repair),"self") then
     while not IsAddonVisible("Repair") do
       yield("/generalaction repair")
       yield("/wait 0.5")
@@ -456,47 +455,53 @@ if type(do_repair)=="string" then
 end
 
 ::BuyBait::
-if type(buy_baits)=="number" then
-  if not HaveEnoughBait() then
-    verbose("Buying more bait.")
-    if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
-    while not IsAddonVisible("Shop") do
-      if GetTargetName()~="Merchant & Mender" then
-        yield("/target Merchant & Mender")
-      elseif IsAddonVisible("SelectIconString") then
-        yield("/pcall SelectIconString true 0")
-      elseif GetCharacterCondition(32, false) then
-        yield("/pinteract")
-      end
-      yield("/wait 0.591")
+if DoBuyBaits() then
+  verbose("Buying more bait.")
+  if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
+  while not IsAddonVisible("Shop") do
+    if GetTargetName()~="Merchant & Mender" then
+      yield("/target Merchant & Mender")
+    elseif IsAddonVisible("SelectIconString") then
+      yield("/pcall SelectIconString true 0")
+    elseif GetCharacterCondition(32, false) then
+      yield("/pinteract")
     end
-    if is_purchase_ragworm then
-      yield("/pcall Shop true 0 0 99")
-      is_purchase_ragworm = false
-      yield("/wait 0.5")
-      if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
-      yield("/wait 0.5")
-    end
-    if is_purchase_krill then
-      yield("/pcall Shop true 0 1 99")
-      is_purchase_krill = false
-      yield("/wait 0.5")
-      if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
-      yield("/wait 0.5")
-    end
-    if is_purchase_plump then
-      yield("/pcall Shop true 0 2 99")
-      is_purchase_plump = false
-      yield("/wait 0.5")
-      if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
-      yield("/wait 0.5")
-    end
-    goto BuyBait
+    yield("/wait 0.591")
   end
-  yield("/pcall Shop true -1")
-  if GetDistanceToPoint(-410,4,76)>6.9 then
-    MoveNear(-404, 4, 73, 1, 2)
-    MoveNear(-408, 4, 73.5, 2.2, 5)
+  if is_purchase_ragworm then
+    yield("/pcall Shop true 0 0 99")
+    is_purchase_ragworm = false
+    yield("/wait 0.5")
+    if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
+    yield("/wait 0.5")
+  end
+  if is_purchase_krill then
+    yield("/pcall Shop true 0 1 99")
+    is_purchase_krill = false
+    yield("/wait 0.5")
+    if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
+    yield("/wait 0.5")
+  end
+  if is_purchase_plump then
+    yield("/pcall Shop true 0 2 99")
+    is_purchase_plump = false
+    yield("/wait 0.5")
+    if IsAddonVisible("SelectYesno") then yield("/pcall SelectYesno true 0") end
+    yield("/wait 0.5")
+  end
+  goto BuyBait
+yield("/pcall Shop true -1")
+end
+
+::BackToOcean::
+if GetDistanceToPoint(-410,4,76)>6.9 then
+  verbose("At Merchant & Mender. Moving to Ocean fishing.")
+  if movement_method=="visland" then
+    yield("/visland exectemponce H4sIAAAAAAAACuWSy2rDMBBFfyXM2hV62hrtQh+QRfqikD7oQiRKLailEistJeTfq9gOLaX9gWRWM6PL5eowG7i0jQMDY5dqtwoujVIcxbmzYbT0be3DCxQws59v0YfUgnnawHVsffIxgNnAPZgTITSpkKkCHsAwRrTkCmUBj2CkJsgklts8xeAmZ1nAsYBbu/Dr7MYILWAa313jQgKTh0lIbmXnaeZTfbXT/9oNcXOoto4f+5ecJrst7WvrvuVdRFbAeROT21sl1wztuFMMw83atWnod8Yz69O34266iKvTGBbDz2m/vPONm2Yd3RZ/cCkVkciF7MBoQnOpsudSEcpKofV/YPhBg9GYwaCqOjCKYC6hezBIGBOU/QRDjwULcqIUH6DQjkc+ISZLjkeIQ9KKaFpiD0R0V4LYn0klSaVRqUPH8rz9ApGJUVChBQAA")
+    yield("/wait 3")
+    while IsVislandRouteRunning() or IsMoving() do
+      yield("/wait 1.036")
+    end
   end
 end
 
@@ -558,7 +563,7 @@ end
 WaitReady(3)
 
 ::PrepareRandom::
-movement = true
+need_to_move_to_rail = true
 move_y = math.random(-11000,5000)/1000
 move_z = 6.750
 if math.ceil(move_y)%2==1 then
@@ -603,25 +608,17 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   ::Loading::
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
+    WaitReady(2)
 
   ::ShouldntNeed::
   elseif IsAddonVisible("IKDResult") then
     break
 
-  ::DoNothing::
-  elseif ( GetCurrentOceanFishingZoneTimeLeft()<0 and is_wait_to_move ) or ( GetCurrentOceanFishingZoneTimeLeft()<30 and GetCurrentOceanFishingZoneTimeLeft()>0 ) or GetCurrentOceanFishingZoneTimeLeft()>420 then
-    yield("/wait 0.05")
-
-  ::BagCheck::
-  elseif GetInventoryFreeSlotCount()<=2 then
-    for _, command in pairs(bags_full) do
-      if command=="/leaveduty" then LeaveDuty() end
-      verbose("Running: "..command)
-      yield(command)
-    end
-
   ::Movement::
-  elseif movement --[[and ( GetCurrentOceanFishingZoneTimeLeft()<420 or not is_wait_to_move )]] then
+  elseif need_to_move_to_rail then
+    while is_wait_to_move and ( GetCurrentOceanFishingZoneTimeLeft()>420 or GetCurrentOceanFishingZoneTimeLeft()<0 ) do
+      yield("/wait 0.244")
+    end
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.512")
     move_tick = 0
@@ -638,28 +635,27 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
     yield("/visland moveto "..move_x*2 .." "..move_z.." "..move_y)
     yield("/wait 0.200")
     yield("/visland stop")
-    movement = false
+    need_to_move_to_rail = false
+
+  ::DoNothing::
+  elseif GetCurrentOceanFishingZoneTimeLeft()<30 or GetCurrentOceanFishingZoneTimeLeft()>420 then
+    yield("/wait 0.05")
+
+  ::BagCheck::
+  elseif GetInventoryFreeSlotCount()<=2 then
+    for _, command in pairs(bags_full) do
+      if command=="/leaveduty" then LeaveDuty() end
+      verbose("Running: "..command)
+      yield(command)
+    end
 
   ::BaitSwitch::
   elseif bait_and_switch and ( ( current_bait.id~=correct_bait.id and GetItemCount(correct_bait.id)>1 ) or ( current_bait.id==baits_list.versatile and GetItemCount(correct_bait.id)<1 ) ) then
     if GetItemCount(correct_bait.id)>1 and current_bait.id~=correct_bait.id then
       yield("/tweaks e baitcommand")
       verbose("Switching bait to: "..correct_bait.name)
---       if GetCharacterCondition(43) then
---         stop_fishing_tick = 0
---         while GetCharacterCondition(42, false) or stop_fishing_tick<3 do
---           stop_fishing_tick = stop_fishing_tick + 1
---           yield("/wait 1.012")
---         end
---         SetAutoHookState(false)
---         while GetCharacterCondition(43) do yield("/wait 1.013") end
---       end
---       for i=1, 10 do
---         yield("/bait "..correct_bait.name)
---         yield("/wait 0.075")
---       end
       bait_switch_failsafe = 0
-      while GetCurrentBait()~=correct_bait.id do
+      while GetCurrentBait()~=correct_bait.id and GetCurrentOceanFishingZoneTimeLeft()>30 and GetCurrentOceanFishingZoneTimeLeft()<420 do
         yield("/bait "..correct_bait.name)
         yield("/wait 0.1014")
         if bait_switch_failsafe > 13 then
@@ -778,25 +774,12 @@ if type(wait_location)=="string" then
     ::MoveToArcanist::
     if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
       verbose("Near ocean fishing. Moving to arcanists guild.")
-      if movement_method=="visland route" then
-        yield("/visland exectemponce H4sIAAAAAAAACuWTTU8DIRCG/0oz55XAArvAzfiR9FCrxqR+xANpqUvigtmlGrPpf5elbOrBX2A5MfO+GYYnMwPc6NaAguXaaDfb2r6x7m0W/Eyb0JjOmQAFrPT3h7cu9KBeBrj1vQ3WO1ADPII6o5IgUcm6gCdQHOECnkFVHHFW8nIfI+/M/BJUFO71xu5ilXJ0LfynaY0LSZm7YDq9DisbmmV2/87lNmMzfeO/JiV2Eatt9XtvjvbUGingqvVhengeTJuv58mRg7ud6UO+j4VX2oZjxTG69t2Fd5v8Y3xIPtjWLKIP74s/eAiJaEVp5iHjKVmdqDARFSYZO0UsXCKCBa4SF4HweNiEhVeSi5OkQhGlbJyPSKVO0yJoohIVLFktThIL5YgQSg5LRMjIhZQTFlaVNf73O/S6/wFHKPaRngUAAA==")
+      if movement_method=="visland" then
+        yield("/visland exectemponce H4sIAAAAAAAACuWUy0pDMRCGX6XM+hhyv5ydeIEualWEesFFaFMb8CTSkypS+u4m8ZR24RPYrDLz/0wmH8Ns4cZ2DlqYzp0No6XvVz68jVIc2fXcBt8naGBmvz+iD6mH9mULt7H3yccA7RYeoT1jhiAtjWrgCVqBcAPP0EqBBKeC7nIUgxtfQpuFe7vwm1yFFtckfrrOhVSVcUhubedp5tNqOriPc0OXuZl+Fb/2Su4iV1va994d7LU10sBVF9P+4XFy3XA9r44huNu4Pg33UnhmfTpULNF1XF/EsBh+jH+TD75zk+zDu+YPHtogJhkbeJh8KFeVCtdZ4YbzU8QiDCJYY1m5aITL4XssQhqhT5IKQ4zxMh+ZiqrTolmlkhVsuNIniYXjvFOo5BULIYULF79YKFKYSaKOsBBqTgUMU4hLqo7BkLJrChmOtJGG/H8wr7sfPGs0+LgGAAA=")
         yield("/wait 3")
         while IsVislandRouteRunning() or IsMoving() do
           yield("/wait 1.031")
         end
-      elseif movement_method=="visland random" then
-        MoveNear(-388, 5, 61, 1, 5, 5.5)  --1
-        MoveNear(-386.5, 6, 41.8, 1, 5, 8)  --2
-        MoveNear(-362.4, 8, 48.5, 1, 5, 3)  --3
-        MoveNear(-354, 8, 50, 0.5, 3, 3)  --4
-        if move_x==7.5 then
-          MoveNear(-352.5, 8, 53.5, 0.5, 3, 2)  --5l
-          MoveNear(-344, 12, 52.4, 0.5, 3, 2)  --6l
-        else
-          MoveNear(-350, 8, 49, 0.5, 3, 2.5)  --5r
-          MoveNear(-336, 12, 48.6, 0.5, 3, 3)  --6r
-        end
-        MoveNear(-333.5, 12, 55.5, 2, 5, 5)  --arcanist
       end
     end
     ::AethernetToAftcastle::
@@ -821,17 +804,12 @@ if type(wait_location)=="string" then
     ::MoveToInn::
     if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
       verbose("Near aftcastle. Moving to inn.")
-      if movement_method=="visland route" then
+      if movement_method=="visland" then
         yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
         yield("/wait 3")
         while IsVislandRouteRunning() or IsMoving() do
           yield("/wait 1.032")
         end
-      elseif movement_method=="visland random" then
-        MoveNear(5.5, 40, 74, 1, 5, 6)  --a
-        MoveNear(-3, 40, 72, 1, 5, 5)  --b
-        MoveNear(0.5, 40, 11, 1, 9, 8)  --c
-        MoveNear(13, 40, 12, 0, 5)  --d
       end
     end
     ::EnterInn::
