@@ -79,7 +79,7 @@ correct_bait = baits_list.unset
 normal_bait = baits_list.unset
 spectral_bait = baits_list.unset
 current_bait = baits_list.unset
-if type(movement_method)~=string then movement_method = "" end
+if type(movement_method)~="string" then movement_method = "" end
 
 ocean_zones = {
   [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
@@ -379,6 +379,7 @@ if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
     while IsVislandRouteRunning() or IsMoving() do
       yield("/wait 1.035")
     end
+  else yield("/pcraft stop")
   end
 end
 ::AethernetToArcanist::
@@ -409,6 +410,7 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
       while IsVislandRouteRunning() or IsMoving() do
         yield("/wait 1.036")
       end
+    else yield("/pcraft stop")
     end
   else
     verbose("At arcanists guild. Moving to ocean fishing.")
@@ -418,6 +420,7 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
       while IsVislandRouteRunning() or IsMoving() do
         yield("/wait 1.036")
       end
+    else yield("/pcraft stop")
     end
   end
 end
@@ -516,6 +519,7 @@ if GetDistanceToPoint(-410,4,76)>6.9 then
     while IsVislandRouteRunning() or IsMoving() do
       yield("/wait 1.036")
     end
+  else yield("/pcraft stop")
   end
 end
 
@@ -830,6 +834,7 @@ if type(wait_location)=="string" then
         while IsVislandRouteRunning() or IsMoving() do
           yield("/wait 1.031")
         end
+      else yield("/pcraft stop")
       end
     end
     ::AethernetToAftcastle::
