@@ -26,7 +26,7 @@ is_discard = false  --Requires Discard Helper. Can set to "spam" to run during c
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
 force_autohook_presets = true
-movement_method = "visland route" --"visland" (navmesh coming soon)
+movement_method = "visland" --"visland" (navmesh coming soon)
 buy_baits = false  --Minimum number of baits you want. Will buy 99 at a time.
 do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
 boat_route = "indigo"  --"indigo", "ruby", "random"
@@ -79,6 +79,7 @@ correct_bait = baits_list.unset
 normal_bait = baits_list.unset
 spectral_bait = baits_list.unset
 current_bait = baits_list.unset
+if type(movement_method)~=string then movement_method = "" end
 
 ocean_zones = {
   [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
@@ -372,7 +373,7 @@ end
 ::MoveToAftcastle::
 if IsInZone(128) and GetDistanceToPoint(13,40,13)<20 then
   verbose("Near inn. Moving to aftcastle.")
-  if movement_method=="visland" then
+  if string.find(string.lower(movement_method),"visland") then
     yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXM2QiNFkvyrXQBH9KNQrrQg2hUIqilYistxeTdqzgKCfQNGp3mnxlGvz40I1zbzkEDbQizFGfWpZXrg0tQwcL+fEYf0gDNywi3cfDJxwDNCI/QcEKlqaVUFTxlZYhEJYWo4BkarIlWRqDaZBmDay+goRXc26Vf52GMZDGPX65zIU2VNiTX27e08Gl1U7qPc8Vj9jSs4ve+ks3kae/2Y3CH9skhVnDZxbS/uE2uK+HZ1FHE3doNqcTbwQvr02HiVl3F/jyGZXk43SUffOfmuY9uqj9YKBFSG6WYPuYiJywMCUdTc3Z6WJAILSUKNlERlCCnivMJi6L5K2ltTo+KIJIaLcoOZSp0e/SOCiesVvoEVwg50UxLdqCyA4IEFar6vwN53fwCXs5zv5QFAAA=")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
@@ -402,7 +403,7 @@ end
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   if DoRepair()=="npc" or DoBuyBaits() then
     verbose("At arcanists guild. Moving to Merchant & Mender.")
-    if movement_method=="visland" then
+    if string.find(string.lower(movement_method),"visland") then
       yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXMWRWyFmu5hS6QQ7pRcNPSg0hUIqilYCstJfjdKy8hUPoEjU7zj35+Rh+jA9za2oGBebO2wbdpRmeN21nfAILKfu+iD6kF83qA+9j65GMAc4BnMBeME8yJIAzBCkxRYNWrEsELGC6xZqwQossyBre4yg6qETzajd/nPIoJgmX8dLULCUwWi5BcY9ep8ml71/t/9aY581jtNn4db/I8Oe3dfrTuZB+GLBBc1zG5Y1Ry9VTOB8ckHvauTVPdB1fWp1Nir25icxnDZno7GZtPvnbL7CMd+oOMUljKkg9gBNb5cCVGMBpzwUquzhOMZpjpfkcyGD6A0XrgUgosqCJnui9aY1GoEQsbsdDxI8n8rQg923WRWDEp6ASG9GDEuDBSYUappP8fzFv3A6BUZs+lBQAA")
       yield("/wait 3")
       while IsVislandRouteRunning() or IsMoving() do
@@ -411,7 +412,7 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
     end
   else
     verbose("At arcanists guild. Moving to ocean fishing.")
-    if movement_method=="visland" then
+    if string.find(string.lower(movement_method),"visland") then
       yield("/visland exectemponce H4sIAAAAAAAACuWSy2oDMQxFfyVoPTX22J6xvAt9QBbpi0L6oAszcRpDxy4Zp6WE/Hsdz4R0kS9ItNKVxLV80AZuTWtBw3jVGO+6OIphFBpr/GjhuqXzH1DAzPx+BedjB/ptA/ehc9EFD3oDz6AvOFekRiYLeAHNGFGilCgKeAUtFEEmsNomFbydXIGmBTyauVsnL0aSmIZv21ofc2fio12ZJs5cXN4N0/9rw65ppW4ZfvadtEtyW5jPzh7G84KsgOs2xP3Dk2jbIR3niUE8rG0Xh3xnPDMuHhx36iasLoOfD/+mffHJtXaa5ui2OEKlkkRgyUXGoghNIaueSk0oq7hSx7GUJ41FYcKCss5YJMEUXPVYkDDGKTtLLFgSKcsBCs080gExUZV4hjgErYmiFfZAeL4SxP5MakFqhVKeOpb37R9ZYl91nAUAAA==")
       yield("/wait 3")
       while IsVislandRouteRunning() or IsMoving() do
@@ -435,7 +436,7 @@ if DoRepair() then
       end
       yield("/wait 0.592")
     end
-    while IsAddonVisible("Repair") and string.gsub(GetNodeText("Repair",2),"%D","")~="0" do
+    while IsAddonVisible("Repair") do
       if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
         if IsAddonVisible("SelectYesno") then
           yield("/pcall SelectYesno true 0")
@@ -509,7 +510,7 @@ end
 WaitReady(0.3)
 if GetDistanceToPoint(-410,4,76)>6.9 then
   verbose("At Merchant & Mender. Moving to Ocean fishing.")
-  if movement_method=="visland" then
+  if string.find(string.lower(movement_method),"visland") then
     yield("/visland exectemponce H4sIAAAAAAAACuVQXUvDQBD8K2Wfz3CJqWnurVSFPtSPIsQqPhztSg+825LbKhLy393UK0XxH/g2MzsMs9PBjfUIBpa4s64dMY1ojTaAgsZ+7sgFjmCeO7ij6NhRANPBI5izUp9nuihLBSswZaYVPIGpRMt1PemFUcD5JZi8qBUs7cbtJacYfAt6R4+BwQiZB8bWrrlxvL0d/L+01E7qxC19HC/SQ9Je7VvEk/1QLldw5YnxGMXoE5weHInc7zFywkNwYx2fEgd2Te2Mwib9rL/FB+dxIT7dq78WGWcXdVGNf04iYJJX/2CSl/4LNp/3pk0CAAA=")
     yield("/wait 3")
     while IsVislandRouteRunning() or IsMoving() do
@@ -619,8 +620,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   verbose("Spectral bait: "..spectral_bait.name, true)
   verbose("Should now be using: "..correct_bait.name, true)
   verbose("Script thinks we're using: "..current_bait.name, true)
-  verbose("time: "..GetCurrentOceanFishingZoneTimeLeft(), true)
-  ocean_fishing_time = GetCurrentOceanFishingZoneTimeLeft()
+  verbose("time: "..string.format("%.1f", GetCurrentOceanFishingZoneTimeLeft()), true)
 
   ::Ifs::
   ::Loading::
@@ -782,10 +782,10 @@ if type(spend_scrips_when_above)=="number" then
       if GetTargetName()~="Scrip Exchange" then
         yield("/target Scrip Exchange")
       elseif IsAddonVisible("SelectIconString") then
-        yield("/lockon on")
         yield("/pcall SelectIconString true 0")
         yield("/visland stop")
       else
+        yield("/lockon on")
         yield("/pinteract")
       end
       yield("/wait 0.521")
@@ -824,7 +824,7 @@ if type(wait_location)=="string" then
     ::MoveToArcanist::
     if IsInZone(129) and GetDistanceToPoint(-408,4,75)<20 then
       verbose("Near ocean fishing. Moving to arcanists guild.")
-      if movement_method=="visland" then
+      if string.find(string.lower(movement_method),"visland") then
         yield("/visland exectemponce H4sIAAAAAAAACuWUy0pDMRCGX6XM+hhyv5ydeIEualWEesFFaFMb8CTSkypS+u4m8ZR24RPYrDLz/0wmH8Ns4cZ2DlqYzp0No6XvVz68jVIc2fXcBt8naGBmvz+iD6mH9mULt7H3yccA7RYeoT1jhiAtjWrgCVqBcAPP0EqBBKeC7nIUgxtfQpuFe7vwm1yFFtckfrrOhVSVcUhubedp5tNqOriPc0OXuZl+Fb/2Su4iV1va994d7LU10sBVF9P+4XFy3XA9r44huNu4Pg33UnhmfTpULNF1XF/EsBh+jH+TD75zk+zDu+YPHtogJhkbeJh8KFeVCtdZ4YbzU8QiDCJYY1m5aITL4XssQhqhT5IKQ4zxMh+ZiqrTolmlkhVsuNIniYXjvFOo5BULIYULF79YKFKYSaKOsBBqTgUMU4hLqo7BkLJrChmOtJGG/H8wr7sfPGs0+LgGAAA=")
         yield("/wait 3")
         while IsVislandRouteRunning() or IsMoving() do
@@ -854,7 +854,7 @@ if type(wait_location)=="string" then
     ::MoveToInn::
     if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
       verbose("Near aftcastle. Moving to inn.")
-      if movement_method=="visland" then
+      if string.find(string.lower(movement_method),"visland") then
         yield("/visland exectemponce H4sIAAAAAAAACuWT22rDMAyGX6XoOjNyYseHu7ID9KI7Mei6sYuwetSw2CNxN0bou09JU1rYnmDVlX5JyNKH3MF1VTuwMHVp7Zrg0iTFiQ8BMlhU3x/Rh9SCfe7gNrY++RjAdvAIliNTyCWKDJZgBTLsjdQTWCWYQNRiSyoGN7sAixncVyu/oV45IzGPn652IQ2ZWUiuqV7Twqf1zVh9HBtHpJHadfzaZ2gW6vZWvbfuUD4MyDO4rGPaPzxLrh7d6VAxiruNa9Po940XlU+Hjr26is15DKtxb9wFH3zt5lSH2+w3FcKgi7LM/6LCmVJSmdOjcoaMK11oLsqBS2GY6a0cuIiCFWgwl6cHhnYzXJpc77FIThcyUOGKqOTmFKnwgnGt6RsdH4uWOyw505Jj+e9/0cv2ByD0KqubBQAA")
         yield("/wait 3")
         while IsVislandRouteRunning() or IsMoving() do
