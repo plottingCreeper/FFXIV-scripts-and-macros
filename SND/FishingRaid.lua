@@ -5,7 +5,7 @@
     Script runs using:
       SomethingNeedDoing (Expanded Edition): https://puni.sh/api/repository/croizat
     Required plugins:
-      Autohook: https://raw.githubusercontent.com/InitialDet/MyDalamudPlugins/main/pluginmaster.json
+      Autohook: https://love.puni.sh/ment.json
       Pandora: https://love.puni.sh/ment.json
       Visland: https://puni.sh/api/repository/veyn
     Required for major features:
@@ -34,8 +34,8 @@ is_recast_on_spectral = true
 
 spend_scrips_when_above = false
 scrip_category = 1
-scrip_subcategory = 6
-scrip_item_to_buy = "Regional Folklore Trader's Token C"
+scrip_subcategory = 1
+scrip_item_to_buy = "Hi-Cordial"
 
 bags_full = {
   "/echo Bags full!",
@@ -293,9 +293,9 @@ end
 ::MainWait::
 while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
   if is_ar_while_waiting then
-    verbose("Still running! AutoRetainer until 5 minutes before the boat.", true)
+    verbose("Still running! AutoRetainer for the next ".. 55 - os.date("!*t").min .." minutes.", true)
   else
-    verbose("Still running! Waiting until 5 minutes before the boat.", true)
+    verbose("Still running! Waiting for the next ".. 55 - os.date("!*t").min .." minutes.", true)
   end
   yield("/wait 1.001")
 end
@@ -525,7 +525,7 @@ end
 
 ::WaitForBoat::
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
-  verbose("Still running! Waiting for the boat.", true)
+  verbose("Still running! ".. 60 - os.date("!*t").min .." minutes until the next boat.", true)
   yield("/wait 1.005")
 end
 
@@ -594,6 +594,7 @@ verbose("move_y: "..move_y)
 
 ::OnBoat::
 start_fishing_attempts = 0
+is_changed_zone = true
 while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false do
   ::AlwaysDo::
   AutoHookPresets()
@@ -648,7 +649,10 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
       yield("/wait 0.244")
     end
     if GetPlayerRawXPos()>0 then move_x = 7.5 else move_x = -7.5 end
-    if wasabi_move then move_y = math.floor(GetPlayerRawZPos()*1000)/1000 end
+    if wasabi_move then
+      move_y = math.floor(GetPlayerRawZPos()*1000)/1000
+      verbose("Resetting move_y to: "..move_y)
+    end
     yield("/visland moveto "..move_x.." "..move_z.." "..move_y)
     yield("/wait 0.512")
     move_tick = 0
@@ -729,6 +733,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
       yield("/pcraft stop")
     elseif start_fishing_attempts>6 then
       if math.floor(GetPlayerRawXPos())~=7 and math.floor(GetPlayerRawXPos())~=-7 then
+        verbose("Not standing at the side of the boat? Lets fix that.")
         need_to_move_to_rail = true
         wasabi_move = true
       end
