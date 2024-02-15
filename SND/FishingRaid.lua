@@ -258,6 +258,10 @@ function verbose(verbose_string, throttle)
   end
 end
 
+function TimeCheck(context)
+
+end
+
 correct_bait = baits_list.unset
 normal_bait = baits_list.unset
 spectral_bait = baits_list.unset
@@ -821,6 +825,7 @@ if type(spend_scrips_when_above)=="number" then
         yield("/visland stop")
       else
         yield("/lockon on")
+        yield("/facetarget")
         yield("/pinteract")
       end
       yield("/wait 0.521")
