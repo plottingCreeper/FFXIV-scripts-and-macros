@@ -33,7 +33,7 @@ is_recast_on_spectral = true  --Cancels cast when spectral current starts
 is_leveling = "auto"  --false, "auto"
 
 -- Getting off the boat
-score_screen_delay = 0  --How long in seconds to wait once the final score is displayed.
+score_screen_delay = 3  --How long in seconds to wait once the final score is displayed.
 is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.
 
