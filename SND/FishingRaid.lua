@@ -17,36 +17,49 @@
       YesAlready: https://love.puni.sh/ment.json
 ]]
 
-is_ar_while_waiting = false  --AutoRetainer multimode enabled in between fishing trips.
-wait_location = false  --Can be false, "inn", or "fc"
-fishing_character = "auto"  --"auto" requires starting the script while on your fishing character.
+-- Before getting on the boat
+do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
+buy_baits = 100  --Minimum number of baits you want. Will buy 99 at a time.
+boat_route = "indigo"  --"indigo", "ruby", "random"
+
+-- Just got on the boat
 is_wait_to_move = true  --Wait for the barrier to drop before moving to the side of the boat.
 is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
-is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
-is_desynth = true  --Runs faster with YesAlready, but this isn't required.'
+
+-- Fishing
 bait_and_switch = true  --Uses /bait command from SimpleTweaks
 force_autohook_presets = true
-movement_method = "visland" --"visland" (navmesh coming soon)
-buy_baits = false  --Minimum number of baits you want. Will buy 99 at a time.
-do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
-boat_route = "indigo"  --"indigo", "ruby", "random"
-is_recast_on_spectral = true
+is_recast_on_spectral = true  --Cancels cast when spectral current starts
 is_leveling = "auto"  --false, "auto"
-is_single_run = false
 
-spend_scrips_when_above = false
+-- Getting off the boat
+is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
+is_desynth = true  --Runs faster with YesAlready, but this isn't required.
+
+-- Waiting for next boat
+wait_location = false  --false, "inn", "fc", "private", "apartment", "shared", "Shared Estate (Plot [#], [#]nd ward)"
+is_ar_while_waiting = false  --AutoRetainer multimode enabled in between fishing trips.
+
+-- Other script settings
+is_verbose = true  --General status messages
+is_debug = false  --Spammy status messages
+fishing_character = "auto"  --"First Last@Server", "auto"
+movement_method = "visland" --"visland" (navmesh coming soon)
+is_last_minute_entry = false  --Waits until 10 minutes before the boat leaves (WIP)
+is_single_run = false  --Only go on 1 fishing trip, then stop.
+
+-- Spend white gatherer scrips (overhaul coming soon:tm:)
+spend_scrips_when_above = 100
 scrip_category = 1
 scrip_subcategory = 1
 scrip_item_to_buy = "Hi-Cordial"
 
+-- What to do when bags are full. (overhaul coming soon:tm:)
 bags_full = {
   "/echo Bags full!",
   "/leaveduty",
   "/pcraft stop",
 }
-
-is_verbose = true
-is_debug = false
 
 ------------------------------------------------------------------------
 
