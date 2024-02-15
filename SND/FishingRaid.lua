@@ -33,6 +33,7 @@ is_recast_on_spectral = true  --Cancels cast when spectral current starts
 is_leveling = "auto"  --false, "auto"
 
 -- Getting off the boat
+score_screen_delay = 0  --How long in seconds to wait once the final score is displayed.
 is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
 is_desynth = true  --Runs faster with YesAlready, but this isn't required.
 
@@ -273,7 +274,11 @@ function verbose(verbose_string, throttle)
 end
 
 function TimeCheck(context)
-
+  if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
+    if is_last_minute_entry and os.date("!*t").min>10 then
+      return true
+    end
+  end
 end
 
 correct_bait = baits_list.unset
@@ -288,6 +293,8 @@ if type(is_leveling)=="string" then
     is_leveling = true
   end
 end
+if type(score_screen_delay)~="number" then score_screen_delay = 0 end
+if score_screen_delay<0 then score_screen_delay = 0 end
 
 ::Start::
 if IsAddonVisible("IKDResult") then
@@ -802,7 +809,7 @@ end
 ::FishingResults::
 if IsAddonVisible("IKDResult") then
   result_timer = 501
-  while IsAddonVisible("IKDResult") and result_timer>=500 do
+  while IsAddonVisible("IKDResult") and result_timer>=500-score_screen_delay do
     result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
     result_timer = tonumber(result_raw)
     if type(result_timer)~="number" then result_timer = 501 end
