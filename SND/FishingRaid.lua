@@ -32,6 +32,7 @@ do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to 
 boat_route = "indigo"  --"indigo", "ruby", "random"
 is_recast_on_spectral = true
 is_leveling = "auto"  --false, "auto"
+is_single_run = false
 
 spend_scrips_when_above = false
 scrip_category = 1
@@ -1036,35 +1037,37 @@ RunDiscard()
 
 ::StartAR::
 verbose("You did a good job today!")
-if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
-if is_ar_while_waiting then
-  verbose("Enabling AutoRetainer while waiting.")
-  target_tick = 1
-  while GetCharacterCondition(50, false) do
-    if target_tick > 99 then
-      break
-    elseif string.lower(GetTargetName())~="summoning bell" then
-      verbose("Finding summoning bell...")
-      yield("/target Summoning Bell")
-      target_tick = target_tick + 1
-    elseif GetDistanceToTarget()>5 then
+if not is_single_run then
+  if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
+  if is_ar_while_waiting then
+    verbose("Enabling AutoRetainer while waiting.")
+    target_tick = 1
+    while GetCharacterCondition(50, false) do
+      if target_tick > 99 then
+        break
+      elseif string.lower(GetTargetName())~="summoning bell" then
+        verbose("Finding summoning bell...")
+        yield("/target Summoning Bell")
+        target_tick = target_tick + 1
+      elseif GetDistanceToTarget()>5 then
+        yield("/lockon on")
+        yield("/automove on")
+      else
+        yield("/automove off")
+        yield("/pinteract")
+      end
       yield("/lockon on")
-      yield("/automove on")
-    else
-      yield("/automove off")
-      yield("/pinteract")
+      yield("/wait 0.511")
     end
-    yield("/lockon on")
-    yield("/wait 0.511")
+    if GetCharacterCondition(50) then
+      yield("/lockon off")
+      yield("/ays e")
+      while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
+      yield("/wait 0.4")
+    end
+    yield("/ays multi e")
+  else
+    verbose("Waiting for the next boat.")
   end
-  if GetCharacterCondition(50) then
-    yield("/lockon off")
-    yield("/ays e")
-    while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
-    yield("/wait 0.4")
-  end
-  yield("/ays multi e")
-else
-  verbose("Waiting for the next boat.")
+  goto MainWait
 end
-goto MainWait
