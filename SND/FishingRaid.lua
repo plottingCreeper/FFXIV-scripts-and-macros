@@ -294,7 +294,7 @@ if type(is_leveling)=="string" then
   end
 end
 if type(score_screen_delay)~="number" then score_screen_delay = 0 end
-if score_screen_delay<0 then score_screen_delay = 0 end
+if score_screen_delay<0 or score_screen_delay>500 then score_screen_delay = 3 end
 
 ::Start::
 if IsAddonVisible("IKDResult") then
