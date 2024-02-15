@@ -438,7 +438,14 @@ function EnterHouse()
         end
         yield("/wait 1.2")
       end
-      while IsPlayerOccupied() do yield("/wait 0.200") end
+      het_tick = 0
+      while het_tick < 3 do
+        if IsPlayerOccupied() then het_tick = 0
+        elseif IsMoving() then het_tick = 0
+        else het_tick = het_tick + 0.2
+        end
+        yield("/wait 0.200")
+      end
     else
       debug("Not entering house?")
     end
@@ -758,6 +765,13 @@ else
   CloseSearch()
 end
 
+if is_check_for_hq then
+  hq = GetNodeText("RetainerSell",18)
+  hq = string.gsub(hq,"%g","")
+  hq = string.gsub(hq,"%s","")
+  if string.len(hq)==25 then is_hq = true end
+end
+
 ::PricingLogic::
 if is_price_sanity_checking and target_price < prices_list_length then
   if prices_list[target_price] == 1 then
@@ -772,11 +786,11 @@ if is_price_sanity_checking and target_price < prices_list_length then
   debug("target_price "..target_price)
   debug("prices_list[target_price] "..prices_list[target_price])
 end
-if is_check_for_hq then
-  hq = GetNodeText("RetainerSell",18)
-  hq = string.gsub(hq,"%g","")
-  hq = string.gsub(hq,"%s","")
-  if string.len(hq)==25 then is_hq = true end
+if is_check_for_hq and is_hq then
+  if not IsNodeVisible("ItemSearchResult", 5, target_price, 13) then
+    target_price = target_price + 1
+    goto PricingLogic
+  end
 end
 if is_dont_undercut_my_retainers then
   for _, retainer_test in pairs(my_retainers) do
