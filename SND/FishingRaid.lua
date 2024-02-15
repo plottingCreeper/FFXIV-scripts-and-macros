@@ -31,6 +31,7 @@ buy_baits = false  --Minimum number of baits you want. Will buy 99 at a time.
 do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
 boat_route = "indigo"  --"indigo", "ruby", "random"
 is_recast_on_spectral = true
+is_leveling = "auto"  --false, "auto"
 
 spend_scrips_when_above = false
 scrip_category = 1
@@ -50,11 +51,19 @@ is_debug = false
 
 function AutoHookPresets()
   if force_autohook_presets then
-    if OceanFishingIsSpectralActive() then
+    if is_leveling then
+      if GetLevel()>=60 then
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1ZTU/jOhT9K1Y2b9MZNdCWgcWTOqUM1SsDop1hgdDIpG5j4caV4wAdxH9/13bixGma8tFldnC/fM61fXwDL14/kXyAYxkP5gvv5MUbRviekT5j3okUCWl5pzySAxwFhF1wHoSZWeWMaUTynFnm+rGahoLEIWdgam+tcE7YakqepXfieS3vJ15CLQ0HqdpIF295I6hx8O3Yqdq/548kx0dip/ocsxjs/UBSHk3XK4j0Xw3gNOLF0z8cONjTNAe8334n/F8xQToKjUYZ+N63z4O/jNhaR4wimVDls6H7br4JS7EfH+2n8YMwWapu/0lichOSyNIYPgeEzGINtY7JUa/7Fi7GG6NBIgSJpCWTEtQwDLWO3+68g5sxV1LjjJFA7jxL79yLrKxF639uJzoWrphRDLf7xRtFj0RkhitBuaBynSczxp8uISLAq9HAmv8EJn5MYwB8C1UkWfrQjoNeD26p+g3uVafdfm3lvna753d86z3sFr2uq5To94793Hvgeh2fD0Xv9nodslaZLTAwP7MFB+kWnNE4HK5JvPPIdLvtPRx6tRzS69mz1N3Lyb/AD2QS0rn8jqk+/8oQZ4aJxMEDcIS16km+heI0pDFa0kUoUcCjOaOBRE9UhkhL1jTEjOKHf2J0hh+5yKlbhEhDtIL8rgbUyNoVlpRAaL6TtgW5K82/JnO13BALtp5SBW+H5HV7+9h9i8Nufm8vmw968ZcMsDTv6S8j6+aJGl1Gg1PLG1zq9bqB3RrNACANMFMFqgLUQo9kwvBq83mrOjugBx9u0VeUtQbhaIbsxumjAoeLMRRxie4Jgjdrhp6AHtKkkWaNsMZaaHTuKxy0/TQ7PeCxOd7Qb8eQ3bTDlmu/JgEsJ7Q06janghafUaH6b9arO4KHn7+bG1cwbdfmnc1a1vns3YSmDZ+lwM5Em5+gyRNeKSx2BvmBaT5OKc+Uq5iS/yVDPpxReZHdpy9qizYqjnnhfFdUNP4dFa+gA2QLSuOrxOl98SrzHUyV+SbC5msRX8EMIuDCmpuzpVOVUW/oVylvS9cqo97Uuzr0xQ5Uxnm36uGk0eIa09kdymKc5tYRqFmg0OhrFTTgSSSJSGtCfFoEyBhbytVFNCaPhMFv6N9eGyqpgexyrtoW67msdK+VQ6UXWvebiBgkkBE0ToT91jo+8o9g4XPOH24IfiiVycz5AF/tPz2fnpcvXubTag9yWqH25ZCfl9MtUeqyq0j1pB0du7bCR1LunEjBo0UFXOOoI2QitlEy3h2k3KB6WiZWv9WHZatDLXOPyYJEMyzWFditr46gDXI4Vvh3sNyIqydqw8tcN0FnEeoVS2LJl9ajcoqzxClPAL6xGgZgnAq6yoyFUGC7MaeldsVg67ySBUwSMceBS25MzIAfw3dTXvUCP6uh75QwDGzbX+FBvqBR2aTYwSeqMotiamYspVeZJ5Kv+nNQkwFO4EnOXz3XPqZLNbP7BUcuRU5SqjkTSYCj/vzarSzXePHExbIgKerzs5GURlIaSWkk5UOS8p+AL7KCoHQbQWlmlGZGaWaUj84oVyxZrtCNO6b0GlVpVKVRlUZVKlQF/rlk/saS/u3x1hqMstzevf4PVDiywk8fAAA=")
+      else
+        UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1ZS1PjOBD+Kypf9sJMxSEJA7UXJoQhtWFCkcxyoKgp4SixCsVKyTKQpfjv25Js2XIch0cOc/AN+qXva3W32vDinSaS93Es4/584Z28eIMI3zNyyph3IkVCDrwzHsk+jgLCLjkPwkysfEY0IrnPLFP9WE1DQeKQMxC1tka4IGw1Jc/SO/G8A+8nXkIsDQep2EgHP/CGEKP97diJenrPH0mOj8RO9DlmMchPA0l5NF2vwNJ/NYBTixdP/9B2sKduDni/9U74v2KCtBUaDjPwvW+fBz+O2FpbDCOZUKWzpvtOvjFLsR8f7Sfx/TBZqmz/TmJyE5LI0hg8B4TMYg21jslRr/sWLkYbo34iBImkJZMS1DAMtY7f6ryDmxFXUuOMkUDurKV33kUW1qL1P3cTHQtXzCiG7n7xhtEjEZngSlAuqFznzozxpzFYBHg17Fvx78DYj2gMgG8hiiRLH9LR7vWgS9Vv0FedVuv1INe1Wj2/41vtYbeodVUlR7937Ofatqt1dL4T9I+Ac7fX7sxuzlSEgfmZiminFXFO43CwJvHOCu52W3voQXUc0ufZ0u7upREv8QOZhHQuv2Oq21EJ4kwwkTh4AI5wVj3Jt1CchjRGS7oIJQp4NGc0kOiJyhDpCToNMaP44a8YneNHLnLqFiHSEO378K4E1EzZKywpAdP8Jm0KclXqf03m6rgBFmw9pQrejgnc7e3j9i0Oe/ntvVw+jK//SB9L87z/Mq+MeTGH46h/ZnmDSj2mN3BbwxkApAFmKkCVgTrokUwYXm2+tlW1A/Pgwyn6irLUIBzNkL04XSpQXIyhiEt0TxA8oTP0BPSQJo00a4Q11kKic12h0Hp7SXZa4LEpb8i3I8g67fDAlV+TAI4TejTqNKcDLT6nQuXfnFdXgoef782NFkzTtdmzWco6n+1NSNrgWQrsLNh5BU2e8EphsSvRD0zz7U5pplzZlPQvGfLBjMrLrJ++qCvaiDjihfquiGj0OyJeQQbIFpRGV4nT++JV+juYKv2NhfXXQ3wFK5GAhjWdsyVTlVZvyFfJb0vWKq3elLs69MUMVNp5t+rhpNHiGtPZHcpsnOTWEag5oJDoa2XU50kkiUhjgn0aBMgYWcrVRTQij4TBb+jvXgsiqf1wPFdpi/WaWOprpVDuhdT9S0QMI5ARNEqE/fQ7PvKP4OALzh9uCH4ohcnE+fdEtf7sYnpRbrxMp6c9jNOKaV82+TmebrFSza4s1ZN2dOzKCt9suXIiBY8WFXCNoo6QsdhGyWh3kHKN6mkZW/1WH5alDrVMPSILEs2wWFdgt7o6gtbI4Vih38Fyw66eqDUvc90EnVmoVyyJJV9ajfIp7hJnPAH4RmoYgHAq6CoTFkyB7caelsoVg637SmYwScQcBy65ETELfgyfcXnUS/yslr4zwjCwbX2FB/mSRmWRYgdfzEosiq6ZsOReJZ5IvjqdwzTp4wSe5PzVc+UjulQ7u19Q5KPIcUpnzkQS4Kg/v3ZPlmu8eOJiWRgp6mu4GSnNSGlGSjNSPjRS/hHwRVYYKN1moDQ7SrOjNDvKR3eUK5YsV+jGXVN6zVRppkozVZqpUjFV4J9L5m8s6d8eb63ATJbbu9f/AVP0+3XeHwAA")
+      end
+    elseif OceanFishingIsSpectralActive() then
       if GetMaxGp()>700 then
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YTXPiOBD9Kypf9sJMQQJkkhsLzIRaSFLBszmkUlOKEViFkChJTsJQ+e8rWZb8gTHJwp7WN6q71XqvpX5qs/V6kWR9KKTozxfe1dYbUvhMUI8Q70ryCDW8AaOyD2mAyISxILRmvWaMKUrXzKzrx9oPORIhI8rU3JvhGpG1j96kd+V5De8GrlSuGA7QuUGcvOGNVI6zb5e5rL1n9oJSfEjkss8hEcreCyRm1N+sVWTr3QBOIrZe/OPsEPZW85PofwoE4igwGlns3W/HY7+lZBNHjKiMsPa50FPX3oQl2C8vTlP3fhitdLF/RQI9hIg6GsO3AKGZiKE6Jkmif3MUxitAP+IcUenYJAxjHIZbu9Vsf4KcMZdyY4SgQObuUhmDTx6GTevQto47iraDy2cYqu7eeiP6grg13HHMOJab/+Ji2T0Nl26rfSSXs4TLdyzC4QaJg7XvdE5xe/R2IN7PHUrnJFdoApdoGuK5/BPi+CJpg7CGqYTBUnFUe1WT/AhFP8QCrPAilCBgdE5wIMErliGIm98PIcFw+YcA3+EL4yl1hxDEEJ20faoAFQJxByVGKjQ9SVeC1JWsv0dzvd0QcrLxsYZ3SDw63VMcvwPiTr97ktNXnfcb9aE0L9NPo5BG7Ue3tD9wnJRLPwQP6rhGMwUQB5DoBGUBeqMXNCVwvdvQZSU6O0JfvwJbGgDpDLiTi++Kul2EAMokeEZAyf8MvCp6ICYNYtYAxlgzhU59mZt2mmInN1yY+63qnTPYVjtv5O33KFDbqfiWFpIqZTw/vgl3ei0py25z2tK0j21CVZzhm+QwNwOmN2X6Ctcai3u2f0CcTiDa4zMdU/BvLfLhDMuJ7Zsv+ih2Mo5Z5h6XZDT+AxnvVAXQHpTGV4rT++KVrs9hKl1vItz6WK3X6tXmqjFNh+ypVGnUB+pVWLenaqVRH6pdFfpsBUrjCnUsRWFuZUWqpKSQMvrrUb+4mC7uIZ49gRvGV2qIeLfLEzr5IJtNIRljIW/nuiqqox93Jn3t0EszlfkbcaGUjCAwjrj7+Li8aF2oTa8ZWz4guCykseZ0pC33D67962JfWV8s2koVS0S7GHJz6++J0r2sI/XLdHGZt2U+G1LnVHJGFyVwjaOKkInIUSo6D3DKB1WzMrHxi3tetOaYWfcYLRCdQb4pQed8Vfxc0B6Kzn+A5U5cNVEXXuS6C9pGqCe/HwnJVs6j12QnggGLFPyi1ed4ba2Glw5VbHfGrcSuGeydOmzANOJzGOTJjZGZ00UA9WOTWCfwTc9uA0SgYtv8qp7VCaZFk2anPtm0mWeXWmNheZl5Ktm6N5eI92GkHtz0Tcvbx3ilR++WcSSSMpVI8Wi+Nz4iHvdw8aoUKqMa+pOrVo1aNWrVqFVjn2r8xdXnUUYzOrVm1JNGPWnUk0bFpHFHotUaPOSHjW4tHLVw1MLxfxWOJ/t/R/I336MzGPF4fHr/B4+oiaDsHQAA")
       elseif GetMaxGp()>400 then
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YXW/iOhD9K1Ze7gtdQQt02zcusC260KKSvX2oqpUbDLEwMbKdUhb1v68dx84HIbQL+7R5QzPj8Tljz/GErdMJBe1CLnh3Nneut04/gC8EdQhxrgULUc3p0UB0YeAhMqLU841ZrRniACVrpsZ1s3J9hrhPiTTV92a4RWTlojfhXDtOzbmDS5krggNUbhAlrzkDmeP861Uma+eFvqIEH+KZ7DNIuLR3PIFp4G5WMrLxrgHHEVsn+nF+CHuj/kn03zkCURQYDAz29tfjsd8HZBNFDAIRYuWzoaeuvQ6LsV9dnqbuXT9cqmL/CDl69FFgafTfPISmPIJqmcSJfucotJeDbsgYCoRlEzOMcGhuzUa9+Qly2lzIjRKCPJG5S0UMPnkYJq1F2zjuKJoWLptiKLt76wyCV8SMYcwwZVhs/sTFMntqLu1G80gu5zGXb5j7/Q3iB2vfap3i9qjtQLSfPZTWSa7QCC7QxMcz8S/E0UVSBm4MEwG9heQo9yon+RGKro85WOK5L4BHgxnBngBrLHwQNb/rQ4Lh4h8OvsFXyhLqFiGIIFpp+1QBSgRiDAVGMjQ5SVuCxBWvf0AztV0fMrJxsYJ3SDxa7VMcvwViT799ktOXnfcTdaHQL9N3rZBa7Qf3QbdnOUmXegge5XENphIg9iBRCYoC1EavaELgarehi0p0foS+fgGmNAAGU2BPLror8nYRAgIqwAsCUv6nYC3pgYg0iFgDGGFNFTrxpW7aaYod33Cu77esd8ZgWu2ilrU/IE9uJ+MbSkjKlPHi+Cbc6bW4LLvNaUrTPLYJZXH6b4LBzAyY3JTJGq4UFvts30CcTCDK41IVk/NvDfL+FIuR6ZszdRQ7GYc0dY8LMmr/gYxjWQG0B6X2FeJ0zpzC9RlMhet1hF0fqfVKvtpMNqbukD2VKoz6QL1y6/ZUrTDqQ7UrQ5+uQGFcro6FKPStLEkVl/RJPbY4mD9APH0Gd5QtIQFnYEjX4GbsvJsUMaVstMmYxNecIebifqZKJNv7aWfsVw6VI1Wm/xHjUtYIAsOQ2S+Rq8vGpdz9ltLFI4KLXBpjTubbYn/v1r3NN5nxRQouJbJAwfMhd/funijV2CpSPVOXV1lb6hsicU4Eo8G8AK52lBHSERlKeecBTtmgclY6Nnp+L/LWDDPjHqI5CqaQbQrQWV8ZPxu0h6L1H2C5E1dO1Ibnue6CNhHy/e+GXNCl9ag16fGgR0MJX1s1A2l0GV4ZYypUst2ZvWK7YrB3BDEBk5DNoJclN0R6aOceVC9PbB3BNzXI9RCBkm39i3xjRzjImxQ7+f2mzCy91Bhzy4vME0FXnZlArAtD+fomD1zWPsRLNYc3tCPWlolAkkf9vfYR8XiA87XUrJRqqO+vSjUq1ahUo1KNfarxH5PfSinNaFWaUU0a1aRRTRolk8aYhMsVeMwOG+1KOCrhqITjbxWOZ/N/R/yf35M1aPF4en7/BRDOl5f5HQAA")
+      else
+        is_leveling = true
       end
       autohook_preset_loaded = "spectral"
     else
@@ -62,6 +71,8 @@ function AutoHookPresets()
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YS3PiOBD+Kypf9pKZggyPSW4sMBNqIUkFz+aQSm0pRmAVwqIkOQlD5b+vHpb8wBiycFvfqO6vpe9rqVtttl4vFrQPueD9+cK73nrDCL4Q1CPEuxYsRhfegEaiD6MAkQmlQWjNKmaMI5TGzKzr59oPGeIhJdLU2LvCDSJrH70L79rzLrxbuJJraTpArQ304hfeSK5x+f0qt2rvhb6ilB/iudXnkHBp7wUC08jfrCWy+WEIJ4itp39c5rgnYTnyzcYn6f/iCGgUGI0s+c7308nfRWSjEaNIxFj5HPTcyTewhPtV9zyJ74fxSmX7n5ijxxBFTsbwPUBoxjXVKiXdTvsYLcbLQT9mDEXCiUkEahpGWqvZaH1CmzGXSqOEoEAcvEufPAu7rGPbPO0kWo4um2Eoq3vrjaJXxKzhnmHKsNjs3quziDGbGjGdZutEMZeJmB+Yh8MN4geT3243znB91HZA7+dOpX2WOzSBSzQN8Vz8CbG+ScrArWEqYLCUGuVe1SKPkeiHmIMVXoQCBDSaExwI8IZFCHTx+yEkGC7/4OAHfKUsle4YAk3RtbZPJaCiQdxDgZGEpifpUpC6kvgHNFfbDSEjGx8reo1Dmemc4/gdEXf6nbOcviy936gPhXmafpkOabr96C7qD5wm6VIPwaM8rtFMEsQBJGqBMoDa6BVNCVwfV9GXjf+eoq/ApgbAaAbcyem7Im8XISCiArwgINv/DLxJeUCLBlo1gJprJtGpL3PTzpPs5IZzc79lvnMGW2pNmYyc4wEFcj8Z0GwfeKm+nV6FO8WW5GW3Om1uWqdWoczO8F0wmJsC06syfYNrxcW92z8hTkcQ5fGpwhT8W8t8OMNiYgvnizqLnRXHNHORS1Y0/gMr3ssMoD0sja+Up/fFK43PcSqNNwgXr9v1Wr7bTFamKZE9mSpFHZGvQtyerJWijspdFftsBkpx3pN6InG0eIB49gwsJpfcKgEVG7hEf1hYIia/5S1lK73hGHNxN1cZkeX8tPONohwqMJOVvxHjso0RBMYxc58eV91mV255Q+nyEcFlYRlrTufZcv/gxr8p1pT16Y4tW2JJxy5Cbu/8PShVxwqpnqXuVd6W+WZInVPBaLQooWscVYIMYp8k4z0gKg+qlmWw+r39VrTmpFn3GC1QNINsU8Ld+aoEOlBOY4n/gModXLVQBy9q3SVtEfLB78dc0JXzqJjsPDCgsaRftPoMr63V6FJQqXZn2ErsSsHemcMCpjGbwyAvbozMlM4DqF6axDqB72pyGyACpdrGV/mmTnBUNCl18otNmVk21BoL4WXmqaDr3lwg1oexfG3TBy1vH+OVGrybxpF0lKlAUkfj4+KY7vEAF2+y92TahvriqttG3TbqtlG3jb1t4y8mv44yTaNdN4161qhnjXrWqJo17km8WoPH/LjRqTtH3TnqzvG/7RzP9j+P5G++J2cw3ePp+eNfQgSXCu4dAAA=")
       elseif GetMaxGp()>400 then
         UseAutoHookAnonymousPreset("AH3_H4sIAAAAAAAACu1YUW/iOBD+K1Ze7qVdQRfotm8csC06aFHJXh+qauUGQyxMjBynlEP97zeOYyeBEKjgbfOGZsbj7xt7Pk/YOO1I8g4OZdiZzpzbjdML8BsjbcacWykicuF0eSA7OPAIG3Lu+cas1gxoQNI1E+O6W7q+IKHPGZhqezPcE7Z0yYd0bh3nwnnAC8gVw0EqN4qTXzh9yHH14yaXtf3G30mKj4S57FPMQrC3PUl54K6XEFn/1ICTiI0T/7jKYU+W5cDXa1+E/yskKI5C/b4B3/pxOvjHgK3jiH4gI6p8NvTcxddhCfab6/MUvuNHC1Xt31FInn0SWBq9D4+QSRhDPcdRaG+IOpEQJJCWTcIwxqG5Neq1xhfIaXMhN84Y8eTBy/TFwzBpLdr6aUfRsHDFhGJo743TD96JMIaRoFxQud69WGchozfVZFr1xolkrhIyP2no99YkPFj8ZvMc10dth+L97Kk0z3KHhnhOxj6dyr8xjW+SMoTGMJbYmwNH2Kuc5DEUXZ+GaEFnvkQeD6aMehKtqPRR3P2ujxnF879C9BO/c5FStwhRDNFq25cKUKIQIywpgdD0JG0JUley/olM1XY9LNjapQreIfVots5x/BaIPf3WWU4fWu8/0sFSv02/tERque8/Bp2u5QQu9RI8w3H1JwCQepipBEUBaqN3MmZ4eVxHX50gsN+QKQ3CwQTZk4vvCtwuxlDAJXojCPR/glZAD8WkUcwa4RhrptCpL3PTzlPs5IaH+n5DvXMG02p1KEbO8UQ82A8W1JWSlD2630/vwp1mS+qy252mNo1TuxCq0/uQAufGwPSqjFd4qbDYh/sO03QGUR6Xq5gt/8Yg702oHJrGuVRnsZNxwDMXuSCj9h/IOIIKkD0ota8Qp3PpFK7PYSpcryPs+liul/BuC+hM3SJ7KlUYdUS9ttbtqVph1FG1K0OfrUBhnPOinkgazJ4wnbwiE4Mu0YCv0N0oV+UyJiU72Yp/mrCEVX7vBy4W+Z0HNJSPU1UjaPCXnc8W5VAZMnX6l4gQhI0RNIiE/Rq5ua5fw973nM+fCZ5vpTHmdMQt9nfv3fvtLjO+WMNBJAs0fDvk4dHdE6U6W0Wqh+r6Jm/LfEakzrEUPJgVwNWOMkI6Yh8l7T1AKh9UTkvHxi/w921rjppxD8iMBBMs1gXYra+MoA3KcSzwH2C5E1dO1IZvc90FbSJgBOhEoeQL61FrshNCl0cAX1s1AzC6gi6NMRMKbHfGr8SuGOydQkzAOBJT7OXJDYie20MPq7cnsQ7xh5rluoRhYFv7Bq/skAbbJsUOvuGUWWSXGuPW8iLzWPJleyqJ6OAI3t/0icvbB3ShRvG6diTSMpYEeNQ+L45Rjyc8W4EIZWRDfYNVslHJRiUblWzslY1/BHwvZUSjWYlGNWtUs0Y1a5TNGiMWLZboOT9utCrlqJSjUo4/VjlezX8eyR9/L9ag1ePl9fN/02kSawEeAAA=")
+      else
+        is_leveling = true
       end
       autohook_preset_loaded = "normal"
     end
@@ -75,11 +86,6 @@ baits_list = {
   krill = { name = "Krill", id = 29715 },
   plumpworm = { name = "Plump Worm", id = 29716 },
 }
-correct_bait = baits_list.unset
-normal_bait = baits_list.unset
-spectral_bait = baits_list.unset
-current_bait = baits_list.unset
-if type(movement_method)~="string" then movement_method = "" end
 
 ocean_zones = {
   [1] = {id = 237, name = "Galadion Bay", normal_bait = baits_list.krill, daytime = baits_list.ragworm, sunset = baits_list.plumpworm, nighttime = baits_list.krill},
@@ -200,7 +206,7 @@ function MoveNear(near_x, near_z, near_y, radius, timeout, fast)
   return "X:"..move_x.." Z:"..move_z.." Y:"..move_y
 end
 
-function DoBuyBaits()
+function IsNeedBait()
   if type(buy_baits)~="number" then
     return false
   else
@@ -224,7 +230,7 @@ function DoBuyBaits()
   end
 end
 
-function DoRepair()
+function IsNeedRepair()
   if type(do_repair)~="string" then
     return false
   else
@@ -252,6 +258,19 @@ function verbose(verbose_string, throttle)
   end
 end
 
+correct_bait = baits_list.unset
+normal_bait = baits_list.unset
+spectral_bait = baits_list.unset
+current_bait = baits_list.unset
+if type(movement_method)~="string" then movement_method = "" end
+if type(is_leveling)=="string" then
+  if GetLevel()==90 then
+    is_leveling = false
+  else
+    is_leveling = true
+  end
+end
+
 ::Start::
 if IsAddonVisible("IKDResult") then
   goto FishingResults
@@ -265,7 +284,7 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
     if GetCharacterCondition(91) then
       verbose("Already in queue.")
       goto Enter
-    elseif DoBuyBaits() then
+    elseif IsNeedBait() then
       goto BuyBait
     elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
       goto PreQueue
@@ -409,7 +428,7 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
 end
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
-  if DoRepair()=="npc" or DoBuyBaits() then
+  if IsNeedRepair()=="npc" or IsNeedBait() then
     verbose("At arcanists guild. Moving to Merchant & Mender.")
     if string.find(string.lower(movement_method),"visland") then
       yield("/visland exectemponce H4sIAAAAAAAACuWTyWrDMBCGXyXMWRWyFmu5hS6QQ7pRcNPSg0hUIqilYCstJfjdKy8hUPoEjU7zj35+Rh+jA9za2oGBebO2wbdpRmeN21nfAILKfu+iD6kF83qA+9j65GMAc4BnMBeME8yJIAzBCkxRYNWrEsELGC6xZqwQossyBre4yg6qETzajd/nPIoJgmX8dLULCUwWi5BcY9ep8ml71/t/9aY581jtNn4db/I8Oe3dfrTuZB+GLBBc1zG5Y1Ry9VTOB8ckHvauTVPdB1fWp1Nir25icxnDZno7GZtPvnbL7CMd+oOMUljKkg9gBNb5cCVGMBpzwUquzhOMZpjpfkcyGD6A0XrgUgosqCJnui9aY1GoEQsbsdDxI8n8rQg923WRWDEp6ASG9GDEuDBSYUappP8fzFv3A6BUZs+lBQAA")
@@ -433,7 +452,7 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
 end
 
 ::Repair::
-if DoRepair() then
+if IsNeedRepair() then
   if string.find(string.lower(do_repair),"npc") then
     if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
     while not IsAddonVisible("Repair") do
@@ -476,7 +495,7 @@ if DoRepair() then
 end
 
 ::BuyBait::
-if DoBuyBaits() then
+if IsNeedBait() then
   verbose("Buying more bait.")
   if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
   while not IsAddonVisible("Shop") do
