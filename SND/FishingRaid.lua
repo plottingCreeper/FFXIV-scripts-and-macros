@@ -284,12 +284,14 @@ end
 
 function EatFood()
   if type(food_to_eat)=="string" then
-    while HasStatus("Well Fed")==false do
+    eat_food_tick = 0
+    while HasStatus("Well Fed")==false and eat_food_tick<8 do
       verbose("Eating "..food_to_eat)
-      yield("/wait 1")
       yield("/useitem "..food_to_eat)
-      yield("/wait 2")
+      yield("/wait 1")
+      eat_food_tick = eat_food_tick + 1
     end
+    if eat_food_tick>=8 then food_to_eat = false end
   end
 end
 
