@@ -285,8 +285,9 @@ end
 function EatFood()
   if type(food_to_eat)=="string" then
     while HasStatus("Well Fed")==false do
+      verbose("Eating "..food_to_eat)
       yield("/wait 1")
-      yield("/item "..food_to_eat)
+      yield("/useitem "..food_to_eat)
       yield("/wait 2")
     end
   end
