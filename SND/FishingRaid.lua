@@ -363,6 +363,13 @@ while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
 end
 
 yield("/ays multi d")
+while GetCharacterCondition(50) do
+  if IsAddonVisible("RetainerList") then
+    verbose("Closing retainer list.")
+    yield("/pcall RetainerList true -1")
+  end
+  yield("/wait 1.004")
+end
 while GetCharacterName(true)~=fishing_character do
   if IsAddonVisible("TitleConnect") or IsAddonVisible("NowLoading") or IsAddonVisible("CharaSelect") or GetCharacterCondition(53) then
     yield("/wait 1.002")
@@ -370,9 +377,6 @@ while GetCharacterName(true)~=fishing_character do
     verbose("Relogging to "..fishing_character)
     yield("/ays relog " .. fishing_character)
     WaitReady(3, true)
-  elseif IsAddonVisible("RetainerList") then
-    verbose("Closing retainer list.")
-    yield("/pcall RetainerList true -1")
   else
     verbose("Waiting for AutoRetainer to finish!")
   end
