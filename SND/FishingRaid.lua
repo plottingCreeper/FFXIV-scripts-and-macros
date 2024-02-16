@@ -23,6 +23,7 @@ buy_baits = 100  --Minimum number of baits you want. Will buy 99 at a time.
 boat_route = "indigo"  --"indigo", "ruby", "random"
 
 -- Just got on the boat
+food_to_eat = false  --Name of the food you want to use, in quotes. DOES NOT CHECK ITEM COUNT YET
 is_wait_to_move = true  --Wait for the barrier to drop before moving to the side of the boat.
 is_adjust_z = true  --true might cause stuttery movement, false might cause infinite movement. Good luck.
 
@@ -277,6 +278,16 @@ function TimeCheck(context)
   if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
     if is_last_minute_entry and os.date("!*t").min>10 then
       return true
+    end
+  end
+end
+
+function EatFood()
+  if type(food_to_eat)=="string" then
+    while HasStatus("Well Fed")==false do
+      yield("/wait 1")
+      yield("/item "..food_to_eat)
+      yield("/wait 2")
     end
   end
 end
@@ -683,6 +694,7 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
     WaitReady(2)
+    EatFood()
 
   ::ShouldntNeed::
   elseif IsAddonVisible("IKDResult") then
