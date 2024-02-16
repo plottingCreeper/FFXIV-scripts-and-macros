@@ -36,7 +36,7 @@ is_leveling = "auto"  --false, "auto"
 -- Getting off the boat
 score_screen_delay = 3  --How long in seconds to wait once the final score is displayed.
 is_discard = false  --Requires Discard Helper. Can set to "spam" to run during cutscenes.
-is_desynth = true  --Runs faster with YesAlready, but this isn't required.
+is_desynth = true  --Will enable Extended Desynthesis Window in Simple Tweaks. Optionally runs faster with YesAlready.
 
 -- Waiting for next boat
 wait_location = false  --false, "inn", "fc", "private", "apartment", "shared", "Shared Estate (Plot [#], [#]nd ward)"
@@ -1002,6 +1002,7 @@ WaitReady()
 
 ::Desynth::
 if is_desynth then
+  yield("/tweaks e UiAdjustments@ExtendedDesynthesisWindow")
   verbose("Running desynthesis.")
   is_doing_desynth = true
   failed_click_tick = 0
@@ -1044,7 +1045,12 @@ if is_desynth then
       for list=2, 16 do
         item_name_raw = string.gsub(GetNodeText("SalvageItemSelector", 3, list, 8),"%W","")
         item_name = string.sub(item_name_raw, 3,-3)
-        item_level_raw = string.sub(GetNodeText("SalvageItemSelector", 3, list, 2),1,3)
+        if string.sub(GetNodeText("SalvageItemSelector", 3, 2, 2),-1,-1)==")" then
+          item_level_raw = string.sub(GetNodeText("SalvageItemSelector", 3, list, 2),1,3)
+        else
+          item_level_raw = string.sub(GetNodeText("SalvageItemSelector", 3, list, 2),-3,-1)
+          item_level_raw = string.gsub(item_level_raw,"%d+/","")
+        end
         item_level = string.gsub(item_level_raw,"%D","")
         item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
         if item_level=="1" and item_type=="Culinarian" then
@@ -1056,6 +1062,7 @@ if is_desynth then
           break
         elseif list==16 then
           is_doing_desynth = false
+          verbose("Desynth finished!")
           break
         end
       end
