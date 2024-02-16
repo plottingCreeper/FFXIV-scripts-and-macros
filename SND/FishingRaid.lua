@@ -287,7 +287,7 @@ function EatFood()
     eat_food_tick = 0
     while HasStatus("Well Fed")==false and eat_food_tick<8 do
       verbose("Eating "..food_to_eat)
-      yield("/useitem "..food_to_eat)
+      yield("/item "..food_to_eat)
       yield("/wait 1")
       eat_food_tick = eat_food_tick + 1
     end
@@ -593,6 +593,7 @@ if GetDistanceToPoint(-410,4,76)>6.9 then
 end
 
 ::WaitForBoat::
+if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then goto PreQueue end
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
   verbose("Still running! ".. 60 - os.date("!*t").min .." minutes until the next boat.", true)
   yield("/wait 1.005")
