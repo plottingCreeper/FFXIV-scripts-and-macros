@@ -47,7 +47,6 @@ is_verbose = true  --General status messages
 is_debug = false  --Spammy status messages
 fishing_character = "auto"  --"First Last@Server", "auto"
 movement_method = "visland" --"visland" (navmesh coming soon)
-is_last_minute_entry = false  --Waits until 10 minutes before the boat leaves (WIP)
 is_single_run = false  --Only go on 1 fishing trip, then stop.
 
 -- Spend white gatherer scrips (overhaul coming soon:tm:)
