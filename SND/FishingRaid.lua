@@ -696,13 +696,13 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
   verbose("Should now be using: "..correct_bait.name, true)
   verbose("Script thinks we're using: "..current_bait.name, true)
   verbose("time: "..string.format("%.1f", GetCurrentOceanFishingZoneTimeLeft()), true)
+  EatFood()
 
   ::Ifs::
   ::Loading::
   if IsAddonVisible("NowLoading") or GetCharacterCondition(35) then
     is_changed_zone = true
     WaitReady(2)
-    EatFood()
 
   ::ShouldntNeed::
   elseif IsAddonVisible("IKDResult") then
