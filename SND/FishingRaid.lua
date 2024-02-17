@@ -263,6 +263,34 @@ function IsNeedRepair()
   end
 end
 
+function JobCheck()
+  while GetClassJobId()~=18 do
+    verbose("Switching to fisher!")
+    if not job_change_attempts then
+      verbose("Attempt 1: SimpleTweaks")
+      yield("/equipjob FSH")
+      job_change_attempts = 0
+    elseif job_change_attempts==1 then
+      verbose("Attempt 2: Fisher")
+      yield("/gearset change Fisher")
+    elseif job_change_attempts==2 then
+      verbose("Attempt 3: FSH")
+      yield("/gearset change FSH")
+    elseif job_change_attempts==3 then
+      verbose("Attempt 4: SimpleTweaks, after enabling EquipJobCommand")
+      yield("/tweaks e EquipJobCommand")
+      yield("/equipjob FSH")
+      job_change_attempts = 0
+    else
+      verbose("Job change hasn't worked!")
+      yield("/pcraft stop")
+    end
+    job_change_attempts = job_change_attempts + 1
+    yield("/wait 1."..job_change_attempts)
+  end
+  job_change_attempts = nil
+end
+
 function verbose(verbose_string, throttle)
   if is_verbose then
     if not throttle or ( throttle and os.date("!*t").sec==0 ) or is_debug then
@@ -306,7 +334,7 @@ if type(is_leveling)=="string" then
     is_leveling = true
   end
 end
-if type(score_screen_delay)~="number" then score_screen_delay = 0 end
+if type(score_screen_delay)~="number" then score_screen_delay = 3 end
 if score_screen_delay<0 or score_screen_delay>500 then score_screen_delay = 3 end
 
 ::Start::
@@ -493,46 +521,30 @@ if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   end
 end
 
-::Repair::
-if IsNeedRepair() then
-  if string.find(string.lower(do_repair),"npc") then
-    if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
-    while not IsAddonVisible("Repair") do
-      if GetTargetName()~="Merchant & Mender" then
-        yield("/target Merchant & Mender")
-      elseif IsAddonVisible("SelectIconString") then
-        yield("/pcall SelectIconString true 1")
-      elseif GetCharacterCondition(32, false) then
-        yield("/pinteract")
-      end
-      yield("/wait 0.592")
+::RepairNPC::
+if IsNeedRepair()=="npc" then
+  if IsInZone(129) and GetDistanceToPoint(-397,3,80)>5 then MoveNear(-398, 3, 78, 2, 5) end
+  while not IsAddonVisible("Repair") do
+    if GetTargetName()~="Merchant & Mender" then
+      yield("/target Merchant & Mender")
+    elseif IsAddonVisible("SelectIconString") then
+      yield("/pcall SelectIconString true 1")
+    elseif GetCharacterCondition(32, false) then
+      yield("/pinteract")
     end
-    while IsAddonVisible("Repair") do
-      if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
-        if IsAddonVisible("SelectYesno") then
-          yield("/pcall SelectYesno true 0")
-        else
-          yield("/pcall Repair true 0")
-        end
+    yield("/wait 0.592")
+  end
+  while IsAddonVisible("Repair") do
+    if string.gsub(GetNodeText("Repair",2),"%D","")~="0" then
+      if IsAddonVisible("SelectYesno") then
+        yield("/pcall SelectYesno true 0")
       else
-        yield("/pcall Repair true -1")
+        yield("/pcall Repair true 0")
       end
-      yield("/wait 0.305")
+    else
+      yield("/pcall Repair true -1")
     end
-  elseif string.find(string.lower(do_repair),"self") then
-    while not IsAddonVisible("Repair") do
-      yield("/generalaction repair")
-      yield("/wait 0.5")
-    end
-    yield("/pcall Repair true 0")
-    yield("/wait 0.1")
-    if IsAddonVisible("SelectYesno") then
-      yield("/pcall SelectYesno true 0")
-      yield("/wait 0.1")
-    end
-    while GetCharacterCondition(39) do yield("/wait 1") end
-    yield("/wait 1")
-    yield("/pcall Repair true -1")
+    yield("/wait 0.305")
   end
 end
 
@@ -591,6 +603,23 @@ if GetDistanceToPoint(-410,4,76)>6.9 then
   end
 end
 
+::RepairSelf::
+if IsNeedRepair()=="self" then
+  while not IsAddonVisible("Repair") do
+    yield("/generalaction repair")
+    yield("/wait 0.5")
+  end
+  yield("/pcall Repair true 0")
+  yield("/wait 0.1")
+  if IsAddonVisible("SelectYesno") then
+    yield("/pcall SelectYesno true 0")
+    yield("/wait 0.1")
+  end
+  while GetCharacterCondition(39) do yield("/wait 1") end
+  yield("/wait 1")
+  yield("/pcall Repair true -1")
+end
+
 ::WaitForBoat::
 if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then goto PreQueue end
 while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
@@ -599,7 +628,7 @@ while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
 end
 
 ::BotPause::
-notabot = math.random(3,10)
+notabot = math.random(2,8)
 verbose("Randomly waiting "..notabot.." seconds. Soooooooo human.")
 yield("/wait "..notabot)
 
@@ -612,6 +641,8 @@ elseif string.find(boat_route,"ruby") or string.find(boat_route,"river") or stri
 else
   q = 0
 end
+
+JobCheck()
 
 ::Queue::
 if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
@@ -642,12 +673,19 @@ else
 end
 
 ::Enter::
-while IsInZone(129) do
+while GetCharacterCondition(91) do
   verbose("Waiting for queue to pop.", true)
-  if IsAddonVisible("ContentsFinderConfirm") then yield("/pcall ContentsFinderConfirm true 8") end
+  if IsAddonVisible("ContentsFinderConfirm") then
+    JobCheck()
+    yield("/pcall ContentsFinderConfirm true 8")
+  end
   yield("/wait 1.007")
 end
 WaitReady(3)
+if not ( IsInZone(900) or IsInZone(1163) ) then
+  verbose("Landed in zone "..GetZoneID()..", which isn't ocean fishing!")
+  yield("/pcraft stop")
+end
 
 ::PrepareRandom::
 need_to_move_to_rail = true
@@ -828,13 +866,16 @@ end
 ::FishingResults::
 if IsAddonVisible("IKDResult") then
   result_timer = 501
-  while IsAddonVisible("IKDResult") and result_timer>=500-score_screen_delay do
+  while IsAddonVisible("IKDResult") do
     result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
     result_timer = tonumber(result_raw)
     if type(result_timer)~="number" then result_timer = 501 end
+    if result_timer>=(500-score_screen_delay) then
+      yield("/pcall IKDResult true 0")
+      yield("/wait 1")
+    end
     yield("/wait 0.266")
   end
-  yield("/pcall IKDResult true 0")
 end
 
 ::DoneFishing::
@@ -1039,6 +1080,7 @@ if is_desynth then
       failed_click_tick = failed_click_tick + 1
       if failed_click_tick>4 then
         is_doing_desynth = false
+        verbose("Desynth failed!")
         yield("/pcall SalvageItemSelector true -1")
       end
     elseif GetCharacterCondition(39, false) then
@@ -1087,29 +1129,31 @@ if not is_single_run then
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   if is_ar_while_waiting then
     verbose("Enabling AutoRetainer while waiting.")
-    target_tick = 1
-    while GetCharacterCondition(50, false) do
-      if target_tick > 99 then
-        break
-      elseif string.lower(GetTargetName())~="summoning bell" then
-        verbose("Finding summoning bell...")
-        yield("/target Summoning Bell")
-        target_tick = target_tick + 1
-      elseif GetDistanceToTarget()>5 then
+    if ARRetainersWaitingToBeProcessed() then
+      target_tick = 1
+      while GetCharacterCondition(50, false) do
+        if target_tick > 99 then
+          break
+        elseif string.lower(GetTargetName())~="summoning bell" then
+          verbose("Finding summoning bell...")
+          yield("/target Summoning Bell")
+          target_tick = target_tick + 1
+        elseif GetDistanceToTarget()>5 then
+          yield("/lockon on")
+          yield("/automove on")
+        else
+          yield("/automove off")
+          yield("/pinteract")
+        end
         yield("/lockon on")
-        yield("/automove on")
-      else
-        yield("/automove off")
-        yield("/pinteract")
+        yield("/wait 0.511")
       end
-      yield("/lockon on")
-      yield("/wait 0.511")
-    end
-    if GetCharacterCondition(50) then
-      yield("/lockon off")
-      yield("/ays e")
-      while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
-      yield("/wait 0.4")
+      if GetCharacterCondition(50) then
+        yield("/lockon off")
+        yield("/ays e")
+        while not IsAddonVisible("RetainerList") do yield("/wait 0.100") end
+        yield("/wait 0.4")
+      end
     end
     yield("/ays multi e")
   else
