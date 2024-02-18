@@ -53,7 +53,7 @@ is_multimode = true --It worked once, which means it's perfect now. Please send 
 start_wait = false --For when starting script during AR operation.
 after_multi = "logout"  --"logout", "wait 10", "wait logout", number. See readme.
 is_autoretainer_while_waiting = false
-multimode_ending_command = "/ays multi"
+multimode_ending_command = "/ays multi e"
 is_use_ar_to_enter_house = true --Breaks if you have subs ready.
 is_autoretainer_compatibility = false --Not implemented. Last on the to-do list.
 
@@ -462,9 +462,10 @@ function OpenBell()
       debug("Finding summoning bell...")
       yield("/target Summoning Bell")
       target_tick = target_tick + 1
-    elseif GetDistanceToTarget()>5 then
+    elseif GetDistanceToTarget()<20 then
       yield("/lockon on")
       yield("/automove on")
+      yield("/pinteract")
     else
       yield("/automove off")
       yield("/pinteract")
@@ -625,7 +626,7 @@ if IsAddonVisible("RetainerList") then is_multimode = false end
 ::MultiWait::
 if start_wait and is_autoretainer_while_waiting then
     WaitARFinish()
-    yield("/ays multi")
+    yield("/ays multi d")
 end
 if string.find(after_multi, "wait logout") then
 elseif string.find(after_multi, "wait") then
@@ -879,7 +880,7 @@ if string.find(after_multi, "logout") then
   end
 elseif wait_until then
   if is_autoretainer_while_waiting then
-    yield("/ays multi")
+    yield("/ays multi e")
     while GetCharacterCondition(1, false) do
       yield("/wait 10.1")
     end
@@ -889,7 +890,7 @@ elseif wait_until then
   end
   if is_autoretainer_while_waiting then
     WaitARFinish()
-    yield("/ays multi")
+    yield("/ays multi d")
   end
   goto MultiWait
 elseif type(after_multi) == "number" then
@@ -898,13 +899,13 @@ end
 
 if string.find(after_multi, "wait logout") then
   if is_autoretainer_while_waiting then
-    yield("/ays multi")
+    yield("/ays multi e")
     while GetCharacterCondition(1, false) do
       yield("/wait 10.2")
     end
   end
   WaitARFinish()
-  if is_autoretainer_while_waiting then yield("/ays multi") end
+  if is_autoretainer_while_waiting then yield("/ays multi d") end
   goto MultiWait
 end
 
