@@ -651,6 +651,11 @@ JobCheck()
 ::Queue::
 if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
   verbose("Queueing up!")
+  if q==1 then
+    verbose("Ruby route")
+  else
+    verbose("Indigo route")
+  end
   while GetCharacterCondition(91, false) do
     if GetTargetName()~="Dryskthota" then
       yield("/target Dryskthota")
