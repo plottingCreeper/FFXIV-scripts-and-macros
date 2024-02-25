@@ -336,6 +336,7 @@ if type(is_leveling)=="string" then
 end
 if type(score_screen_delay)~="number" then score_screen_delay = 3 end
 if score_screen_delay<0 or score_screen_delay>500 then score_screen_delay = 3 end
+points_earned = 0
 
 ::Start::
 if IsAddonVisible("IKDResult") then
@@ -496,6 +497,9 @@ if IsInZone(128) and GetDistanceToPoint(14,40,71)<9 then
   end
   WaitReady(3, true)
 end
+
+JobCheck()
+
 ::MoveToOcean::
 if IsInZone(129) and GetDistanceToPoint(-335,12,53)<9 then
   if IsNeedRepair()=="npc" or IsNeedBait() then
@@ -864,25 +868,38 @@ while ( IsInZone(900) or IsInZone(1163) ) and IsAddonVisible("IKDResult")==false
 end
 
 ::FishingResults::
+score_screen_wait = 500-(((score_screen_delay//60)*100)+(score_screen_delay%60)+40)
 if IsAddonVisible("IKDResult") then
   result_timer = 501
   while IsAddonVisible("IKDResult") do
     result_raw = string.gsub(GetNodeText("IKDResult",4),"%D","")
     result_timer = tonumber(result_raw)
     if type(result_timer)~="number" then result_timer = 501 end
-    if result_timer>=(500-score_screen_delay) then
+    if result_timer<=(score_screen_wait) then
+      points_earned_string = ""
+      for i=9, 1, -1 do
+        if type(GetNodeText("IKDResult",27,i))=="string" then
+          points_earned_string = GetNodeText("IKDResult",27,i)..points_earned_string
+        end
+      end
+      points_earned = tonumber(points_earned_string)
       yield("/pcall IKDResult true 0")
       yield("/wait 1")
     end
     yield("/wait 0.266")
   end
+  verbose("Points earned: "..points_earned)
 end
 
 ::DoneFishing::
 RunDiscard(1)
 DeleteAllAutoHookAnonymousPresets()
 WaitReady(3, false, 72)
-yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
+if IsInZone(129) then
+  yield("/echo Landed at: X:"..math.floor(GetPlayerRawXPos()*1000)/1000 .." Z:"..math.floor(GetPlayerRawYPos()*1000)/1000 .." Y:"..math.floor(GetPlayerRawZPos()*1000)/1000)
+else
+  goto AtWaitLocation
+end
 
 ::SpendScrips::
 if type(spend_scrips_when_above)=="number" then
@@ -1048,6 +1065,7 @@ end
 
 WaitReady()
 
+::AtWaitLocation::
 ::Desynth::
 if is_desynth then
   yield("/tweaks e UiAdjustments@ExtendedDesynthesisWindow")
@@ -1125,6 +1143,7 @@ RunDiscard()
 
 ::StartAR::
 verbose("You did a good job today!")
+verbose("Points earned: "..points_earned)
 if not is_single_run then
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   if is_ar_while_waiting then
