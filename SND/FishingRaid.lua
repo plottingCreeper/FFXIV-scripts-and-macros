@@ -21,6 +21,7 @@
 do_repair = "npc"  --"npc", "self". Add a number to set threshhold; "npc 10" to only repair if under 10%
 buy_baits = 100  --Minimum number of baits you want. Will buy 99 at a time.
 boat_route = "indigo"  --"indigo", "ruby", "random"
+is_equip_recommended_gear = true  --Run /equiprecommended
 
 -- Just got on the boat
 food_to_eat = false  --Name of the food you want to use, in quotes. DOES NOT CHECK ITEM COUNT YET
@@ -289,6 +290,11 @@ function JobCheck()
     yield("/wait 1."..job_change_attempts)
   end
   job_change_attempts = nil
+  if is_equip_recommended_gear then
+    yield("/tweaks e RecommendEquipCommand")
+    WaitReady(1)
+    yield("/equiprecommended")
+  end
 end
 
 function verbose(verbose_string, throttle)
