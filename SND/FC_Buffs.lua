@@ -26,7 +26,7 @@ actions_list = {
   "reduced rates",
 }
 
-selected_action = 1
+selected_action = 0
 
 function NextBuff()
   action_click = nil
