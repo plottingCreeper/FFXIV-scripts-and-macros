@@ -51,7 +51,7 @@ movement_method = "visland" --"visland" (navmesh coming soon)
 is_single_run = false  --Only go on 1 fishing trip, then stop.
 
 -- Spend white gatherer scrips (overhaul coming soon:tm:)
-spend_scrips_when_above = 100
+spend_scrips_when_above = false
 scrip_category = 1
 scrip_subcategory = 1
 scrip_item_to_buy = "Hi-Cordial"
