@@ -48,6 +48,7 @@ is_verbose = true  --General status messages
 is_debug = false  --Spammy status messages
 fishing_character = "auto"  --"First Last@Server", "auto"
 movement_method = "visland" --"visland" (navmesh coming soon)
+is_last_minute_entry = false  --Waits until 5 minutes before the boat leaves
 is_single_run = false  --Only go on 1 fishing trip, then stop.
 
 -- Spend white gatherer scrips (overhaul coming soon:tm:)
@@ -146,7 +147,15 @@ function WaitReady(delay, is_not_ready, status, target_zone)
   if type(status)=="number" then wait = wait + (status / 10000) end
   while loading_tick<delay do
     if IsAddonVisible("NowLoading") then loading_tick = 0
-    elseif IsPlayerOccupied() then loading_tick = 0
+    elseif IsPlayerOccupied() then
+      if GetCharacterCondition(3) or GetCharacterCondition(11) then  --Emoting or sitting
+        yield("/autorun on")
+        yield("/autorun off")
+      elseif GetCharacterCondition(16) then  --Performance
+        yield("/send escape")  --I HATE using sends, it's clumsy. Need to find a better way to end performance.
+      else
+        loading_tick = 0
+      end
     elseif loading_tick == -1 then
       if type(target_zone)=="number" then
         if IsInZone(target_zone) then loading_tick = 0 end
@@ -308,11 +317,29 @@ function verbose(verbose_string, throttle)
 end
 
 function TimeCheck(context)
-  if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
+  time_state = false
+  if is_last_minute_entry then
+    if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
+      if os.date("!*t").min>=11 then
+        time_state = "queue"
+      elseif os.date("!*t").min>=10 then
+        time_state = "movewait"
+      end
+    end
+  elseif os.date("!*t").hour%2==0 then
     if is_last_minute_entry and os.date("!*t").min>10 then
-      return true
+      time_state = "queue"
+    elseif os.date("!*t").min<15 then
+      time_state = "queue"
+    end
+  elseif os.date("!*t").hour%2==1 then
+    if os.date("!*t").min>=55 then
+      time_state = "movewait"
+    elseif context and os.date("!*t").min>=45 then
+      time_state = "early"
     end
   end
+  return time_state
 end
 
 function EatFood()
@@ -350,7 +377,7 @@ if IsAddonVisible("IKDResult") then
 elseif IsInZone(900) or IsInZone(1163) then
   verbose("We're on the boat!")
   goto OnBoat
-elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").hour%2==0 and os.date("!*t").min<15) then
+elseif TimeCheck("start") then
   verbose("Starting at or near fishing time.")
   if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     verbose("Near the ocean fishing NPC.")
@@ -359,9 +386,9 @@ elseif (os.date("!*t").hour%2==1 and os.date("!*t").min>=45) or (os.date("!*t").
       goto Enter
     elseif IsNeedBait() then
       goto BuyBait
-    elseif os.date("!*t").hour%2==0 and os.date("!*t").min<15 then
+    elseif TimeCheck(false) then
       goto PreQueue
-    elseif os.date("!*t").hour%2==1 and os.date("!*t").min>=45 then
+    else
       goto WaitForBoat
     end
   else
@@ -383,7 +410,7 @@ else
 end
 
 ::MainWait::
-while not ( os.date("!*t").hour%2==1 and os.date("!*t").min>=55 ) do
+while not TimeCheck(false) do
   if os.date("!*t").hour%2==1 then
     time_remaining = 55 - os.date("!*t").min .." minutes."
   elseif os.date("!*t").min<=55 then
@@ -540,6 +567,7 @@ if IsNeedRepair()=="npc" then
     elseif IsAddonVisible("SelectIconString") then
       yield("/pcall SelectIconString true 1")
     elseif GetCharacterCondition(32, false) then
+      yield("/lockon on")
       yield("/pinteract")
     end
     yield("/wait 0.592")
@@ -553,6 +581,7 @@ if IsNeedRepair()=="npc" then
       end
     else
       yield("/pcall Repair true -1")
+      yield("/lockon off")
     end
     yield("/wait 0.305")
   end
@@ -568,6 +597,7 @@ if IsNeedBait() then
     elseif IsAddonVisible("SelectIconString") then
       yield("/pcall SelectIconString true 0")
     elseif GetCharacterCondition(32, false) then
+      yield("/lockon on")
       yield("/pinteract")
     end
     yield("/wait 0.591")
@@ -596,6 +626,7 @@ if IsNeedBait() then
   goto BuyBait
 elseif IsAddonVisible("Shop") then
   yield("/pcall Shop true -1")
+  yield("/lockon off")
   goto BuyBait
 end
 
@@ -631,8 +662,8 @@ if IsNeedRepair()=="self" then
 end
 
 ::WaitForBoat::
-if os.date("!*t").hour%2==0 and os.date("!*t").min<15 then goto PreQueue end
-while not ( os.date("!*t").hour%2==0 and os.date("!*t").min<15 ) do
+if TimeCheck()=="queue" then goto PreQueue end
+while not TimeCheck() do
   verbose("Still running! ".. 60 - os.date("!*t").min .." minutes until the next boat.", true)
   yield("/wait 1.005")
 end
@@ -666,6 +697,7 @@ if IsInZone(129) and GetDistanceToPoint(-410,4,76)<6.9 then
     if GetTargetName()~="Dryskthota" then
       yield("/target Dryskthota")
     elseif GetCharacterCondition(32, false) then
+      yield("/lockon on")
       yield("/pinteract")
     elseif IsAddonVisible("Talk") then
       yield("/click talk")
@@ -686,6 +718,7 @@ else
   verbose("That's not gonna work, chief.")
   yield("/pcraft stop")
 end
+yield("/lockon off")
 
 ::Enter::
 while GetCharacterCondition(91) do
@@ -1019,6 +1052,7 @@ if type(wait_location)=="string" then
         if GetTargetName()~="Mytesyn" then
           yield("/target Mytesyn")
         elseif GetCharacterCondition(32, false) then
+          yield("/lockon on")
           yield("/pinteract")
         elseif IsAddonVisible("Talk") then
           yield("/click talk")
@@ -1150,11 +1184,12 @@ if is_desynth then
   yield("/pcall SalvageItemSelector true -1")
 end
 
+::WrapUp::
 RunDiscard()
-
-::StartAR::
 verbose("You did a good job today!")
 verbose("Points earned: "..points_earned)
+
+::StartAR::
 if not is_single_run then
   if fishing_character=="auto" then fishing_character = GetCharacterName(true) end
   if is_ar_while_waiting then
