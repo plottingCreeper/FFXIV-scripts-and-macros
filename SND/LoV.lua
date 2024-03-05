@@ -50,7 +50,7 @@ yield("/pcall ContentsFinder true 12 1")
 while string.gsub(GetNodeText("ContentsFinder", 25, 6, 14),"%W","")=="" do
   yield("/wait 0.1")
   tick = tick + 1
-  if tick > 30 then yield("/pcraft stop")
+  if tick > 30 then yield("/pcraft stop") end
 end
 yield("/wait 0.1")
 for i=3, 12 do
