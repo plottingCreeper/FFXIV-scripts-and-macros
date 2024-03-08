@@ -386,7 +386,7 @@ elseif TimeCheck("start") then
       goto Enter
     elseif IsNeedBait() then
       goto BuyBait
-    elseif TimeCheck(false) then
+    elseif TimeCheck()=="queue" then
       goto PreQueue
     else
       goto WaitForBoat
