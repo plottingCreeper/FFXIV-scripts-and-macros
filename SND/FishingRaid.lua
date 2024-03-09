@@ -1182,6 +1182,8 @@ if is_desynth then
       end
       for list=2, 16 do
         item_name_raw = string.gsub(GetNodeText("SalvageItemSelector", 3, list, 8),"%W","")
+        desynth_prev_item = desynth_last_item
+        desynth_last_item = item_name
         item_name = string.sub(item_name_raw, 3,-3)
         if string.sub(GetNodeText("SalvageItemSelector", 3, 2, 2),-1,-1)==")" then
           item_level_raw = string.sub(GetNodeText("SalvageItemSelector", 3, list, 2),1,3)
@@ -1196,8 +1198,6 @@ if is_desynth then
           verbose("item_level: "..item_level, true)
           verbose("item_type: "..item_type, true)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
-          desynth_prev_item = desynth_last_item
-          desynth_last_item = item_name
           is_clicked_desynth = true
           break
         elseif list==16 then
