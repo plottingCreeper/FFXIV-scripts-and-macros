@@ -1143,9 +1143,12 @@ if is_desynth then
       if open_desynth_attempts>5 then
         is_doing_desynth = false
         is_desynth = false
+        desynth_last_item = nil
+        desynth_prev_item = nil
+        item_name = nil
         verbose("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
-    elseif item_name and desynth_last_item==item_name and desynth_prev_item==item_name then
+    elseif desynth_prev_item~=nil and item_name and desynth_last_item==item_name and desynth_prev_item==item_name then
       verbose("Repeat item bug?")
       verbose("Closing desynth window")
       yield("/pcall SalvageItemSelector true -1")
