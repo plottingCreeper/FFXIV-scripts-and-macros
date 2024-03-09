@@ -1190,8 +1190,8 @@ if is_desynth then
         item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
         if item_level=="1" and item_type=="Culinarian" then
           verbose("Desynthing: "..item_name)
-          debug("item_level: "..item_level)
-          debug("item_type: "..item_type)
+          verbose("item_level: "..item_level, true)
+          verbose("item_type: "..item_type, true)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
           desynth_prev_item = desynth_last_item
           desynth_last_item = item_name
