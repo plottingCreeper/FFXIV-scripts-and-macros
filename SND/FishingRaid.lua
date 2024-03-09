@@ -1134,6 +1134,7 @@ if is_desynth then
   while is_doing_desynth do
     verbose("Desynth is running...", true)
     if not IsAddonVisible("SalvageItemSelector") then
+      verbose("Opening desynth window")
       yield("/generalaction desynthesis")
       open_desynth_attempts = open_desynth_attempts + 1
       if open_desynth_attempts>5 then
@@ -1156,7 +1157,9 @@ if is_desynth then
       if failed_click_tick>4 then
         is_doing_desynth = false
         verbose("Desynth failed!")
+        verbose("Closing desynth window")
         yield("/pcall SalvageItemSelector true -1")
+        yield("/wait 1")
       end
     elseif GetCharacterCondition(39, false) then
       for i=1,20 do
@@ -1178,9 +1181,9 @@ if is_desynth then
         item_level = string.gsub(item_level_raw,"%D","")
         item_type = GetNodeText("SalvageItemSelector", 3, list, 5)
         if item_level=="1" and item_type=="Culinarian" then
-          verbose("item_name: "..item_name)
-          verbose("item_level: "..item_level)
-          verbose("item_type: "..item_type)
+          verbose("Desynthing: "..item_name)
+          debug("item_level: "..item_level)
+          debug("item_type: "..item_type)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
           is_clicked_desynth = true
           break
