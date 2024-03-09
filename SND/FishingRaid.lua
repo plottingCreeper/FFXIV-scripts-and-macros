@@ -1130,6 +1130,9 @@ if is_desynth then
   is_doing_desynth = true
   failed_click_tick = 0
   open_desynth_attempts = 0
+  desynth_last_item = nil
+  desynth_prev_item = nil
+  item_name = nil
   yield("/wait 0.1")
   while is_doing_desynth do
     verbose("Desynth is running...", true)
@@ -1142,6 +1145,11 @@ if is_desynth then
         is_desynth = false
         verbose("Tried too many times to open desynth, and it hasn't worked. Giving up and moving on.")
       end
+    elseif item_name and desynth_last_item==item_name and desynth_prev_item==item_name then
+      verbose("Repeat item bug?")
+      verbose("Closing desynth window")
+      yield("/pcall SalvageItemSelector true -1")
+      yield("/wait 1")
     elseif not IsAddonReady("SalvageItemSelector") then
       yield("/wait 0.541")
     elseif IsAddonVisible("SalvageDialog") then
@@ -1185,6 +1193,8 @@ if is_desynth then
           debug("item_level: "..item_level)
           debug("item_type: "..item_type)
           yield("/pcall SalvageItemSelector true 12 "..list-2)
+          desynth_prev_item = desynth_last_item
+          desynth_last_item = item_name
           is_clicked_desynth = true
           break
         elseif list==16 then
