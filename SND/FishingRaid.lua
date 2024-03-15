@@ -149,8 +149,8 @@ function WaitReady(delay, is_not_ready, status, target_zone)
     if IsAddonVisible("NowLoading") then loading_tick = 0
     elseif IsPlayerOccupied() then
       if GetCharacterCondition(3) or GetCharacterCondition(11) then  --Emoting or sitting
-        yield("/autorun on")
-        yield("/autorun off")
+        yield("/automove on")
+        yield("/automove off")
       elseif GetCharacterCondition(16) then  --Performance
         yield("/send escape")  --I HATE using sends, it's clumsy. Need to find a better way to end performance.
       else
