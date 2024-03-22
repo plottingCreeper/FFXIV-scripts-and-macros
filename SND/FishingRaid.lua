@@ -236,12 +236,13 @@ function VislandRoute(route)
     yield("/visland stop")
     yield("/wait 0.2")
   end
-  while IsMoving()==false do
+  movement_start_point = GetPlayerRawXPos()..GetPlayerRawZPos()
+  repeat
     yield("/visland stop")
     yield("/wait 0.2")
     yield("/visland exectemponce "..route)
-    yield("/wait 0.3")
-  end
+    yield("/wait 0.8")
+  until GetPlayerRawXPos()..GetPlayerRawZPos()~=movement_start_point
   bugfix_tick = 0
   while IsVislandRouteRunning() or IsMoving() do
     if bugfix_tick>=3 then
