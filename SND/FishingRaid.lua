@@ -240,7 +240,7 @@ function VislandRoute(route)
     yield("/visland stop")
     yield("/wait 0.2")
     yield("/visland exectemponce "..route)
-    yield("/wait 3")
+    yield("/wait 0.3")
   end
   bugfix_tick = 0
   while IsVislandRouteRunning() or IsMoving() do
